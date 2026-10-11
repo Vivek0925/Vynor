@@ -20,6 +20,7 @@ import TaskCard from "./TaskCard";
 import TaskListColumn from "./TaskListColumn";
 import CreateTaskModal from "./CreateTaskModal";
 import TaskDetailModal from "./TaskDetailModal";
+import { socket } from "@/lib/socket";
 
 
 type TasksBoardProps = {
@@ -65,6 +66,24 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
   useEffect(() => {
     void loadLists();
   }, [loadLists]);
+
+  useEffect(() => {
+  const handleTaskChange = () => {
+    void loadLists();
+  };
+
+  socket.on("task:created", handleTaskChange);
+  socket.on("task:updated", handleTaskChange);
+  socket.on("task:moved", handleTaskChange);
+  socket.on("task:deleted", handleTaskChange);
+
+  return () => {
+    socket.off("task:created", handleTaskChange);
+    socket.off("task:updated", handleTaskChange);
+    socket.off("task:moved", handleTaskChange);
+    socket.off("task:deleted", handleTaskChange);
+  };
+}, [loadLists]);
 
   function handleDragStart(event: {
     active: {
