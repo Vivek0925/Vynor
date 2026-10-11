@@ -13,6 +13,7 @@ import { UpdateTaskDto } from '../dto/update-task.dto';
 
 import { TaskListsRepository } from '../repositories/task-lists.repository';
 import { TasksRepository } from '../repositories/tasks.repository';
+import { TaskRealtimeService } from '../../realtime/services/task-realtime.service';
 
 @Injectable()
 export class TasksService {
@@ -20,6 +21,7 @@ export class TasksService {
     private readonly tasksRepository: TasksRepository,
     private readonly taskListsRepository: TaskListsRepository,
     private readonly workspaceService: WorkspaceService,
+    private readonly taskRealtimeService: TaskRealtimeService,
   ) {}
 
   async create(userId: string, workspaceSlug: string, dto: CreateTaskDto) {
@@ -43,7 +45,7 @@ export class TasksService {
       list.id,
     );
 
-    return this.tasksRepository.create({
+    const createdTask = await this.tasksRepository.create({
       workspaceId: workspace.id,
       listId: list.id,
       title: dto.title.trim(),
@@ -54,6 +56,10 @@ export class TasksService {
       position,
       createdById: userId,
     });
+
+    this.taskRealtimeService.emitTaskCreated(workspace.id, createdTask);
+
+    return createdTask;
   }
 
   async findAll(userId: string, workspaceSlug: string) {
@@ -65,11 +71,7 @@ export class TasksService {
     return this.tasksRepository.findByWorkspace(workspace.id);
   }
 
-  async findOne(
-    userId: string,
-    workspaceSlug: string,
-    taskId: string,
-  ) {
+  async findOne(userId: string, workspaceSlug: string, taskId: string) {
     const workspace = await this.workspaceService.findAccessibleWorkspace(
       userId,
       workspaceSlug,
@@ -141,7 +143,11 @@ export class TasksService {
       }),
     };
 
-    return this.tasksRepository.update(taskId, data);
+    const updatedTask = await this.tasksRepository.update(taskId, data);
+
+    this.taskRealtimeService.emitTaskUpdated(workspace.id, updatedTask);
+
+    return updatedTask;
   }
 
   async move(
@@ -163,9 +169,7 @@ export class TasksService {
 
     await this.assertCanManageTask(workspace.id, userId, task);
 
-    const targetList = await this.taskListsRepository.findById(
-      dto.listId,
-    );
+    const targetList = await this.taskListsRepository.findById(dto.listId);
 
     if (!targetList || targetList.workspaceId !== workspace.id) {
       throw new BadRequestException('Invalid task list.');
@@ -187,7 +191,8 @@ export class TasksService {
           task.id,
         );
 
-        return this.tasksRepository.update(task.id, {
+        return this.moveAndEmit(workspace.id, task.id, {
+          listId: targetList.id,
           position: targetPosition,
         });
       }
@@ -208,8 +213,9 @@ export class TasksService {
         task.id,
       );
 
-      return this.tasksRepository.update(task.id, {
+      return this.moveAndEmit(workspace.id, task.id, {
         position: refreshedPosition,
+        listId: task.listId,
       });
     }
 
@@ -230,7 +236,7 @@ export class TasksService {
       task.id,
     );
 
-    return this.tasksRepository.update(task.id, {
+    return this.moveAndEmit(workspace.id, task.id, {
       listId: targetList.id,
       position: targetPosition,
     });
@@ -242,17 +248,22 @@ export class TasksService {
       workspaceSlug,
     );
 
-    return this.tasksRepository.findByAssignee(
-      workspace.id,
-      userId,
-    );
+    return this.tasksRepository.findByAssignee(workspace.id, userId);
   }
 
-  async remove(
-    userId: string,
-    workspaceSlug: string,
+  private async moveAndEmit(
+    workspaceId: string,
     taskId: string,
+    data: { listId: string; position: number },
   ) {
+    const task = await this.tasksRepository.update(taskId, data);
+
+    this.taskRealtimeService.emitTaskMoved(workspaceId, task);
+
+    return task;
+  }
+
+  async remove(userId: string, workspaceSlug: string, taskId: string) {
     const workspace = await this.workspaceService.findAccessibleWorkspace(
       userId,
       workspaceSlug,
@@ -274,6 +285,7 @@ export class TasksService {
     );
 
     await this.tasksRepository.delete(task.id);
+    this.taskRealtimeService.emitTaskDeleted(workspace.id, task.id);
 
     return {
       id: task.id,
@@ -281,37 +293,30 @@ export class TasksService {
   }
 
   private async assertCanManageTask(
-  workspaceId: string,
-  userId: string,
-  task: {
-    createdById: string;
-    assigneeId: string | null;
-  },
-): Promise<void> {
-  const isAdminOrOwner =
-    await this.workspaceService.isWorkspaceAdminOrOwner(
-      workspaceId,
-      userId,
-    );
-
-  const isCreator = task.createdById === userId;
-  const isAssignee = task.assigneeId === userId;
-
-  if (!isAdminOrOwner && !isCreator && !isAssignee) {
-    throw new ForbiddenException(
-      "You don't have permission to modify this task.",
-    );
-  }
-}
-
-  private async validateAssignee(
     workspaceId: string,
     userId: string,
-  ) {
-    const isMember = await this.workspaceService.isMember(
+    task: {
+      createdById: string;
+      assigneeId: string | null;
+    },
+  ): Promise<void> {
+    const isAdminOrOwner = await this.workspaceService.isWorkspaceAdminOrOwner(
       workspaceId,
       userId,
     );
+
+    const isCreator = task.createdById === userId;
+    const isAssignee = task.assigneeId === userId;
+
+    if (!isAdminOrOwner && !isCreator && !isAssignee) {
+      throw new ForbiddenException(
+        "You don't have permission to modify this task.",
+      );
+    }
+  }
+
+  private async validateAssignee(workspaceId: string, userId: string) {
+    const isMember = await this.workspaceService.isMember(workspaceId, userId);
 
     if (!isMember) {
       throw new BadRequestException(

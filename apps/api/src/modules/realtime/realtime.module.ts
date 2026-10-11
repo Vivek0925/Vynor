@@ -8,6 +8,8 @@ import { ChatModule } from '../chat/chat.module';
 import { MeetingModule } from "../meeting/meeting.module";
 import { WorkspaceModule } from '../workspace/workspace.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { TaskRealtimeService } from './services/task-realtime.service';
+import { TaskRealtimeModule } from './task-realtime.module';
 
 @Module({
   imports: [
@@ -17,6 +19,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
     MeetingModule,
     WorkspaceModule,
     NotificationsModule,
+    TaskRealtimeModule,
   ],
   providers: [
     RealtimeGateway,
