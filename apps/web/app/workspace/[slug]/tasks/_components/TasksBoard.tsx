@@ -9,10 +9,16 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { Plus } from "lucide-react";
+import { ArrowDown, ArrowUp, MoreHorizontal, Pencil, Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
-import { createTaskList, getTaskLists, moveTask } from "@/lib/tasks";
+import {
+  createTaskList,
+  getTaskLists,
+  moveTask,
+  moveTaskList,
+  updateTaskList,
+} from "@/lib/tasks";
 
 import type { Task, TaskList } from "./task-types";
 
@@ -21,7 +27,6 @@ import TaskListColumn from "./TaskListColumn";
 import CreateTaskModal from "./CreateTaskModal";
 import TaskDetailModal from "./TaskDetailModal";
 import { socket } from "@/lib/socket";
-
 
 type TasksBoardProps = {
   workspaceSlug: string;
@@ -49,6 +54,11 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
   const [isAddingList, setIsAddingList] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
+  const [editingListId, setEditingListId] = useState<string | null>(null);
+  const [editingListName, setEditingListName] = useState("");
+  const [savingList, setSavingList] = useState(false);
+  const [openListMenuId, setOpenListMenuId] = useState<string | null>(null);
+
   const loadLists = useCallback(async () => {
     try {
       setLoading(true);
@@ -68,22 +78,22 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
   }, [loadLists]);
 
   useEffect(() => {
-  const handleTaskChange = () => {
-    void loadLists();
-  };
+    const handleTaskChange = () => {
+      void loadLists();
+    };
 
-  socket.on("task:created", handleTaskChange);
-  socket.on("task:updated", handleTaskChange);
-  socket.on("task:moved", handleTaskChange);
-  socket.on("task:deleted", handleTaskChange);
+    socket.on("task:created", handleTaskChange);
+    socket.on("task:updated", handleTaskChange);
+    socket.on("task:moved", handleTaskChange);
+    socket.on("task:deleted", handleTaskChange);
 
-  return () => {
-    socket.off("task:created", handleTaskChange);
-    socket.off("task:updated", handleTaskChange);
-    socket.off("task:moved", handleTaskChange);
-    socket.off("task:deleted", handleTaskChange);
-  };
-}, [loadLists]);
+    return () => {
+      socket.off("task:created", handleTaskChange);
+      socket.off("task:updated", handleTaskChange);
+      socket.off("task:moved", handleTaskChange);
+      socket.off("task:deleted", handleTaskChange);
+    };
+  }, [loadLists]);
 
   function handleDragStart(event: {
     active: {
@@ -372,6 +382,73 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
     }
   }
 
+
+  async function handleRenameList(listId: string) {
+    const name = editingListName.trim();
+
+    if (!name || savingList) return;
+
+    try {
+      setSavingList(true);
+
+      await updateTaskList(workspaceSlug, listId, name);
+
+      setEditingListId(null);
+      setEditingListName("");
+      setOpenListMenuId(null);
+
+      await loadLists();
+    } catch (error) {
+      console.error("Failed to rename task list:", error);
+    } finally {
+      setSavingList(false);
+    }
+  }
+
+  async function handleMoveList(listId: string, direction: -1 | 1) {
+    const currentIndex = lists.findIndex((list) => list.id === listId);
+    const targetIndex = currentIndex + direction;
+
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= lists.length) {
+      return;
+    }
+
+    const reorderedLists = [...lists];
+    const [movedList] = reorderedLists.splice(currentIndex, 1);
+    reorderedLists.splice(targetIndex, 0, movedList);
+
+    const previousLists = lists;
+
+    setLists(
+      reorderedLists.map((list, index) => ({
+        ...list,
+        position: index,
+      })),
+    );
+    setOpenListMenuId(null);
+
+    try {
+      // Persist each position so the ordering remains consistent.
+      await Promise.all(
+        reorderedLists.map((list, index) =>
+          moveTaskList(workspaceSlug, list.id, index),
+        ),
+      );
+
+      await loadLists();
+    } catch (error) {
+      console.error("Failed to reorder task lists:", error);
+      setLists(previousLists);
+      await loadLists();
+    }
+  }
+
+  function handleStartRenameList(list: TaskList) {
+    setEditingListId(list.id);
+    setEditingListName(list.name);
+    setOpenListMenuId(null);
+  }
+
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border border-[#DEDFE8] bg-[#6E548A] shadow-[0_18px_50px_rgba(20,20,28,0.08)] sm:rounded-[28px]">
       {/* Board top bar */}
@@ -419,7 +496,7 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
                 </div>
               ) : (
                 <>
-                  {lists.map((list) => (
+                  {lists.map((list, index) => (
                     <TaskListColumn
                       key={list.id}
                       list={list}
@@ -427,6 +504,29 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
                       onToggleComplete={handleToggleComplete}
                       onAddTask={handleAddTask}
                       movingTaskId={movingTaskId}
+                      onRenameList={handleStartRenameList}
+                      editingListId={editingListId}
+                      editingListName={editingListName}
+                      onEditingListNameChange={setEditingListName}
+                      onSaveRenameList={(listId) =>
+                        void handleRenameList(listId)
+                      }
+                      onCancelRenameList={() => {
+                        setEditingListId(null);
+                        setEditingListName("");
+                      }}
+                      savingList={savingList}
+                      onMoveListLeft={(selectedList) =>
+                        void handleMoveList(selectedList.id, -1)
+                      }
+                      onMoveListRight={(selectedList) =>
+                        void handleMoveList(selectedList.id, 1)
+                      }
+                      onDeleteList={() => {
+                        console.warn("Delete list is not implemented yet.");
+                      }}
+                      canMoveLeft={index > 0}
+                      canMoveRight={index < lists.length - 1}
                     />
                   ))}
 
