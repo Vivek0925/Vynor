@@ -14,6 +14,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import {
   createTaskList,
+  deleteTaskList,
   getTaskLists,
   moveTask,
   moveTaskList,
@@ -449,6 +450,29 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
     setOpenListMenuId(null);
   }
 
+ 
+async function handleDeleteList(list: TaskList) {
+  const confirmed = window.confirm(
+    `Delete "${list.name}"? This action cannot be undone.`,
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await deleteTaskList(workspaceSlug, list.id);
+    await loadLists();
+  } catch (error) {
+    console.error("Failed to delete task list:", error);
+
+    window.alert(
+      error instanceof Error
+        ? error.message
+        : "Failed to delete the list. Please try again.",
+    );
+  }
+}
+
+
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border border-[#DEDFE8] bg-[#6E548A] shadow-[0_18px_50px_rgba(20,20,28,0.08)] sm:rounded-[28px]">
       {/* Board top bar */}
@@ -522,9 +546,7 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
                       onMoveListRight={(selectedList) =>
                         void handleMoveList(selectedList.id, 1)
                       }
-                      onDeleteList={() => {
-                        console.warn("Delete list is not implemented yet.");
-                      }}
+                      onDeleteList={handleDeleteList}
                       canMoveLeft={index > 0}
                       canMoveRight={index < lists.length - 1}
                     />

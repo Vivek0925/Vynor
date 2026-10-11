@@ -126,6 +126,18 @@ export async function moveTaskList(
   );
 }
 
+export async function deleteTaskList(
+  workspaceSlug: string,
+  listId: string,
+) {
+  return api<{ id: string }>(
+    `/workspaces/${encodeURIComponent(workspaceSlug)}/task-lists/${encodeURIComponent(listId)}`,
+    {
+      method: "DELETE",
+    },
+  );
+}
+
 export async function getWorkspaceTasks(
   workspaceSlug: string,
 ) {

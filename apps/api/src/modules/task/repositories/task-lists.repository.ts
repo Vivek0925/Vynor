@@ -100,6 +100,12 @@ export class TaskListsRepository {
     });
   }
 
+  async countTasks(listId: string) {
+  return this.prisma.task.count({
+    where: { listId },
+  });
+}
+
   async getNextPosition(workspaceId: string) {
     const lastList = await this.prisma.taskList.findFirst({
       where: { workspaceId },

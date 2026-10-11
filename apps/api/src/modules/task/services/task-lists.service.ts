@@ -7,6 +7,7 @@ import {
 import { WorkspaceService } from "../../workspace/services/workspace.service";
 import { TaskListsRepository } from "../repositories/task-lists.repository";
 
+
 @Injectable()
 export class TaskListsService {
   constructor(
@@ -149,30 +150,39 @@ export class TaskListsService {
   }
 
   async remove(
-    userId: string,
-    workspaceSlug: string,
-    listId: string,
-  ) {
-    const workspace =
-      await this.workspaceService.findAccessibleWorkspace(
-        userId,
-        workspaceSlug,
-      );
-
-    const list = await this.taskListsRepository.findById(listId);
-
-    if (!list || list.workspaceId !== workspace.id) {
-      throw new NotFoundException("List not found.");
-    }
-
-    await this.taskListsRepository.shiftPositionsAfterRemoval(
-      workspace.id,
-      list.position,
-      list.id,
+  userId: string,
+  workspaceSlug: string,
+  listId: string,
+) {
+  const workspace =
+    await this.workspaceService.findAccessibleWorkspace(
+      userId,
+      workspaceSlug,
     );
 
-    await this.taskListsRepository.delete(list.id);
+  const list = await this.taskListsRepository.findById(listId);
 
-    return { id: list.id };
+  if (!list || list.workspaceId !== workspace.id) {
+    throw new NotFoundException("List not found.");
   }
+
+  const taskCount =
+    await this.taskListsRepository.countTasks(list.id);
+
+  if (taskCount > 0) {
+    throw new BadRequestException(
+      "This list contains tasks. Move or delete its tasks before deleting the list.",
+    );
+  }
+
+  await this.taskListsRepository.shiftPositionsAfterRemoval(
+    workspace.id,
+    list.position,
+    list.id,
+  );
+
+  await this.taskListsRepository.delete(list.id);
+
+  return { id: list.id };
+}
 }

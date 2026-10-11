@@ -7,7 +7,7 @@ import {
   Patch,
   Post,
   UseGuards,
-} from '@nestjs/common';
+} from "@nestjs/common";
 
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
