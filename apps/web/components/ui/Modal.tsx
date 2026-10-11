@@ -7,6 +7,7 @@ type ModalProps = {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
+  size?: "default" | "compact";
 };
 
 export default function Modal({
@@ -14,6 +15,7 @@ export default function Modal({
   onClose,
   title,
   children,
+  size = "default",
 }: ModalProps) {
   useEffect(() => {
     if (!open) return;
@@ -47,13 +49,16 @@ export default function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? "modal-title" : undefined}
-        className="
-          relative z-10 flex h-[100dvh] w-full min-w-0 flex-col
-          overflow-hidden bg-white shadow-2xl
-          sm:h-[min(780px,calc(100dvh-48px))]
-          sm:w-[min(1160px,calc(100vw-48px))]
-          sm:rounded-2xl
-        "
+        className={`
+  relative z-10 flex h-[100dvh] w-full min-w-0 flex-col
+  overflow-hidden bg-white shadow-2xl
+  sm:rounded-2xl
+  ${
+    size === "compact"
+      ? "sm:h-auto sm:max-h-[calc(100dvh-48px)] sm:w-[min(700px,calc(100vw-48px))]"
+      : "sm:h-[min(780px,calc(100dvh-48px))] sm:w-[min(1160px,calc(100vw-48px))]"
+  }
+`}
       >
         {title && (
           <header className="flex h-[60px] shrink-0 items-center justify-between border-b border-slate-200 px-4 sm:px-6">
@@ -78,18 +83,13 @@ export default function Modal({
                 className="h-5 w-5"
                 aria-hidden="true"
               >
-                <path
-                  d="M18 6 6 18M6 6l12 12"
-                  strokeLinecap="round"
-                />
+                <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" />
               </svg>
             </button>
           </header>
         )}
 
-        <div className="min-h-0 flex-1 overflow-hidden p-0">
-          {children}
-        </div>
+        <div className="min-h-0 flex-1 overflow-hidden p-0">{children}</div>
       </div>
     </div>
   );

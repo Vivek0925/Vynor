@@ -133,152 +133,156 @@ export default function CreateTaskModal({
   }
 
   return (
-    <Modal open={open} onClose={handleClose} title="Create task">
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Title */}
-        <div>
-          <label
-            htmlFor="task-title"
-            className="mb-1.5 block text-[12px] font-medium text-[#292929]"
-          >
-            Task title
-          </label>
+    <Modal open={open} onClose={handleClose} title="Create task" size="compact">
+      <div className="flex h-full min-h-0 w-full min-w-0 flex-col overflow-y-auto">
+        <div className="flex flex-1 flex-col justify-center px-6 py-8 sm:px-10">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Title */}
+            <div>
+              <label
+                htmlFor="task-title"
+                className="mb-1.5 block text-[12px] font-medium text-[#292929]"
+              >
+                Task title
+              </label>
 
-          <input
-            id="task-title"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder="What needs to be done?"
-            autoFocus
-            className="h-10 w-full rounded-[9px] border border-[#DEDFE8] bg-white px-3 text-[13px] text-[#14141C] outline-none transition focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/10"
-          />
-        </div>
+              <input
+                id="task-title"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder="What needs to be done?"
+                autoFocus
+                className="h-10 w-full rounded-[9px] border border-[#DEDFE8] bg-white px-3 text-[13px] text-[#14141C] outline-none transition focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/10"
+              />
+            </div>
 
-        {/* Description */}
-        <div>
-          <label
-            htmlFor="task-description"
-            className="mb-1.5 block text-[12px] font-medium text-[#292929]"
-          >
-            Description
-          </label>
+            {/* Description */}
+            <div>
+              <label
+                htmlFor="task-description"
+                className="mb-1.5 block text-[12px] font-medium text-[#292929]"
+              >
+                Description
+              </label>
 
-          <textarea
-            id="task-description"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="Add some details..."
-            rows={3}
-            className="w-full resize-none rounded-[9px] border border-[#DEDFE8] bg-white px-3 py-2.5 text-[13px] text-[#14141C] outline-none transition focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/10"
-          />
-        </div>
+              <textarea
+                id="task-description"
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder="Add some details..."
+                rows={3}
+                className="w-full resize-none rounded-[9px] border border-[#DEDFE8] bg-white px-3 py-2.5 text-[13px] text-[#14141C] outline-none transition focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/10"
+              />
+            </div>
 
-        {/* Assignee */}
-        <div>
-          <label
-            htmlFor="task-assignee"
-            className="mb-1.5 flex items-center gap-1.5 text-[12px] font-medium text-[#292929]"
-          >
-            <UserRound size={13} />
-            Assignee
-          </label>
+            {/* Assignee */}
+            <div>
+              <label
+                htmlFor="task-assignee"
+                className="mb-1.5 flex items-center gap-1.5 text-[12px] font-medium text-[#292929]"
+              >
+                <UserRound size={13} />
+                Assignee
+              </label>
 
-          <select
-            id="task-assignee"
-            value={assigneeId}
-            onChange={(event) => setAssigneeId(event.target.value)}
-            disabled={loadingMembers}
-            className="h-10 w-full rounded-[9px] border border-[#DEDFE8] bg-white px-3 text-[13px] text-[#14141C] outline-none focus:border-[#059669]"
-          >
-            <option value="">
-              {loadingMembers ? "Loading members..." : "Unassigned"}
-            </option>
+              <select
+                id="task-assignee"
+                value={assigneeId}
+                onChange={(event) => setAssigneeId(event.target.value)}
+                disabled={loadingMembers}
+                className="h-10 w-full rounded-[9px] border border-[#DEDFE8] bg-white px-3 text-[13px] text-[#14141C] outline-none focus:border-[#059669]"
+              >
+                <option value="">
+                  {loadingMembers ? "Loading members..." : "Unassigned"}
+                </option>
 
-            {members.map((member) => (
-              <option key={member.userId} value={member.userId}>
-                {member.user.name}
-              </option>
-            ))}
-          </select>
-        </div>
+                {members.map((member) => (
+                  <option key={member.userId} value={member.userId}>
+                    {member.user.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        {/* Priority + due date */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label
-              htmlFor="task-priority"
-              className="mb-1.5 block text-[12px] font-medium text-[#292929]"
-            >
-              Priority
-            </label>
+            {/* Priority + due date */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label
+                  htmlFor="task-priority"
+                  className="mb-1.5 block text-[12px] font-medium text-[#292929]"
+                >
+                  Priority
+                </label>
 
-            <select
-              id="task-priority"
-              value={priority}
-              onChange={(event) =>
-                setPriority(event.target.value as TaskPriority)
-              }
-              className="h-10 w-full rounded-[9px] border border-[#DEDFE8] bg-white px-3 text-[13px] outline-none focus:border-[#059669]"
-            >
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
-              <option value="URGENT">Urgent</option>
-            </select>
-          </div>
+                <select
+                  id="task-priority"
+                  value={priority}
+                  onChange={(event) =>
+                    setPriority(event.target.value as TaskPriority)
+                  }
+                  className="h-10 w-full rounded-[9px] border border-[#DEDFE8] bg-white px-3 text-[13px] outline-none focus:border-[#059669]"
+                >
+                  <option value="LOW">Low</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="HIGH">High</option>
+                  <option value="URGENT">Urgent</option>
+                </select>
+              </div>
 
-          <div>
-            <label
-              htmlFor="task-due-date"
-              className="mb-1.5 flex items-center gap-1.5 text-[12px] font-medium text-[#292929]"
-            >
-              <CalendarDays size={13} />
-              Due date
-            </label>
+              <div>
+                <label
+                  htmlFor="task-due-date"
+                  className="mb-1.5 flex items-center gap-1.5 text-[12px] font-medium text-[#292929]"
+                >
+                  <CalendarDays size={13} />
+                  Due date
+                </label>
 
-            <input
-              id="task-due-date"
-              type="date"
-              value={dueDate}
-              onChange={(event) => setDueDate(event.target.value)}
-              className="h-10 w-full rounded-[9px] border border-[#DEDFE8] bg-white px-3 text-[12px] outline-none focus:border-[#059669]"
-            />
-          </div>
-        </div>
+                <input
+                  id="task-due-date"
+                  type="date"
+                  value={dueDate}
+                  onChange={(event) => setDueDate(event.target.value)}
+                  className="h-10 w-full rounded-[9px] border border-[#DEDFE8] bg-white px-3 text-[12px] outline-none focus:border-[#059669]"
+                />
+              </div>
+            </div>
 
-        {error && (
-          <div className="rounded-[9px] border border-red-200 bg-red-50 px-3 py-2.5 text-[12px] text-red-600">
-            {error}
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex justify-end gap-2 border-t border-[#EEEEEA] pt-4">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleClose}
-            disabled={submitting}
-          >
-            Cancel
-          </Button>
-
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={submitting || !title.trim()}
-          >
-            {submitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              "Create task"
+            {error && (
+              <div className="rounded-[9px] border border-red-200 bg-red-50 px-3 py-2.5 text-[12px] text-red-600">
+                {error}
+              </div>
             )}
-          </Button>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-2 border-t border-[#EEEEEA] pt-4">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleClose}
+                disabled={submitting}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={submitting || !title.trim()}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create task"
+                )}
+              </Button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </Modal>
   );
 }
