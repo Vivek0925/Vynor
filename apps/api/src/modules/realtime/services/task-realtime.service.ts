@@ -25,6 +25,15 @@ export class TaskRealtimeService {
     this.emit(workspaceId, 'task:deleted', { id: taskId });
   }
 
+  
+  emitTaskCommentCreated(
+    workspaceId: string,
+    comment: unknown,
+  ) {
+    this.emit(workspaceId, 'task:comment:created', comment);
+  }
+
+
   private emit(workspaceId: string, event: string, payload: unknown) {
     this.server
       ?.to(`workspace:${workspaceId}`)

@@ -29,6 +29,7 @@ import {
   type TaskPriority,
   type WorkspaceMember,
 } from "@/lib/tasks";
+import { socket } from "@/lib/socket";
 
 type TaskDetailModalProps = {
   open: boolean;
@@ -258,6 +259,30 @@ export default function TaskDetailModal({
     void loadComments();
   }, [open, task?.id, loadComments]);
 
+  useEffect(() => {
+    if (!open || !task) return;
+
+    const taskId = task.id;
+
+    function handleCommentCreated(comment: TaskComment & { taskId?: string }) {
+      if (comment.taskId !== taskId) return;
+
+      setComments((previous) => {
+        if (previous.some((item) => item.id === comment.id)) {
+          return previous;
+        }
+
+        return [...previous, comment];
+      });
+    }
+
+    socket.on("task:comment:created", handleCommentCreated);
+
+    return () => {
+      socket.off("task:comment:created", handleCommentCreated);
+    };
+  }, [open, task?.id]);
+
   if (!task) return null;
 
   const member = members.find((item) => item.userId === currentUser?.id);
@@ -338,7 +363,13 @@ export default function TaskDetailModal({
 
       const created = await createTaskComment(workspaceSlug, task.id, content);
 
-      setComments((previous) => [...previous, created]);
+      setComments((previous) => {
+        if (previous.some((comment) => comment.id === created.id)) {
+          return previous;
+        }
+
+        return [...previous, created];
+      });
       setCommentText("");
     } catch (err) {
       setCommentsError(
