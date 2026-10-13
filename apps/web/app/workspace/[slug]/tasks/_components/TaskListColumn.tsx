@@ -100,13 +100,13 @@ export default function TaskListColumn({
                 }}
                 disabled={savingList}
                 maxLength={80}
-                className="min-w-0 w-full rounded-md border border-white/20 bg-black/20 px-2 py-1 text-[13px] text-white outline-none focus:border-white/50"
+                className="min-w-0 w-full rounded-md border border-[#D1D5DB] bg-white px-2 py-1 text-[13px] text-[#292934] outline-none focus:border-[#16A36A] focus:ring-2 focus:ring-[#16A36A]/10"
                 aria-label="Task list name"
               />
               <button
                 type="submit"
                 disabled={savingList || !editingListName.trim()}
-                className="rounded-md px-2 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-40"
+                className="rounded-md px-2 py-1 text-xs font-medium text-[#128653] hover:bg-[#E8F6EE] disabled:opacity-40"
               >
                 {savingList ? "..." : "Save"}
               </button>
@@ -114,7 +114,7 @@ export default function TaskListColumn({
                 type="button"
                 onClick={onCancelRenameList}
                 disabled={savingList}
-                className="rounded-md px-2 py-1 text-xs text-white/60 hover:bg-white/10"
+                className="rounded-md px-2 py-1 text-xs text-[#737380] hover:bg-[#F3F4F6]"
               >
                 Cancel
               </button>
@@ -125,7 +125,7 @@ export default function TaskListColumn({
             </h2>
           )}
 
-          <span className="shrink-0 text-[11px] text-white/45">
+          <span className="shrink-0 rounded-md bg-[#F3F4F6] px-1.5 py-0.5 text-[11px] font-medium text-[#737380]">
             {tasks.length}
           </span>
         </div>
@@ -133,7 +133,7 @@ export default function TaskListColumn({
         <button
           type="button"
           onClick={() => setMenuOpen((open) => !open)}
-          className="rounded-md p-1.5 text-white/60 transition hover:bg-white/10 hover:text-white"
+          className="rounded-md p-1.5 text-[#858591] transition hover:bg-[#F3F4F6] hover:text-[#292934]"
           aria-label={`List options for ${list.name}`}
           aria-expanded={menuOpen}
           aria-haspopup="menu"
@@ -217,9 +217,9 @@ export default function TaskListColumn({
           ))}
 
           {tasks.length === 0 && (
-            <div className="rounded-xl border border-dashed border-white/15 px-3 py-7 text-center text-[11px] text-white/35">
-              Drop a card here
-            </div>
+            <div className="rounded-xl border border-dashed border-[#D1D5DB] bg-[#F9FAFB] px-3 py-7 text-center text-[11px] text-[#9CA3AF]">
+  Drop a card here
+</div>
           )}
         </div>
       </SortableContext>
