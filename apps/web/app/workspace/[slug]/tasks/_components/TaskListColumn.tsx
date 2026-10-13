@@ -227,7 +227,7 @@ export default function TaskListColumn({
       <button
         type="button"
         onClick={() => onAddTask(list.id)}
-        className="mx-2 mb-2 flex h-9 shrink-0 items-center gap-2 rounded-xl px-2 text-left text-[12px] font-medium text-white/60 transition hover:bg-white/10 hover:text-white"
+        className="mx-2 mb-2 flex h-9 shrink-0 items-center gap-2 rounded-xl px-2 text-left text-[12px] font-medium text-[#737380] transition hover:bg-[#E8F6EE] hover:text-[#128653]"
       >
         <Plus size={15} />
         Add a card
