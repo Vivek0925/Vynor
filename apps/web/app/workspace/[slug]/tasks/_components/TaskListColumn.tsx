@@ -74,11 +74,10 @@ export default function TaskListColumn({
     <section
       ref={setNodeRef}
       className={[
-        "relative flex h-fit max-h-full w-[310px] shrink-0 flex-col",
-        "rounded-2xl border border-white/10",
-        "bg-black/10 backdrop-blur-sm transition",
-        isOver ? "ring-2 ring-white/30" : "",
-      ].join(" ")}
+  "relative flex h-fit max-h-full w-[310px] shrink-0 flex-col",
+  "rounded-2xl border border-[#E5E7EB] bg-white shadow-sm transition",
+  isOver ? "ring-2 ring-[#16A36A]/30 border-[#16A36A]" : "",
+].join(" ")}
     >
       <header className="relative flex h-12 shrink-0 items-center justify-between px-3">
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -121,7 +120,7 @@ export default function TaskListColumn({
               </button>
             </form>
           ) : (
-            <h2 className="truncate text-[13px] font-semibold text-white">
+            <h2 className="truncate text-[13px] font-semibold text-[#292934]">
               {list.name}
             </h2>
           )}
