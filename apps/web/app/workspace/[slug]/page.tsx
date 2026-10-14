@@ -1,10 +1,6 @@
 import WorkspaceSectionPage from "./_components/WorkspaceSectionPage";
-import WorkspaceSocket from "./_components/WorkspaceSocket";
 import MyTasksCard from "./_components/MyTasksCard";
-
-const meetings = [
-  { date: "JUL 10", title: "Sprint Planning", time: "Today, 10:00 AM" },
-];
+import UpcomingMeetingsCard from "./_components/UpcomingMeetingsCard";
 
 const documents = [
   { label: "Product Requirements.docx", meta: "Updated 2h ago" },
@@ -60,40 +56,7 @@ export default async function WorkspacePage({
         </div>
 
         {/* Upcoming Meetings */}
-        <div className="rounded-[28px] border border-[#DEDFE8] bg-[#FAFAF8] p-6">
-          <div className="text-[13px] font-medium uppercase tracking-[0.18em] text-[#5B5D6E]">
-            Upcoming meetings
-          </div>
-
-          <div className="mt-4 space-y-4">
-            {meetings.map((meeting) => (
-              <div
-                key={meeting.title}
-                className="flex items-center justify-between rounded-[20px] border border-white bg-white px-4 py-3 shadow-[0_8px_20px_rgba(20,20,28,0.04)]"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="rounded-[16px] bg-[#EAFBF1] px-3 py-2 text-center text-[12px] font-medium leading-none text-[#065F46]">
-                    <div>{meeting.date.split(" ")[0]}</div>
-
-                    <div className="mt-1 text-[16px]">
-                      {meeting.date.split(" ")[1]}
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="text-[14px] font-medium text-[#14141C]">
-                      {meeting.title}
-                    </div>
-
-                    <div className="mt-1 text-[13px] text-[#5B5D6E]">
-                      {meeting.time}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <UpcomingMeetingsCard workspaceSlug={slug} />
       </div>
 
       {/* Recent Documents */}
