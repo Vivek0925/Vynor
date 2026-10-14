@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { AppState, BinaryFiles } from "@excalidraw/excalidraw/types";
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import "@excalidraw/excalidraw/index.css";
+import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 
 const Excalidraw = dynamic(
   async () => {
@@ -40,6 +41,9 @@ export default function WhiteboardCanvas({
     unknown
   > | null>(null);
   const [ready, setReady] = useState(false);
+
+  const [excalidrawAPI, setExcalidrawAPI] =
+    useState<ExcalidrawImperativeAPI | null>(null);
 
   useEffect(() => {
     try {
@@ -83,6 +87,40 @@ export default function WhiteboardCanvas({
     [storageKey],
   );
 
+  useEffect(() => {
+    const handleOutsideClick = (event: PointerEvent) => {
+      if (!excalidrawAPI) return;
+
+      const appState = excalidrawAPI.getAppState();
+
+      if (appState.openMenu !== "canvas") return;
+
+      const target = event.target;
+
+      if (!(target instanceof Element)) return;
+
+      // Keep the menu open when interacting with the menu itself.
+      if (
+        target.closest(".dropdown-menu") ||
+        target.closest('[data-testid="main-menu-trigger"]')
+      ) {
+        return;
+      }
+
+      excalidrawAPI.updateScene({
+        appState: {
+          openMenu: null,
+        },
+      });
+    };
+
+    document.addEventListener("pointerdown", handleOutsideClick, true);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsideClick, true);
+    };
+  }, [excalidrawAPI]);
+
   if (!ready) {
     return (
       <div className="flex h-full items-center justify-center text-sm text-[#536657]">
@@ -96,6 +134,7 @@ export default function WhiteboardCanvas({
       <div className="absolute inset-0 min-h-0 min-w-0">
         <Excalidraw
           key={workspaceSlug}
+          excalidrawAPI={setExcalidrawAPI}
           initialData={{
             ...initialData,
             appState: {
@@ -106,7 +145,6 @@ export default function WhiteboardCanvas({
           }}
           onChange={handleChange}
           theme="light"
-          
         />
       </div>
     </div>
