@@ -30,8 +30,23 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
       return;
     }
 
-    touchStartX.current = event.touches[0]?.clientX ?? null;
-    touchStartY.current = event.touches[0]?.clientY ?? null;
+    const touch = event.touches[0];
+    if (!touch) return;
+
+    const target = event.target as HTMLElement;
+    const startedInsideTasksBoard = Boolean(
+      target.closest('[data-tasks-board="true"]'),
+    );
+
+    // On Tasks, only allow sidebar swipes from the left edge.
+    if (isTasksPage && startedInsideTasksBoard && touch.clientX > 45) {
+      touchStartX.current = null;
+      touchStartY.current = null;
+      return;
+    }
+
+    touchStartX.current = touch.clientX;
+    touchStartY.current = touch.clientY;
   }
 
   function handleShellTouchEnd(event: React.TouchEvent<HTMLDivElement>) {
@@ -39,30 +54,24 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
       return;
     }
 
-    const endX = event.changedTouches[0]?.clientX ?? touchStartX.current;
+    const startX = touchStartX.current;
+    const startY = touchStartY.current;
 
-    const endY = event.changedTouches[0]?.clientY ?? touchStartY.current;
+    // Reset coordinates before any early return.
+    touchStartX.current = null;
+    touchStartY.current = null;
 
-    const distanceX = endX - touchStartX.current;
-    const distanceY = endY - touchStartY.current;
+    const endX = event.changedTouches[0]?.clientX ?? startX;
+    const endY = event.changedTouches[0]?.clientY ?? startY;
+
+    const distanceX = endX - startX;
+    const distanceY = endY - startY;
 
     const horizontalSwipe = Math.abs(distanceX) > Math.abs(distanceY);
 
-    const target = event.target as HTMLElement;
-    const startedInsideTasksBoard = Boolean(
-      target.closest('[data-tasks-board="true"]'),
-    );
-
     if (horizontalSwipe && distanceX > 60) {
-      if (isTasksPage && startedInsideTasksBoard) {
-        return;
-      }
-
       setSidebarOpen(true);
     }
-
-    touchStartX.current = null;
-    touchStartY.current = null;
   }
 
   useEffect(() => {
