@@ -95,7 +95,14 @@ export default function WhiteboardCanvas({
     <div className="h-full min-h-0 w-full overflow-hidden rounded-xl border border-[#DCE5DA] bg-white">
       <Excalidraw
         key={workspaceSlug}
-        initialData={initialData ?? undefined}
+        initialData={{
+          appState: {
+            gridModeEnabled: true,
+            gridSize: 20,
+            ...(initialData?.appState as Record<string, unknown> | undefined),
+          },
+          ...initialData,
+        }}
         onChange={handleChange}
         theme="light"
       />
