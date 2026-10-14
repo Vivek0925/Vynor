@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { Search, Menu } from "lucide-react";
 import { getWorkspaceBySlug, type Workspace } from "@/lib/workspace";
@@ -14,6 +14,8 @@ type WorkspaceShellProps = {
 
 export default function WorkspaceShell({ children }: WorkspaceShellProps) {
   const params = useParams<{ slug: string }>();
+  const pathname = usePathname();
+  const isTasksPage = pathname.includes("/tasks");
   const slug = typeof params?.slug === "string" ? params.slug : "";
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +48,16 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
 
     const horizontalSwipe = Math.abs(distanceX) > Math.abs(distanceY);
 
+    const target = event.target as HTMLElement;
+    const startedInsideTasksBoard = Boolean(
+      target.closest('[data-tasks-board="true"]'),
+    );
+
     if (horizontalSwipe && distanceX > 60) {
+      if (isTasksPage && startedInsideTasksBoard) {
+        return;
+      }
+
       setSidebarOpen(true);
     }
 
