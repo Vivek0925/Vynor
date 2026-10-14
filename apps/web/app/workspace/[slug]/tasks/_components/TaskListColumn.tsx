@@ -60,6 +60,8 @@ export default function TaskListColumn({
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
   useEffect(() => {
     if (!menuOpen) return;
 
@@ -87,8 +89,9 @@ export default function TaskListColumn({
     action();
   }
 
-  return (
-    <section
+    return (
+    <>
+      <section
       ref={setNodeRef}
       className={[
         "relative flex h-fit max-h-full w-[310px] shrink-0 flex-col",
@@ -163,10 +166,10 @@ export default function TaskListColumn({
 
         {menuOpen && (
           <div
-  ref={menuRef}
-  role="menu"
-  className="absolute right-2 top-10 z-50 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 text-slate-700 shadow-xl"
->
+            ref={menuRef}
+            role="menu"
+            className="absolute right-2 top-10 z-50 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 text-slate-700 shadow-xl"
+          >
             <button
               type="button"
               role="menuitem"
@@ -204,7 +207,10 @@ export default function TaskListColumn({
             <button
               type="button"
               role="menuitem"
-              onClick={() => runAction(() => onDeleteList(list))}
+              onClick={() => {
+                setMenuOpen(false);
+                setDeleteConfirmOpen(true);
+              }}
               className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
             >
               <Trash2 size={15} />
@@ -252,7 +258,69 @@ export default function TaskListColumn({
       >
         <Plus size={15} />
         Add a card
+      
       </button>
     </section>
+
+    {deleteConfirmOpen && (
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/25 p-4 backdrop-blur-[2px]"
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) {
+            setDeleteConfirmOpen(false);
+          }
+        }}
+      >
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="delete-list-title"
+          aria-describedby="delete-list-description"
+          className="w-full max-w-[360px] rounded-2xl border border-[#DCE5DA] bg-[#FAFCF9] p-5 shadow-[0_20px_60px_rgba(25,45,30,0.18)]"
+        >
+          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
+            <Trash2 size={19} />
+          </div>
+
+          <h3
+            id="delete-list-title"
+            className="text-base font-semibold text-[#26382C]"
+          >
+            Delete "{list.name}"?
+          </h3>
+
+          <p
+            id="delete-list-description"
+            className="mt-2 text-sm leading-5 text-[#667768]"
+          >
+            This will delete the task list and may affect the tasks inside it.
+            This action cannot be undone.
+          </p>
+
+          <div className="mt-6 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setDeleteConfirmOpen(false)}
+              className="h-9 rounded-lg border border-[#DCE5DA] px-3 text-sm font-medium text-[#536657] transition hover:bg-[#E8EFE6]"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setDeleteConfirmOpen(false);
+                onDeleteList(list);
+              }}
+              className="inline-flex h-9 items-center gap-2 rounded-lg bg-red-600 px-3 text-sm font-medium text-white transition hover:bg-red-700"
+            >
+              <Trash2 size={14} />
+              Delete list
+            </button>
+          </div>
+        </div>
+      </div>
+         )}
+    </>
   );
 }

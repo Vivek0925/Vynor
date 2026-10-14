@@ -449,26 +449,22 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
     setOpenListMenuId(null);
   }
 
-  async function handleDeleteList(list: TaskList) {
-    const confirmed = window.confirm(
-      `Delete "${list.name}"? This action cannot be undone.`,
+ 
+async function handleDeleteList(list: TaskList) {
+  try {
+    await deleteTaskList(workspaceSlug, list.id);
+    await loadLists();
+  } catch (error) {
+    console.error("Failed to delete task list:", error);
+
+    window.alert(
+      error instanceof Error
+        ? error.message
+        : "Failed to delete the list. Please try again.",
     );
-
-    if (!confirmed) return;
-
-    try {
-      await deleteTaskList(workspaceSlug, list.id);
-      await loadLists();
-    } catch (error) {
-      console.error("Failed to delete task list:", error);
-
-      window.alert(
-        error instanceof Error
-          ? error.message
-          : "Failed to delete the list. Please try again.",
-      );
-    }
   }
+}
+
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border border-[#DCE5DA] bg-[#E8EFE6] shadow-[0_12px_36px_rgba(35,55,38,0.07)] sm:rounded-[28px]">
