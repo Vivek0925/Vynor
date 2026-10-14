@@ -47,24 +47,8 @@ export default function WhiteboardPageClient({
           : "h-full min-h-0 rounded-xl border border-[#DCE5DA]"
       }`}
     >
-      <div className="flex h-12 shrink-0 items-center justify-end border-b border-[#DCE5DA] bg-[#FAFCF9] px-3">
-        <button
-          type="button"
-          onClick={toggleFullscreen}
-          title={isFullscreen ? "Exit fullscreen (Esc)" : "Enter fullscreen"}
-          aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-          className="inline-flex h-8 items-center gap-2 rounded-lg border border-[#DCE5DA] bg-white px-3 text-sm text-[#26382C] transition hover:bg-[#E8EFE6]"
-        >
-          {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-          <span>{isFullscreen ? "Exit fullscreen" : "Fullscreen"}</span>
-        </button>
-      </div>
-
       <div className="min-h-0 flex-1">
-        <WhiteboardCanvas
-          workspaceSlug={workspaceSlug}
-          containerRef={containerRef}
-        />
+        <WhiteboardCanvas workspaceSlug={workspaceSlug} />
       </div>
     </div>
   );

@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from "react";
 import type { AppState, BinaryFiles } from "@excalidraw/excalidraw/types";
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import "@excalidraw/excalidraw/index.css";
-import type React from "react";
 
 const Excalidraw = dynamic(
   async () => {
@@ -32,10 +31,8 @@ const STORAGE_KEY_PREFIX = "vynor-whiteboard:";
 
 export default function WhiteboardCanvas({
   workspaceSlug,
-  containerRef,
 }: {
   workspaceSlug: string;
-  containerRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const storageKey = `${STORAGE_KEY_PREFIX}${workspaceSlug}`;
   const [initialData, setInitialData] = useState<Record<
@@ -95,10 +92,7 @@ export default function WhiteboardCanvas({
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl border border-[#DCE5DA] bg-white"
-    >
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl border border-[#DCE5DA] bg-white">
       <div className="min-h-0 flex-1">
         <Excalidraw
           key={workspaceSlug}
