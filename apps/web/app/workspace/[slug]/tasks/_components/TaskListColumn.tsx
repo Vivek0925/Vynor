@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   MoreHorizontal,
   Plus,
@@ -58,6 +58,23 @@ export default function TaskListColumn({
   canMoveRight,
 }: TaskListColumnProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function handleOutsideClick(event: PointerEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsideClick);
+    };
+  }, [menuOpen]);
 
   const { setNodeRef, isOver } = useDroppable({
     id: list.id,
@@ -146,9 +163,10 @@ export default function TaskListColumn({
 
         {menuOpen && (
           <div
-            role="menu"
-            className="absolute right-2 top-10 z-50 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 text-slate-700 shadow-xl"
-          >
+  ref={menuRef}
+  role="menu"
+  className="absolute right-2 top-10 z-50 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 text-slate-700 shadow-xl"
+>
             <button
               type="button"
               role="menuitem"
