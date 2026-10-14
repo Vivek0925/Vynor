@@ -74,10 +74,13 @@ export default function TaskListColumn({
     <section
       ref={setNodeRef}
       className={[
-  "relative flex h-fit max-h-full w-[310px] shrink-0 flex-col",
-  "rounded-2xl border border-[#E5E7EB] bg-white shadow-sm transition",
-  isOver ? "ring-2 ring-[#16A36A]/30 border-[#16A36A]" : "",
-].join(" ")}
+        "relative flex h-fit max-h-full w-[310px] shrink-0 flex-col",
+        "rounded-2xl border border-[#DCE5DA] bg-[#F5F8F3]",
+        "shadow-[0_3px_10px_rgba(35,55,38,0.05)] transition-all duration-200",
+        isOver
+          ? "border-[#168653] bg-[#EEF5EB] ring-2 ring-[#168653]/20"
+          : "hover:border-[#C8D8C6]",
+      ].join(" ")}
     >
       <header className="relative flex h-12 shrink-0 items-center justify-between px-3">
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -100,13 +103,13 @@ export default function TaskListColumn({
                 }}
                 disabled={savingList}
                 maxLength={80}
-                className="min-w-0 w-full rounded-md border border-[#D1D5DB] bg-white px-2 py-1 text-[13px] text-[#292934] outline-none focus:border-[#16A36A] focus:ring-2 focus:ring-[#16A36A]/10"
+                className="min-w-0 w-full rounded-md border border-[#D1DDD0] bg-white px-2 py-1 text-[13px] text-[#26382C] outline-none focus:border-[#168653] focus:ring-2 focus:ring-[#168653]/10"
                 aria-label="Task list name"
               />
               <button
                 type="submit"
                 disabled={savingList || !editingListName.trim()}
-                className="rounded-md px-2 py-1 text-xs font-medium text-[#128653] hover:bg-[#E8F6EE] disabled:opacity-40"
+                className="rounded-md px-2 py-1 text-xs font-medium text-[#168653] hover:bg-[#E8F0E5] disabled:opacity-40"
               >
                 {savingList ? "..." : "Save"}
               </button>
@@ -114,18 +117,18 @@ export default function TaskListColumn({
                 type="button"
                 onClick={onCancelRenameList}
                 disabled={savingList}
-                className="rounded-md px-2 py-1 text-xs text-[#737380] hover:bg-[#F3F4F6]"
+                className="rounded-md px-2 py-1 text-xs text-[#536657] hover:bg-[#E8EFE6]"
               >
                 Cancel
               </button>
             </form>
           ) : (
-            <h2 className="truncate text-[13px] font-semibold text-[#292934]">
+            <h2 className="truncate text-[13px] font-semibold text-[#26382C]">
               {list.name}
             </h2>
           )}
 
-          <span className="shrink-0 rounded-md bg-[#F3F4F6] px-1.5 py-0.5 text-[11px] font-medium text-[#737380]">
+          <span className="shrink-0 rounded-md bg-[#E8EFE6] px-1.5 py-0.5 text-[11px] font-medium text-[#536657]">
             {tasks.length}
           </span>
         </div>
@@ -133,7 +136,7 @@ export default function TaskListColumn({
         <button
           type="button"
           onClick={() => setMenuOpen((open) => !open)}
-          className="rounded-md p-1.5 text-[#858591] transition hover:bg-[#F3F4F6] hover:text-[#292934]"
+          className="rounded-md p-1.5 text-[#7A897B] transition hover:bg-[#E8EFE6] hover:text-[#26382C]"
           aria-label={`List options for ${list.name}`}
           aria-expanded={menuOpen}
           aria-haspopup="menu"
@@ -217,9 +220,9 @@ export default function TaskListColumn({
           ))}
 
           {tasks.length === 0 && (
-            <div className="rounded-xl border border-dashed border-[#D1D5DB] bg-[#F9FAFB] px-3 py-7 text-center text-[11px] text-[#9CA3AF]">
-  Drop a card here
-</div>
+            <div className="rounded-xl border border-dashed border-[#C8D8C6] bg-[#EEF3ED] px-3 py-7 text-center text-[11px] text-[#899689]">
+              Drop a card here
+            </div>
           )}
         </div>
       </SortableContext>
@@ -227,7 +230,7 @@ export default function TaskListColumn({
       <button
         type="button"
         onClick={() => onAddTask(list.id)}
-        className="mx-2 mb-2 flex h-9 shrink-0 items-center gap-2 rounded-xl px-2 text-left text-[12px] font-medium text-[#737380] transition hover:bg-[#E8F6EE] hover:text-[#128653]"
+        className="mx-2 mb-2 flex h-9 shrink-0 items-center gap-2 rounded-xl px-2 text-left text-[12px] font-medium text-[#667768] transition hover:bg-[#E8F0E5] hover:text-[#168653]"
       >
         <Plus size={15} />
         Add a card

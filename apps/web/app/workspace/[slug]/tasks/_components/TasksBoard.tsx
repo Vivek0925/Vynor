@@ -383,7 +383,6 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
     }
   }
 
-
   async function handleRenameList(listId: string) {
     const name = editingListName.trim();
 
@@ -450,41 +449,40 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
     setOpenListMenuId(null);
   }
 
- 
-async function handleDeleteList(list: TaskList) {
-  const confirmed = window.confirm(
-    `Delete "${list.name}"? This action cannot be undone.`,
-  );
-
-  if (!confirmed) return;
-
-  try {
-    await deleteTaskList(workspaceSlug, list.id);
-    await loadLists();
-  } catch (error) {
-    console.error("Failed to delete task list:", error);
-
-    window.alert(
-      error instanceof Error
-        ? error.message
-        : "Failed to delete the list. Please try again.",
+  async function handleDeleteList(list: TaskList) {
+    const confirmed = window.confirm(
+      `Delete "${list.name}"? This action cannot be undone.`,
     );
-  }
-}
 
+    if (!confirmed) return;
+
+    try {
+      await deleteTaskList(workspaceSlug, list.id);
+      await loadLists();
+    } catch (error) {
+      console.error("Failed to delete task list:", error);
+
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete the list. Please try again.",
+      );
+    }
+  }
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-[#F7F8FA] shadow-[0_8px_30px_rgba(20,20,28,0.05)] sm:rounded-[28px]">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border border-[#DCE5DA] bg-[#E8EFE6] shadow-[0_12px_36px_rgba(35,55,38,0.07)] sm:rounded-[28px]">
       {/* Board top bar */}
-      <header className="flex h-[60px] shrink-0 items-center justify-between gap-4 border-b border-[#E5E7EB] bg-white px-4 text-[#20202A] sm:px-5">
+
+      <header className="flex h-[60px] shrink-0 items-center justify-between gap-4 border-b border-[#E1E8DE] bg-[#FAFCF9] px-4 text-[#202A22] sm:px-5">
         <div className="flex min-w-0 items-center gap-3">
           <h1 className="truncate text-[16px] font-semibold">Tasks</h1>
 
           <span className="hidden h-5 w-px bg-white/20 sm:block" />
 
-          <span className="hidden text-[12px] text-[#858591] sm:block">
-  Workspace task board
-</span>
+          <span className="hidden text-[12px] text-[#737D73] sm:block">
+            Workspace task board
+          </span>
         </div>
 
         <button
@@ -497,7 +495,7 @@ async function handleDeleteList(list: TaskList) {
             }
           }}
           disabled={lists.length === 0}
-          className="inline-flex h-9 shrink-0 items-center gap-2 rounded-[9px] bg-[#16A36A] px-3 text-[12px] font-medium text-white transition hover:bg-[#128653] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-9 shrink-0 items-center gap-2 rounded-[9px] bg-[#168653] px-3 text-[12px] font-medium text-white transition hover:bg-[#116B43] disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Plus size={15} />
           Add task
@@ -515,9 +513,9 @@ async function handleDeleteList(list: TaskList) {
           <div className="h-full overflow-x-auto overflow-y-hidden p-3 sm:p-4">
             <div className="flex h-full min-w-max items-start gap-3">
               {loading ? (
-                <div className="px-2 py-3 text-sm text-[#858591]">
-  Loading task board...
-</div>
+                <div className="px-2 py-3 text-sm text-[#536657]">
+                  Loading task board...
+                </div>
               ) : (
                 <>
                   {lists.map((list, index) => (
@@ -555,7 +553,7 @@ async function handleDeleteList(list: TaskList) {
                   {/* Add another list */}
                   <div className="w-[310px] shrink-0">
                     {isAddingList ? (
-                      <div className="rounded-2xl border border-[#E5E7EB] bg-white p-3 shadow-sm">
+                      <div className="rounded-2xl border border-[#DCE5DA] bg-[#F5F8F3] p-3 shadow-sm">
                         <input
                           autoFocus
                           value={newListName}
@@ -583,7 +581,7 @@ async function handleDeleteList(list: TaskList) {
                             type="button"
                             onClick={() => void handleCreateList()}
                             disabled={!newListName.trim() || creatingList}
-                            className="h-9 rounded-[9px] bg-[#16A36A] px-3 text-[12px] font-medium text-white transition hover:bg-[#128653] disabled:cursor-not-allowed disabled:opacity-50"
+                            className="h-9 rounded-[9px] bg-[#168653] px-3 text-[12px] font-medium text-white transition hover:bg-[#116B43] disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {creatingList ? "Adding..." : "Add list"}
                           </button>
@@ -595,7 +593,7 @@ async function handleDeleteList(list: TaskList) {
                               setIsAddingList(false);
                             }}
                             disabled={creatingList}
-                            className="h-9 rounded-[9px] px-3 text-[12px] font-medium text-[#737380] transition hover:bg-[#F3F4F6] hover:text-[#292934]"
+                            className="h-9 rounded-[9px] px-3 text-[12px] font-medium text-[#536657] transition hover:bg-[#E8EFE6] hover:text-[#26382C]"
                           >
                             Cancel
                           </button>
@@ -605,7 +603,7 @@ async function handleDeleteList(list: TaskList) {
                       <button
                         type="button"
                         onClick={() => setIsAddingList(true)}
-                        className="flex h-[37px] w-[210px] items-center justify-center gap-2 rounded-[14px] border border-dashed border-[#D1D5DB] bg-white/70 text-[13px] font-medium text-[#737380] transition hover:border-[#16A36A] hover:bg-white hover:text-[#128653]"
+                        className="flex h-[37px] w-[210px] items-center justify-center gap-2 rounded-[14px] border border-dashed border-[#B9CBB7] bg-[#F5F8F3]/80 text-[13px] font-medium text-[#536657] transition hover:border-[#168653] hover:bg-[#F5F8F3] hover:text-[#116B43]"
                       >
                         <Plus size={16} />
                         Add another list
