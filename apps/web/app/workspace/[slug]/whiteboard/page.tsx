@@ -1,5 +1,5 @@
 import WorkspaceSectionPage from "../_components/WorkspaceSectionPage";
-import WhiteboardCanvas from "./WhiteboardCanvas";
+import WhiteboardPageClient from "./WhiteboardPageClient";
 
 export default async function WhiteboardPage({
   params,
@@ -16,7 +16,7 @@ export default async function WhiteboardPage({
   contentClassName="overflow-hidden flex flex-col"
 >
   <div className="min-h-0 flex-1 py-3">
-    <WhiteboardCanvas workspaceSlug={slug} />
+    <WhiteboardPageClient workspaceSlug={slug} />
   </div>
 </WorkspaceSectionPage>
   );
