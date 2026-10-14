@@ -290,12 +290,12 @@ export default function Meetings({ slug }: MeetingsProps) {
       <div className="sticky top-0 z-30 shrink-0 rounded-xl border-b border-[#ECEEF3] bg-white px-3 py-3 shadow-[0_6px_16px_rgba(20,20,28,0.04)] sm:px-6 sm:py-4">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#EAFBF1] sm:h-11 sm:w-11 sm:rounded-2xl">
-              <Video size={21} className="text-[#1E8E5A]" />
-            </div>
+            <div className="min-w-0">
+              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#059669]">
+                Meetings
+              </div>
 
-            <div>
-              <h1 className="truncate text-[22px] font-light tracking-[-0.035em] text-[#14141C] sm:text-[24px]">
+              <h1 className="font-light tracking-[-0.035em] text-[20px] text-[#14141C] sm:text-[22px]">
                 Meetings
               </h1>
             </div>

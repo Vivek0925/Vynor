@@ -18,7 +18,7 @@ export default function WorkspaceSectionPage({
           {eyebrow}
         </div>
 
-        <h1 className="mt-0.5 text-[22px] font-light tracking-[-0.035em] text-[#14141C] sm:text-[24px]">
+        <h1 className="mt-0.5 truncate font-light tracking-[-0.035em] text-[20px] text-[#14141C] sm:text-[22px]">
           {title}
         </h1>
       </header>

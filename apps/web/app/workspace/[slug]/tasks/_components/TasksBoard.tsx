@@ -449,36 +449,36 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
     setOpenListMenuId(null);
   }
 
- 
-async function handleDeleteList(list: TaskList) {
-  try {
-    await deleteTaskList(workspaceSlug, list.id);
-    await loadLists();
-  } catch (error) {
-    console.error("Failed to delete task list:", error);
+  async function handleDeleteList(list: TaskList) {
+    try {
+      await deleteTaskList(workspaceSlug, list.id);
+      await loadLists();
+    } catch (error) {
+      console.error("Failed to delete task list:", error);
 
-    window.alert(
-      error instanceof Error
-        ? error.message
-        : "Failed to delete the list. Please try again.",
-    );
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete the list. Please try again.",
+      );
+    }
   }
-}
-
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border border-[#DCE5DA] bg-[#E8EFE6] shadow-[0_12px_36px_rgba(35,55,38,0.07)] sm:rounded-[28px]">
       {/* Board top bar */}
 
-      <header className="flex h-[60px] shrink-0 items-center justify-between gap-4 border-b border-[#E1E8DE] bg-[#FAFCF9] px-4 text-[#202A22] sm:px-5">
+      <header className="flex min-h-[60px] shrink-0 items-center justify-between gap-4 border-b border-[#E1E8DE] bg-[#FAFCF9] px-4 py-2 text-[#202A22] sm:px-5">
         <div className="flex min-w-0 items-center gap-3">
-          <h1 className="truncate font-light tracking-[-0.035em] text-[22px] text-[#14141C] sm:text-[24px]">Tasks</h1>
+          <div className="min-w-0">
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#059669]">
+              Tasks
+            </div>
 
-          <span className="hidden h-5 w-px bg-white/20 sm:block" />
-
-          <span className="hidden text-[15px] text-[#737D73] sm:block">
-            Workspace task board
-          </span>
+            <h1 className="truncate font-light tracking-[-0.035em] text-[20px] text-[#14141C] sm:text-[22px]">
+              Task board
+            </h1>
+          </div>
         </div>
 
         <button
