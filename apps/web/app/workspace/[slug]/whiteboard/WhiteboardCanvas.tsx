@@ -1,4 +1,3 @@
-
 "use client";
 
 import dynamic from "next/dynamic";
@@ -36,9 +35,10 @@ export default function WhiteboardCanvas({
   workspaceSlug: string;
 }) {
   const storageKey = `${STORAGE_KEY_PREFIX}${workspaceSlug}`;
-  const [initialData, setInitialData] = useState<Record<string, unknown> | null>(
-    null,
-  );
+  const [initialData, setInitialData] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -55,32 +55,33 @@ export default function WhiteboardCanvas({
   }, [storageKey]);
 
   const handleChange = useCallback(
-  (
-    elements: readonly ExcalidrawElement[],
-    appState: AppState,
-    files: BinaryFiles,
-  ) => {
-    try {
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify({
-          elements,
-          appState: {
-            viewBackgroundColor: appState.viewBackgroundColor,
-            gridSize: appState.gridSize,
-            zoom: appState.zoom,
-            scrollX: appState.scrollX,
-            scrollY: appState.scrollY,
-          },
-          files,
-        }),
-      );
-    } catch {
-      // Storage may be full or unavailable.
-    }
-  },
-  [storageKey],
-);
+    (
+      elements: readonly ExcalidrawElement[],
+      appState: AppState,
+      files: BinaryFiles,
+    ) => {
+      try {
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify({
+            elements,
+            appState: {
+              viewBackgroundColor: appState.viewBackgroundColor,
+              gridSize: appState.gridSize ?? 20,
+              gridModeEnabled: true,
+              zoom: appState.zoom,
+              scrollX: appState.scrollX,
+              scrollY: appState.scrollY,
+            },
+            files,
+          }),
+        );
+      } catch {
+        // Storage may be full or unavailable.
+      }
+    },
+    [storageKey],
+  );
 
   if (!ready) {
     return (
@@ -91,7 +92,7 @@ export default function WhiteboardCanvas({
   }
 
   return (
-    <div className="h-full min-h-[520px] overflow-hidden rounded-2xl border border-[#DCE5DA] bg-white">
+    <div className="h-full min-h-0 w-full overflow-hidden rounded-xl border border-[#DCE5DA] bg-white">
       <Excalidraw
         key={workspaceSlug}
         initialData={initialData ?? undefined}
