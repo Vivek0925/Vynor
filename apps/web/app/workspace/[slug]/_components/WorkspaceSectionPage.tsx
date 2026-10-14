@@ -18,7 +18,7 @@ export default function WorkspaceSectionPage({
   headerActions,
 }: WorkspaceSectionPageProps) {
   return (
-    <section className="flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-[24px] border border-[#DEDFE8] bg-white shadow-[0_18px_50px_rgba(20,20,28,0.06)] sm:rounded-[32px]">
+    <section className="flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-[24px] border border-[#DEDFE8] bg-white shadow-[0_18px_50px_rgba(20,20,28,0.06)] fullscreen:!h-screen fullscreen:!w-screen fullscreen:!max-w-none fullscreen:!rounded-none fullscreen:!border-0 sm:rounded-[32px]">
       <header className="z-20 flex shrink-0 items-center justify-between gap-4 border-b border-[#ECEEF3] bg-white px-5 py-2.5 sm:px-6 md:px-7">
         <div className="min-w-0">
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#059669]">
