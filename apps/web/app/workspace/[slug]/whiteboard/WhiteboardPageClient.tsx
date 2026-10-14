@@ -45,10 +45,12 @@ export default function WhiteboardPageClient() {
       onClick={toggleFullscreen}
       title={isFullscreen ? "Exit fullscreen (Esc)" : "Enter fullscreen"}
       aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-      className="inline-flex h-9 items-center gap-2 rounded-xl border border-[#DCE5DA] bg-white px-3 text-sm text-[#26382C] transition hover:bg-[#E8EFE6]"
+      className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-[#DCE5DA] bg-white px-2.5 text-sm text-[#26382C] transition hover:bg-[#E8EFE6] sm:rounded-xl sm:px-3"
     >
       {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-      <span>{isFullscreen ? "Exit fullscreen" : "Fullscreen"}</span>
+      <span className="hidden sm:inline">
+        {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+      </span>
     </button>
   );
 }

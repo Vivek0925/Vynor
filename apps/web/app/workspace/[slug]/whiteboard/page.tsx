@@ -17,7 +17,7 @@ export default async function WhiteboardPage({
       contentClassName="overflow-hidden flex flex-col"
       headerActions={<WhiteboardPageClient />}
     >
-      <div className="min-h-0 flex-1 py-3">
+      <div className="min-h-[360px] min-w-0 flex-1 py-2 sm:min-h-0 sm:py-3">
         <WhiteboardCanvas workspaceSlug={slug} />
       </div>
     </WorkspaceSectionPage>

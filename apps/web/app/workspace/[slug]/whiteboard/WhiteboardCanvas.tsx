@@ -92,8 +92,8 @@ export default function WhiteboardCanvas({
   }
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl border border-[#DCE5DA] bg-white">
-      <div className="min-h-0 flex-1">
+    <div className="relative flex h-full min-h-[360px] min-w-0 w-full flex-col overflow-hidden rounded-lg border border-[#DCE5DA] bg-white sm:min-h-0 sm:rounded-xl">
+      <div className="absolute inset-0 min-h-0 min-w-0">
         <Excalidraw
           key={workspaceSlug}
           initialData={{
@@ -106,6 +106,7 @@ export default function WhiteboardCanvas({
           }}
           onChange={handleChange}
           theme="light"
+          
         />
       </div>
     </div>

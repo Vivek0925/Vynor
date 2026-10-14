@@ -18,14 +18,14 @@ export default function WorkspaceSectionPage({
   headerActions,
 }: WorkspaceSectionPageProps) {
   return (
-    <section className="flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-[24px] border border-[#DEDFE8] bg-white shadow-[0_18px_50px_rgba(20,20,28,0.06)] fullscreen:!h-screen fullscreen:!w-screen fullscreen:!max-w-none fullscreen:!rounded-none fullscreen:!border-0 sm:rounded-[32px]">
-      <header className="z-20 flex shrink-0 items-center justify-between gap-4 border-b border-[#ECEEF3] bg-white px-5 py-2.5 sm:px-6 md:px-7">
+    <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[#DEDFE8] bg-white shadow-[0_12px_32px_rgba(20,20,28,0.05)] sm:rounded-[24px] lg:rounded-[32px] fullscreen:!h-screen fullscreen:!w-screen fullscreen:!max-w-none fullscreen:!rounded-none fullscreen:!border-0">
+      <header className="z-20 flex shrink-0 items-center justify-between gap-3 border-b border-[#ECEEF3] bg-white px-4 py-3 sm:px-5 md:px-6 lg:px-7">
         <div className="min-w-0">
-          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#059669]">
+          <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#059669] sm:text-[10px] sm:tracking-[0.22em]">
             {eyebrow}
           </div>
 
-          <h1 className="mt-0.5 truncate text-[20px] font-light tracking-[-0.035em] text-[#14141C] sm:text-[22px]">
+          <h1 className="mt-0.5 truncate text-lg font-light tracking-[-0.035em] text-[#14141C] sm:text-xl md:text-[22px]">
             {title}
           </h1>
         </div>
@@ -38,7 +38,7 @@ export default function WorkspaceSectionPage({
       </header>
 
       <div
-        className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-5 pb-5 sm:px-6 sm:pb-6 md:px-7 md:pb-7 ${
+        className={`min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6 lg:px-7 ${
           contentClassName ?? ""
         }`}
       >
