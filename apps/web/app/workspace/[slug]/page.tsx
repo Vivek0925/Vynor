@@ -44,7 +44,7 @@ export default async function WorkspacePage({
       description="A clean home for project work, task tracking, docs, meetings, chat, and files."
     >
       {/* Dashboard cards */}
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-4 my-4 xl:grid-cols-2">
         {/* My Tasks */}
         <MyTasksCard workspaceSlug={slug} />
 

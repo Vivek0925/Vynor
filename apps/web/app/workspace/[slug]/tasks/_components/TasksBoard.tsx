@@ -472,11 +472,11 @@ async function handleDeleteList(list: TaskList) {
 
       <header className="flex h-[60px] shrink-0 items-center justify-between gap-4 border-b border-[#E1E8DE] bg-[#FAFCF9] px-4 text-[#202A22] sm:px-5">
         <div className="flex min-w-0 items-center gap-3">
-          <h1 className="truncate text-[16px] font-semibold">Tasks</h1>
+          <h1 className="truncate font-light tracking-[-0.035em] text-[22px] text-[#14141C] sm:text-[24px]">Tasks</h1>
 
           <span className="hidden h-5 w-px bg-white/20 sm:block" />
 
-          <span className="hidden text-[12px] text-[#737D73] sm:block">
+          <span className="hidden text-[15px] text-[#737D73] sm:block">
             Workspace task board
           </span>
         </div>

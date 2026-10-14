@@ -295,13 +295,9 @@ export default function Meetings({ slug }: MeetingsProps) {
             </div>
 
             <div>
-              <h1 className="truncate text-xl font-semibold tracking-[-0.02em] text-[#20232D] sm:text-2xl">
+              <h1 className="truncate text-[22px] font-light tracking-[-0.035em] text-[#14141C] sm:text-[24px]">
                 Meetings
               </h1>
-
-              <p className="mt-1 hidden text-sm text-[#707487] sm:block">
-                Meet, collaborate, and stay connected with your workspace.
-              </p>
             </div>
           </div>
 

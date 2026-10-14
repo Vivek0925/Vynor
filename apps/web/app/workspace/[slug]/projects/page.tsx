@@ -7,7 +7,7 @@ export default function ProjectsPage() {
       title="Projects"
       description="Track every project, keep planning visible, and jump into project-specific work without leaving the workspace shell."
     >
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4  my-4 md:grid-cols-2 xl:grid-cols-3">
         {["Brand refresh", "Product launch", "Internal ops"].map((item) => (
           <div
             key={item}
