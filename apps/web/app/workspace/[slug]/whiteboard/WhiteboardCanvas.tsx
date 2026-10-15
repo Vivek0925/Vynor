@@ -105,15 +105,22 @@ export default function WhiteboardCanvas({
 
   const emitScene = useCallback(
     (scene: Scene) => {
+      const { zoom, scrollX, scrollY, ...sharedAppState } =
+        scene.appState ?? {};
+
       socket.emit("whiteboard:update", {
         workspaceSlug,
-        scene,
+        scene: {
+          elements: scene.elements ?? [],
+          appState: sharedAppState,
+          files: scene.files ?? {},
+        },
       });
     },
     [workspaceSlug],
   );
 
-  const applyScene = useCallback((scene: Scene) => {
+  const applyScene = useCallback((scene: Scene, preserveViewport = true) => {
     const api = apiRef.current;
     if (!api) return;
 
@@ -126,17 +133,17 @@ export default function WhiteboardCanvas({
         );
       }
 
+      const { zoom, scrollX, scrollY, ...savedAppState } = scene.appState ?? {};
+
       api.updateScene({
         elements: [...(scene.elements ?? [])],
-
         appState: {
-          ...(scene.appState ?? {}),
+          ...(preserveViewport ? (scene.appState ?? {}) : savedAppState),
           gridModeEnabled: true,
           gridSize: 20,
         } as AppState,
       });
     } finally {
-      // Excalidraw may notify onChange immediately after updateScene.
       queueMicrotask(() => {
         applyingRemoteRef.current = false;
       });
@@ -161,8 +168,15 @@ export default function WhiteboardCanvas({
         return;
       }
 
-      applyScene(serverScene);
-      saveLocally(serverScene);
+      applyScene(serverScene, false);
+      saveLocally({
+        ...serverScene,
+        appState: {
+          ...apiRef.current?.getAppState(),
+          gridModeEnabled: true,
+          gridSize: 20,
+        },
+      });
       syncReadyRef.current = true;
       setSyncStatus("connected");
     };
@@ -190,18 +204,47 @@ export default function WhiteboardCanvas({
         }
       }
 
-      const mergedScene: Scene = {
-        elements: [...byId.values()],
-        appState: incoming.appState,
-        files: {
-          ...apiRef.current.getFiles(),
-          ...(incoming.files ?? {}),
-        },
+      const mergedElements = [...byId.values()];
+      const api = apiRef.current;
+
+      if (!api) return;
+
+      const mergedFiles = {
+        ...api.getFiles(),
+        ...(incoming.files ?? {}),
       };
 
-      pendingSceneRef.current = mergedScene;
-      applyScene(mergedScene);
-      saveLocally(mergedScene);
+      applyingRemoteRef.current = true;
+
+      try {
+        if (incoming.files && typeof incoming.files === "object") {
+          api.addFiles(
+            Object.values(incoming.files) as Parameters<typeof api.addFiles>[0],
+          );
+        }
+
+        // Update drawings only. Never apply another user's viewport.
+        api.updateScene({
+          elements: mergedElements,
+        });
+      } finally {
+        queueMicrotask(() => {
+          applyingRemoteRef.current = false;
+        });
+      }
+
+      const localScene: Scene = {
+        elements: mergedElements,
+        appState: {
+          ...api.getAppState(),
+          gridModeEnabled: true,
+          gridSize: 20,
+        },
+        files: mergedFiles,
+      };
+
+      localSceneRef.current = localScene;
+      saveLocally(localScene);
     };
 
     const handleError = () => {
@@ -321,7 +364,7 @@ export default function WhiteboardCanvas({
 
   return (
     <div className="relative flex h-full min-h-[360px] min-w-0 w-full flex-col overflow-hidden rounded-lg border border-[#DCE5DA] bg-white sm:min-h-0 sm:rounded-xl">
-      <div className="absolute right-3 top-3 z-10 rounded-md bg-white/90 px-2 py-1 text-xs text-[#536657]">
+      <div className="absolute right-6 top-14 z-10 rounded-md bg-white/90 px-2 py-1 text-xs text-[#536657]">
         {syncStatus === "connected"
           ? "Live sync"
           : syncStatus === "error"
