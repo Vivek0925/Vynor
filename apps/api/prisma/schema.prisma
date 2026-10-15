@@ -100,6 +100,7 @@ model Workspace {
   meetings Meeting[]
   tasks Task[]
   taskLists TaskList[]
+  whiteboard Whiteboard?
 
   @@index([ownerId])
   @@map("workspaces")
@@ -362,6 +363,18 @@ model TaskList {
   @@index([workspaceId])
   @@index([workspaceId, position])
   @@map("task_lists")
+}
+
+model Whiteboard {
+  id          String    @id @default(cuid())
+  workspaceId String    @unique
+  scene       Json      @default("{}")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("whiteboards")
 }
 
 

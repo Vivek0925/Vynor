@@ -39,7 +39,7 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
     );
 
     // On Tasks, only allow sidebar swipes from the left edge.
-    if (isTasksPage && startedInsideTasksBoard && touch.clientX > 45) {
+    if (isTasksPage && startedInsideTasksBoard && touch.clientX > 55) {
       touchStartX.current = null;
       touchStartY.current = null;
       return;
