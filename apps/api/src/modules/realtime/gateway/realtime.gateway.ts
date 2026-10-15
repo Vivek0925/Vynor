@@ -18,6 +18,7 @@ import type { AuthenticatedSocket } from '../interfaces/authenticated-socket.int
 import { JoinWorkspaceDto } from '../dto/join-workspace.dto';
 
 import { PrismaService } from '../../../database/prisma.service';
+import { Prisma } from '@prisma/client';
 
 import { ChatService } from '../../chat/services/chat.service';
 import { SendMessageDto } from '../../chat/dto/send-message.dto';
@@ -209,6 +210,144 @@ export class RealtimeGateway
       `${socket.data.currentUser.name} left workspace ${workspace.slug}`,
     );
   }
+
+  
+  // =========================================================
+  // WHITEBOARD COLLABORATION
+  // =========================================================
+
+  @SubscribeMessage('whiteboard:join')
+  async handleWhiteboardJoin(
+    @MessageBody()
+    payload: { workspaceSlug: string },
+
+    @ConnectedSocket()
+    socket: AuthenticatedSocket,
+  ) {
+    try {
+      const workspace =
+        await this.workspaceService.findAccessibleWorkspace(
+          socket.data.currentUser.id,
+          payload.workspaceSlug,
+        );
+
+      const room = `whiteboard:${workspace.id}`;
+
+      // Leave any previously joined whiteboard rooms.
+      for (const joinedRoom of socket.rooms) {
+        if (joinedRoom.startsWith('whiteboard:')) {
+          await socket.leave(joinedRoom);
+        }
+      }
+
+      await socket.join(room);
+
+      const whiteboard = await this.prisma.whiteboard.upsert({
+        where: { workspaceId: workspace.id },
+        create: { workspaceId: workspace.id },
+        update: {},
+      });
+
+      socket.emit('whiteboard:load', {
+        scene: whiteboard.scene,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Whiteboard join failed for ${payload?.workspaceSlug}`,
+      );
+
+      socket.emit('whiteboard:error', {
+        message: 'Unable to join this whiteboard.',
+      });
+    }
+  }
+
+  @SubscribeMessage('whiteboard:update')
+  async handleWhiteboardUpdate(
+    @MessageBody()
+    payload: {
+      workspaceSlug: string;
+      scene: Record<string, unknown>;
+    },
+
+    @ConnectedSocket()
+    socket: AuthenticatedSocket,
+  ) {
+    try {
+      if (
+        !payload?.workspaceSlug ||
+        !payload.scene ||
+        typeof payload.scene !== 'object' ||
+        Array.isArray(payload.scene)
+      ) {
+        socket.emit('whiteboard:error', {
+          message: 'Invalid whiteboard update.',
+        });
+        return;
+      }
+
+      const workspace =
+        await this.workspaceService.findAccessibleWorkspace(
+          socket.data.currentUser.id,
+          payload.workspaceSlug,
+        );
+
+      const room = `whiteboard:${workspace.id}`;
+
+      // A member must join the board before updating it.
+      if (!socket.rooms.has(room)) {
+        socket.emit('whiteboard:error', {
+          message: 'Join the whiteboard before updating it.',
+        });
+        return;
+      }
+
+      const scene = payload.scene as Prisma.InputJsonValue;
+
+      await this.prisma.whiteboard.upsert({
+        where: { workspaceId: workspace.id },
+        create: {
+          workspaceId: workspace.id,
+          scene,
+        },
+        update: { scene },
+      });
+
+      // Send to everyone else in the same board room.
+      socket.to(room).emit('whiteboard:update', {
+        scene: payload.scene,
+        userId: socket.data.currentUser.id,
+      });
+    } catch (error) {
+      this.logger.error('Whiteboard update failed', error);
+
+      socket.emit('whiteboard:error', {
+        message: 'Unable to save the whiteboard.',
+      });
+    }
+  }
+
+  @SubscribeMessage('whiteboard:leave')
+  async handleWhiteboardLeave(
+    @MessageBody()
+    payload: { workspaceSlug: string },
+
+    @ConnectedSocket()
+    socket: AuthenticatedSocket,
+  ) {
+    try {
+      const workspace =
+        await this.workspaceService.findAccessibleWorkspace(
+          socket.data.currentUser.id,
+          payload.workspaceSlug,
+        );
+
+      await socket.leave(`whiteboard:${workspace.id}`);
+    } catch {
+      // Ignore inaccessible or already-deleted workspaces.
+    }
+  }
+
 
   // =========================================================
   // CHAT
