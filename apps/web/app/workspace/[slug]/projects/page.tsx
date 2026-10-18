@@ -1,30 +1,23 @@
+"use client";
+
+import { useMemo, useState } from "react";
+
 import WorkspaceSectionPage from "../_components/WorkspaceSectionPage";
 
+
+import type { Project, ProjectStatus } from "./_lib/project-types";
+
 export default function ProjectsPage() {
+  // Manage project data, search, filters, and modal state here.
+  // Pass data and callbacks to the components.
+
   return (
     <WorkspaceSectionPage
-      eyebrow="Projects"
+      eyebrow="Project management"
       title="Projects"
-      description="Track every project, keep planning visible, and jump into project-specific work without leaving the workspace shell."
+      description="Plan client work, track delivery, and keep every project moving."
     >
-      <div className="grid gap-4  my-4 md:grid-cols-2 xl:grid-cols-3">
-        {["Brand refresh", "Product launch", "Internal ops"].map((item) => (
-          <div
-            key={item}
-            className="rounded-[24px] border border-[#DEDFE8] bg-[#FAFAF8] p-5"
-          >
-            <div className="text-[13px] font-medium uppercase tracking-[0.18em] text-[#5B5D6E]">
-              Project
-            </div>
-            <div className="mt-2 text-[18px] font-medium text-[#14141C]">
-              {item}
-            </div>
-            <div className="mt-2 text-[13px] text-[#5B5D6E]">
-              Project pages, tasks, and settings can be added here next.
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Compose the reusable components here */}
     </WorkspaceSectionPage>
   );
 }
