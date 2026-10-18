@@ -13,6 +13,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { GoogleCalendarModule } from "./google-calendar/google-calendar.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { TasksModule } from "./modules/task/tasks.module";
+import { ProjectModule } from './modules/project/project.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { TasksModule } from "./modules/task/tasks.module";
     GoogleCalendarModule,
     NotificationsModule,
     TasksModule,
+    ProjectModule,
   ],
   providers: [
   {
