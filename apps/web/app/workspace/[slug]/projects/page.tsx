@@ -16,10 +16,8 @@ import {
   getProjects,
   updateProject,
 } from "@/lib/projects";
-import type {
-  Project,
-  CreateProjectPayload,
-} from "@/lib/projects";
+import type { Project, CreateProjectPayload } from "@/lib/projects";
+import ProjectDetailModal from "./_components/ProjectDetailModal";
 
 export default function ProjectsPage() {
   const params = useParams<{ slug: string }>();
@@ -34,6 +32,9 @@ export default function ProjectsPage() {
   const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    null,
+  );
 
   const loadProjects = useCallback(async () => {
     setLoading(true);
@@ -43,9 +44,7 @@ export default function ProjectsPage() {
       const data = await getProjects(slug);
       setProjects(data);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Could not load projects.",
-      );
+      setError(err instanceof Error ? err.message : "Could not load projects.");
     } finally {
       setLoading(false);
     }
@@ -65,8 +64,7 @@ export default function ProjectsPage() {
         (project.clientName ?? "").toLowerCase().includes(query) ||
         (project.description ?? "").toLowerCase().includes(query);
 
-      const matchesStatus =
-        status === "ALL" || project.status === status;
+      const matchesStatus = status === "ALL" || project.status === status;
 
       return matchesSearch && matchesStatus;
     });
@@ -127,17 +125,15 @@ export default function ProjectsPage() {
   }
 
   function handleOpen(project: Project) {
-    router.push(
-      `/workspace/${encodeURIComponent(slug)}/projects/${encodeURIComponent(project.id)}`,
-    );
+    setSelectedProjectId(project.id);
   }
 
   return (
     <WorkspaceSectionPage
-  eyebrow="Project management"
-  title="Projects"
-  description="Plan client work, track delivery, and keep every project moving."
->
+      eyebrow="Project management"
+      title="Projects"
+      description="Plan client work, track delivery, and keep every project moving."
+    >
       <div className="space-y-6">
         {error && (
           <div
@@ -199,6 +195,18 @@ export default function ProjectsPage() {
           }
         }}
         onSubmit={handleSave}
+      />
+
+      <ProjectDetailModal
+        open={selectedProjectId !== null}
+        workspaceSlug={slug}
+        projectId={selectedProjectId}
+        onClose={() => setSelectedProjectId(null)}
+        onEdit={(project) => {
+          setSelectedProjectId(null);
+          setEditingProject(project);
+          setModalOpen(true);
+        }}
       />
     </WorkspaceSectionPage>
   );
