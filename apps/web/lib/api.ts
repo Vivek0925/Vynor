@@ -1,5 +1,4 @@
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 let csrfTokenPromise: Promise<string> | null = null;
 
@@ -8,9 +7,7 @@ function readCsrfCookie() {
     return null;
   }
 
-  const match = document.cookie.match(
-    /(?:^|;\s*)csrf_token=([^;]*)/,
-  );
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/);
   return match ? decodeURIComponent(match[1]) : null;
 }
 
@@ -42,8 +39,7 @@ export async function api<T>(
   endpoint: string,
   options?: RequestInit,
 ): Promise<T> {
-  const isFormData =
-    options?.body instanceof FormData;
+  const isFormData = options?.body instanceof FormData;
   const method = options?.method?.toUpperCase() ?? "GET";
   const headers = new Headers(options?.headers);
 
@@ -55,23 +51,25 @@ export async function api<T>(
     headers.set("X-CSRF-Token", await getCsrfToken());
   }
 
-  const response = await fetch(
-    `${API_URL}${endpoint}`,
-    {
-      credentials: "include",
-      ...options,
-      headers,
-    },
-  );
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    credentials: "include",
+    ...options,
+    headers,
+  });
 
-  const data = await response.json();
+  const contentType = response.headers.get("content-type");
+
+  const data = contentType?.includes("application/json")
+    ? await response.json()
+    : null;
 
   if (!response.ok) {
-    throw new Error(
-      data.message ||
-        "Something went wrong",
-    );
+    const message = Array.isArray(data?.message)
+      ? data.message.join(", ")
+      : data?.message;
+
+    throw new Error(message || "Something went wrong");
   }
 
-  return data;
+  return data as T;
 }

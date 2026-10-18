@@ -78,9 +78,9 @@ export default function ProjectsStats({ projects }: ProjectsStatsProps) {
         return (
           <div
             key={stat.label}
-            className="rounded-2xl border border-[#DEDFE8] bg-[#FAFAF8] p-3.5 sm:rounded-[22px] sm:p-5"
+            className="rounded-2xl my-3 border border-[#DEDFE8] bg-[#FAFAF8] p-3.5 sm:rounded-[22px] sm:p-5"
           >
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex  items-center justify-between gap-2">
               <span className="text-[11px] text-[#5B5D6E] sm:text-[13px]">
                 {stat.label}
               </span>

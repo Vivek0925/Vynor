@@ -1,29 +1,12 @@
-export type ProjectStatus =
-  | "PLANNING"
-  | "IN_PROGRESS"
-  | "IN_REVIEW"
-  | "READY_FOR_DELIVERY"
-  | "COMPLETED"
-  | "ARCHIVED";
+import type {
+  Project,
+  ProjectPriority,
+  ProjectStatus,
+} from "@/lib/projects";
 
-export type ProjectPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+export type { Project, ProjectPriority, ProjectStatus };
 
-export type Project = {
-  id: string;
-  name: string;
-  clientName: string;
-  description: string;
-  status: ProjectStatus;
-  priority: ProjectPriority;
-  startDate: string;
-  deadline: string;
-  tasks: number;
-};
-
-export const statusOptions: {
-  value: ProjectStatus | "ALL";
-  label: string;
-}[] = [
+export const statusOptions = [
   { value: "ALL", label: "All projects" },
   { value: "PLANNING", label: "Planning" },
   { value: "IN_PROGRESS", label: "In progress" },
@@ -58,25 +41,24 @@ export const priorityStyles: Record<ProjectPriority, string> = {
   URGENT: "text-[#C24141]",
 };
 
-export function formatDate(value: string) {
+export function formatDate(value: string | null | undefined) {
   if (!value) return "Not set";
 
-  return new Date(`${value}T12:00:00`).toLocaleDateString("en-IN", {
+  return new Date(value).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 }
 
-export function getDaysRemaining(deadline: string) {
-  if (!deadline) return null;
+export function getDaysRemaining(value: string | null | undefined) {
+  if (!value) return null;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const due = new Date(`${deadline}T00:00:00`);
+  const deadline = new Date(value);
+  deadline.setHours(0, 0, 0, 0);
 
-  if (due < today) return 0;
-
-  return Math.ceil((due.getTime() - today.getTime()) / 86400000);
+  return Math.ceil((deadline.getTime() - today.getTime()) / 86400000);
 }
