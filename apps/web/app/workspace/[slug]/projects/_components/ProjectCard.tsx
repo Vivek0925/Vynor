@@ -15,6 +15,7 @@ import {
   statusLabels,
   statusStyles,
 } from "../_lib/project-types";
+import { useEffect, useRef } from "react";
 
 type Props = {
   project: Project;
@@ -30,6 +31,33 @@ export default function ProjectCard({
   onDelete,
 }: Props) {
   const daysRemaining = getDaysRemaining(project.deadline ?? "");
+
+  const menuRef = useRef<HTMLDetailsElement>(null);
+
+useEffect(() => {
+  function handleOutsideClick(event: MouseEvent) {
+    if (
+      menuRef.current &&
+      !menuRef.current.contains(event.target as Node)
+    ) {
+      menuRef.current.open = false;
+    }
+  }
+
+  function handleEscape(event: KeyboardEvent) {
+    if (event.key === "Escape" && menuRef.current) {
+      menuRef.current.open = false;
+    }
+  }
+
+  document.addEventListener("mousedown", handleOutsideClick);
+  document.addEventListener("keydown", handleEscape);
+
+  return () => {
+    document.removeEventListener("mousedown", handleOutsideClick);
+    document.removeEventListener("keydown", handleEscape);
+  };
+}, []);
 
   return (
     <article
@@ -49,6 +77,7 @@ export default function ProjectCard({
 
         <div className="relative shrink-0">
           <details
+            ref={menuRef}
             className="group/menu"
             onClick={(event) => event.stopPropagation()}
           >
@@ -79,7 +108,7 @@ export default function ProjectCard({
                 }}
                 className="w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
               >
-                Delete project
+                Delete
               </button>
             </div>
           </details>
