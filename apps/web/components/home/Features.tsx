@@ -43,7 +43,7 @@ function PlanPane() {
         <BoardColumn title="In progress">
           <TaskCard title="Auth flow" tag="Dev" variant="butter" />
           <TaskCard title="Prisma schema" tag="Dev" variant="butter" active />
-          <span className="absolute left-[30%] top-[128px] rounded-md bg-ink px-2 py-0.5 text-[11px] font-semibold text-white">
+          <span className="absolute left-[60%] top-[126px] rounded-md bg-ink px-2 py-0.5 text-[11px] font-semibold text-white">
             Arjun
           </span>
         </BoardColumn>
