@@ -134,19 +134,10 @@ export default function ProjectsPage() {
 
   return (
     <WorkspaceSectionPage
-      eyebrow="Project management"
-      title="Projects"
-      description="Plan client work, track delivery, and keep every project moving."
-      headerActions={
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="rounded-xl bg-[#5555D9] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#4444C5]"
-        >
-          New project
-        </button>
-      }
-    >
+  eyebrow="Project management"
+  title="Projects"
+  description="Plan client work, track delivery, and keep every project moving."
+>
       <div className="space-y-6">
         {error && (
           <div

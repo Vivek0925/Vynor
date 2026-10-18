@@ -25,7 +25,7 @@ export default function ProjectsGrid({
 }: Props) {
   if (projects.length === 0) {
     return (
-      <div className="flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#DCDCE6] bg-white px-6 py-12 text-center">
+      <div className="flex min-h-[270px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#DCDCE6] bg-white px-2 py-7 text-center">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F0F0FF] text-[#5555D9]">
           {hasProjects ? <Search size={22} /> : <FolderKanban size={22} />}
         </div>

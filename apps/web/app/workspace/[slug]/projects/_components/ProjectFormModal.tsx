@@ -19,7 +19,9 @@ type Props = {
 };
 
 const inputClass =
-  "mt-1.5 h-10 w-full rounded-xl border border-[#E5E5EB] bg-white px-3 text-sm text-[#252638] outline-none transition focus:border-[#7777E8] focus:ring-2 focus:ring-[#7777E8]/10";
+  "mt-1.5 h-10 w-full min-w-0 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm text-[#252638] outline-none transition focus:border-[#16A36A] focus:ring-2 focus:ring-[#16A36A]/10 disabled:opacity-60";
+
+const labelClass = "text-sm font-medium text-[#454655]";
 
 const statuses: { value: ProjectStatus; label: string }[] = [
   { value: "PLANNING", label: "Planning" },
@@ -70,6 +72,17 @@ export default function ProjectFormModal({
     setValidationError("");
   }, [open, project]);
 
+  useEffect(() => {
+    if (!open) return;
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape" && !saving) onClose();
+    }
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [open, saving, onClose]);
+
   if (!open) return null;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -81,7 +94,7 @@ export default function ProjectFormModal({
       return;
     }
 
-    const payload: CreateProjectPayload = {
+    await onSubmit({
       name: name.trim(),
       description: description.trim() || undefined,
       clientName: clientName.trim() || undefined,
@@ -89,14 +102,12 @@ export default function ProjectFormModal({
       priority,
       startDate: startDate || undefined,
       deadline: deadline || undefined,
-    };
-
-    await onSubmit(payload);
+    });
   }
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-3 sm:p-5"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !saving) onClose();
       }}
@@ -105,17 +116,18 @@ export default function ProjectFormModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="project-form-title"
-        className="my-auto w-full max-w-xl rounded-2xl border border-[#E8E8EF] bg-white shadow-2xl"
+        className="my-auto flex max-h-[calc(100dvh-24px)] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-[#E8E8EF] bg-white shadow-2xl sm:max-h-[calc(100dvh-40px)]"
       >
-        <div className="flex items-center justify-between border-b border-[#EEEEF2] px-6 py-4">
+        {/* Header */}
+        <div className="flex shrink-0 items-center justify-between border-b border-[#ECEEF3] px-5 py-3.5 sm:px-6">
           <div>
             <h2
               id="project-form-title"
-              className="text-lg font-semibold text-[#252638]"
+              className="text-lg font-semibold tracking-tight text-[#252638]"
             >
               {project ? "Edit project" : "Create project"}
             </h2>
-            <p className="mt-1 text-sm text-[#77798A]">
+            <p className="mt-0.5 text-sm text-[#858797]">
               {project
                 ? "Update the details for this project."
                 : "Add a new project to this workspace."}
@@ -127,18 +139,19 @@ export default function ProjectFormModal({
             aria-label="Close modal"
             disabled={saving}
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-[#77798A] transition hover:bg-[#F3F3F8] disabled:opacity-50"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#77798A] transition hover:bg-[#F3F5F4] hover:text-[#252638] disabled:opacity-50"
           >
             <X size={19} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 p-6">
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit}
+          className="min-h-0 space-y-4 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5"
+        >
           <div>
-            <label
-              htmlFor="project-name"
-              className="text-sm font-medium text-[#454655]"
-            >
+            <label htmlFor="project-name" className={labelClass}>
               Project name *
             </label>
             <input
@@ -150,31 +163,27 @@ export default function ProjectFormModal({
               required
               maxLength={120}
               autoFocus
+              disabled={saving}
             />
           </div>
 
           <div>
-            <label
-              htmlFor="project-description"
-              className="text-sm font-medium text-[#454655]"
-            >
+            <label htmlFor="project-description" className={labelClass}>
               Description
             </label>
             <textarea
               id="project-description"
-              className="mt-1.5 min-h-24 w-full resize-y rounded-xl border border-[#E5E5EB] bg-white p-3 text-sm text-[#252638] outline-none transition focus:border-[#7777E8] focus:ring-2 focus:ring-[#7777E8]/10"
+              className="mt-1.5 min-h-[76px] w-full resize-y rounded-xl border border-[#E5E7EB] bg-white p-3 text-sm text-[#252638] outline-none transition placeholder:text-[#999AA7] focus:border-[#16A36A] focus:ring-2 focus:ring-[#16A36A]/10 disabled:opacity-60"
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="What is this project about?"
-              rows={3}
+              placeholder="Add some details..."
+              rows={2}
+              disabled={saving}
             />
           </div>
 
           <div>
-            <label
-              htmlFor="project-client"
-              className="text-sm font-medium text-[#454655]"
-            >
+            <label htmlFor="project-client" className={labelClass}>
               Client name
             </label>
             <input
@@ -183,15 +192,13 @@ export default function ProjectFormModal({
               value={clientName}
               onChange={(event) => setClientName(event.target.value)}
               placeholder="Enter client name"
+              disabled={saving}
             />
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label
-                htmlFor="project-status"
-                className="text-sm font-medium text-[#454655]"
-              >
+              <label htmlFor="project-status" className={labelClass}>
                 Status
               </label>
               <select
@@ -201,6 +208,7 @@ export default function ProjectFormModal({
                 onChange={(event) =>
                   setStatus(event.target.value as ProjectStatus)
                 }
+                disabled={saving}
               >
                 {statuses.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -211,10 +219,7 @@ export default function ProjectFormModal({
             </div>
 
             <div>
-              <label
-                htmlFor="project-priority"
-                className="text-sm font-medium text-[#454655]"
-              >
+              <label htmlFor="project-priority" className={labelClass}>
                 Priority
               </label>
               <select
@@ -224,6 +229,7 @@ export default function ProjectFormModal({
                 onChange={(event) =>
                   setPriority(event.target.value as ProjectPriority)
                 }
+                disabled={saving}
               >
                 {priorities.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -236,10 +242,7 @@ export default function ProjectFormModal({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label
-                htmlFor="project-start-date"
-                className="text-sm font-medium text-[#454655]"
-              >
+              <label htmlFor="project-start-date" className={labelClass}>
                 Start date
               </label>
               <input
@@ -248,14 +251,12 @@ export default function ProjectFormModal({
                 className={inputClass}
                 value={startDate}
                 onChange={(event) => setStartDate(event.target.value)}
+                disabled={saving}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="project-deadline"
-                className="text-sm font-medium text-[#454655]"
-              >
+              <label htmlFor="project-deadline" className={labelClass}>
                 Deadline
               </label>
               <input
@@ -265,6 +266,7 @@ export default function ProjectFormModal({
                 value={deadline}
                 min={startDate || undefined}
                 onChange={(event) => setDeadline(event.target.value)}
+                disabled={saving}
               />
             </div>
           </div>
@@ -275,12 +277,13 @@ export default function ProjectFormModal({
             </p>
           )}
 
-          <div className="flex justify-end gap-3 border-t border-[#EEEEF2] pt-4">
+          {/* Footer */}
+          <div className="flex justify-end gap-3 border-t border-[#ECEEF3] pt-4">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="rounded-xl border border-[#E5E5EB] px-4 py-2.5 text-sm font-medium text-[#454655] transition hover:bg-[#F7F7FA] disabled:opacity-50"
+              className="h-10 rounded-xl border border-[#E5E7EB] px-4 text-sm font-medium text-[#454655] transition hover:bg-[#F5F6F6] disabled:opacity-50"
             >
               Cancel
             </button>
@@ -288,7 +291,7 @@ export default function ProjectFormModal({
             <button
               type="submit"
               disabled={saving || !name.trim()}
-              className="rounded-xl bg-[#5555D9] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#4444C5] disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-10 rounded-xl bg-[#168653] px-5 text-sm font-medium text-white transition hover:bg-[#117347] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving
                 ? "Saving..."

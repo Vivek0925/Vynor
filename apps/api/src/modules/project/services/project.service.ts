@@ -69,32 +69,54 @@ export class ProjectService {
     };
   }
 
-  async update(
-    userId: string,
-    workspaceSlug: string,
-    projectId: string,
-    dto: UpdateProjectDto,
-  ) {
-    await this.getAccessibleProject(userId, workspaceSlug, projectId);
+ async update(
+  userId: string,
+  workspaceSlug: string,
+  projectId: string,
+  dto: UpdateProjectDto,
+) {
+  const project = await this.getAccessibleProject(
+    userId,
+    workspaceSlug,
+    projectId,
+  );
 
-    this.validateDates(dto.startDate, dto.deadline);
+  const startDate =
+    dto.startDate === undefined
+      ? project.startDate
+      : dto.startDate
+        ? new Date(dto.startDate)
+        : null;
 
-    return this.projectRepository.update(projectId, {
-      ...dto,
-      startDate:
-        dto.startDate === undefined
-          ? undefined
-          : dto.startDate
-            ? new Date(dto.startDate)
-            : null,
-      deadline:
-        dto.deadline === undefined
-          ? undefined
-          : dto.deadline
-            ? new Date(dto.deadline)
-            : null,
-    });
+  const deadline =
+    dto.deadline === undefined
+      ? project.deadline
+      : dto.deadline
+        ? new Date(dto.deadline)
+        : null;
+
+  if (startDate && deadline && deadline < startDate) {
+    throw new BadRequestException(
+      'Project deadline cannot be before its start date.',
+    );
   }
+
+  return this.projectRepository.update(projectId, {
+    ...dto,
+    startDate:
+      dto.startDate === undefined
+        ? undefined
+        : dto.startDate
+          ? new Date(dto.startDate)
+          : null,
+    deadline:
+      dto.deadline === undefined
+        ? undefined
+        : dto.deadline
+          ? new Date(dto.deadline)
+          : null,
+  });
+}
 
   async delete(userId: string, workspaceSlug: string, projectId: string) {
     await this.getAccessibleProject(userId, workspaceSlug, projectId);
