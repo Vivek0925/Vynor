@@ -59,7 +59,7 @@ export default function ProjectsToolbar({
       <button
         type="button"
         onClick={onCreateProject}
-        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#5555D9] px-4 text-sm font-medium text-white transition hover:bg-[#4444C5] focus:outline-none focus:ring-2 focus:ring-[#7777E8]/30"
+        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#168653] px-4 text-sm font-medium text-white transition hover:bg-[#116B43] focus:outline-none focus:ring-2 focus:ring-[#7777E8]/30"
       >
         <Plus size={17} />
         New project

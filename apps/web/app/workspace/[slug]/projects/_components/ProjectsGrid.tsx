@@ -26,7 +26,7 @@ export default function ProjectsGrid({
   if (projects.length === 0) {
     return (
       <div className="flex min-h-[270px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#DCDCE6] bg-white px-2 py-7 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F0F0FF] text-[#5555D9]">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E7F5EF] text-[#168653]">
           {hasProjects ? <Search size={22} /> : <FolderKanban size={22} />}
         </div>
 
@@ -52,7 +52,7 @@ export default function ProjectsGrid({
           <button
             type="button"
             onClick={onCreateProject}
-            className="mt-5 rounded-xl bg-[#5555D9] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#4444C5]"
+            className="mt-5 rounded-xl bg-[#168653] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#116B43]"
           >
             Create your first project
           </button>
