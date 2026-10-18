@@ -33,6 +33,26 @@ export interface Project {
   };
 }
 
+export interface ProjectTask {
+  id: string;
+  title: string;
+  description: string | null;
+  priority: ProjectPriority;
+  dueDate: string | null;
+  assigneeId: string | null;
+  assignee: {
+    id: string;
+    name: string;
+    avatar: string | null;
+  } | null;
+}
+
+export interface ProjectDetails extends Project {
+  tasks: ProjectTask[];
+  progress: number;
+  totalTasks: number;
+}
+
 export interface CreateProjectPayload {
   name: string;
   description?: string;
@@ -58,9 +78,12 @@ export function getProjects(workspaceSlug: string) {
   });
 }
 
-export function getProject(workspaceSlug: string, projectId: string) {
-  return request<Project>(
-    `/workspaces/${workspaceSlug}/projects/${projectId}`,
+export function getProject(
+  workspaceSlug: string,
+  projectId: string,
+) {
+  return request<ProjectDetails>(
+    `/workspaces/${encodeURIComponent(workspaceSlug)}/projects/${encodeURIComponent(projectId)}`,
     { method: "GET" },
   );
 }
