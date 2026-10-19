@@ -24,6 +24,7 @@ export type Task = {
   id: string;
   name: string;
   position: number;
+  isCompleted: boolean;
 };
 
   title: string;
@@ -188,6 +189,7 @@ export async function deleteTask(
   );
 }
 
+
 export async function updateTask(
   workspaceSlug: string,
   taskId: string,
@@ -195,19 +197,21 @@ export async function updateTask(
     title?: string;
     description?: string;
     priority?: TaskPriority;
+    isCompleted?: boolean;
     listId?: string;
     assigneeId?: string | null;
     dueDate?: string | null;
   },
 ) {
   return api<Task>(
-    `/workspaces/${encodeURIComponent(workspaceSlug)}/tasks/${taskId}`,
+    `/workspaces/${encodeURIComponent(workspaceSlug)}/tasks/${encodeURIComponent(taskId)}`,
     {
       method: "PATCH",
       body: JSON.stringify(input),
     },
   );
 }
+
 
 export async function moveTask(
   workspaceSlug: string,

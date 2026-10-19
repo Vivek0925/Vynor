@@ -1,14 +1,15 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   CalendarDays,
+  Check,
   Clock3,
   FolderKanban,
   Loader2,
   Pencil,
   UserRound,
-  X,
 } from "lucide-react";
 
 import Modal from "@/components/ui/Modal";
@@ -19,6 +20,7 @@ import type {
   ProjectPriority,
   ProjectStatus,
 } from "@/lib/projects";
+import { updateTask } from "@/lib/tasks";
 import {
   priorityStyles,
   statusLabels,
@@ -44,7 +46,6 @@ function formatDate(value: string | null | undefined) {
   if (!value) return "Not set";
 
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) return "Unknown";
 
   return date.toLocaleDateString("en-IN", {
@@ -64,6 +65,28 @@ export default function ProjectDetailModal({
   const [project, setProject] = useState<ProjectDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [updatingTaskIds, setUpdatingTaskIds] = useState<string[]>([]);
+  const [taskError, setTaskError] = useState<string | null>(null);
+
+  const loadProject = useCallback(async () => {
+    if (!projectId) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await getProject(workspaceSlug, projectId);
+      setProject(result);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to load project details.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceSlug, projectId]);
 
   useEffect(() => {
     if (!open || !projectId) {
@@ -73,13 +96,12 @@ export default function ProjectDetailModal({
 
     let cancelled = false;
 
-    async function loadProject() {
+    async function load() {
       setLoading(true);
       setError(null);
 
       try {
         const result = await getProject(workspaceSlug, projectId!);
-
         if (!cancelled) setProject(result);
       } catch (err) {
         if (!cancelled) {
@@ -94,30 +116,90 @@ export default function ProjectDetailModal({
       }
     }
 
-    void loadProject();
+    void load();
 
     return () => {
       cancelled = true;
     };
   }, [open, workspaceSlug, projectId]);
 
+  async function handleTaskCompletion(taskId: string, isCompleted: boolean) {
+    if (!project || updatingTaskIds.includes(taskId)) return;
+
+    const previousProject = project;
+    const previousTask = project.tasks.find((task) => task.id === taskId);
+
+    if (!previousTask) return;
+
+    setTaskError(null);
+    setUpdatingTaskIds((ids) => [...ids, taskId]);
+
+    const nextTasks = project.tasks.map((task) =>
+      task.id === taskId ? { ...task, isCompleted } : task,
+    );
+    const completedTasks = nextTasks.filter((task) => task.isCompleted).length;
+    const totalTasks = nextTasks.length;
+
+    setProject({
+      ...project,
+      tasks: nextTasks,
+      completedTasks,
+      totalTasks,
+      progress:
+        totalTasks === 0
+          ? 0
+          : Math.round((completedTasks / totalTasks) * 100),
+    });
+
+    try {
+      await updateTask(workspaceSlug, taskId, { isCompleted });
+      await loadProject();
+    } catch (err) {
+      setProject(previousProject);
+      setTaskError(
+        err instanceof Error
+          ? err.message
+          : "Unable to update task completion.",
+      );
+    } finally {
+      setUpdatingTaskIds((ids) => ids.filter((id) => id !== taskId));
+    }
+  }
+
+  const completedTasks =
+    project?.completedTasks ??
+    project?.tasks.filter((task) => task.isCompleted).length ??
+    0;
+  const totalTasks = project?.totalTasks ?? project?.tasks.length ?? 0;
+  const progress =
+    totalTasks === 0
+      ? 0
+      : Math.min(
+          100,
+          Math.max(
+            0,
+            project?.progress ??
+              Math.round((completedTasks / totalTasks) * 100),
+          ),
+        );
+
   return (
     <Modal open={open} onClose={onClose} title="Project details">
       <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
-        {loading ? (
+        {loading && !project ? (
           <div className="flex items-center justify-center gap-2 py-12 text-sm text-[#737373]">
             <Loader2 className="h-4 w-4 animate-spin" />
             Loading project details...
           </div>
-        ) : error ? (
+        ) : error && !project ? (
           <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
             {error}
           </div>
         ) : project ? (
-          <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 overflow-y-auto md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:overflow-hidden">
-            <section className="min-h-0 min-w-0 overflow-y-auto px-5 py-5 sm:px-7 sm:py-6">
+          <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 overflow-y-auto md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:overflow-hidden">
+            <section className="min-h-0 min-w-0 overflow-y-auto px-4 py-4 sm:px-5">
               <div className="flex items-start justify-between gap-3">
-                <h2 className="min-w-0 break-words text-xl font-semibold text-[#20202A]">
+                <h2 className="min-w-0 break-words text-lg font-semibold text-[#20202A]">
                   {project.name}
                 </h2>
 
@@ -131,56 +213,85 @@ export default function ProjectDetailModal({
                 </Button>
               </div>
 
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-2 flex flex-wrap gap-2">
                 <span
-                  className={`rounded-md px-2.5 py-1 text-xs font-medium ${statusStyles[project.status as ProjectStatus]}`}
+                  className={`rounded-md px-2 py-1 text-xs font-medium ${statusStyles[project.status as ProjectStatus]}`}
                 >
                   {statusLabels[project.status as ProjectStatus]}
                 </span>
 
                 <span
-                  className={`rounded-md px-2.5 py-1 text-xs font-medium ${priorityStyles[project.priority]}`}
+                  className={`rounded-md px-2 py-1 text-xs font-medium ${priorityStyles[project.priority]}`}
                 >
                   {priorityLabels[project.priority]} priority
                 </span>
               </div>
 
-              <div className="mt-6">
+              <div className="mt-4 rounded-xl border border-[#E8EEE9] bg-[#FAFCFA] p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-medium text-[#696B7C]">
+                    Task progress
+                  </span>
+                  <span className="text-sm font-semibold tabular-nums text-[#168653]">
+                    {progress}%
+                  </span>
+                </div>
+
+                <div
+                  role="progressbar"
+                  aria-label="Project task completion"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={progress}
+                  className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#E3EEE7]"
+                >
+                  <div
+                    className="h-full rounded-full bg-[#168653] transition-[width] duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+
+                <p className="mt-1.5 text-xs text-[#77798A]">
+                  {completedTasks} of {totalTasks} tasks completed
+                </p>
+              </div>
+
+              <div className="mt-4">
                 <h3 className="text-sm font-semibold text-[#353541]">
                   Description
                 </h3>
-                <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-[#646471]">
+                <p className="mt-1.5 whitespace-pre-wrap break-words text-sm leading-5 text-[#646471]">
                   {project.description || "No description provided."}
                 </p>
               </div>
 
-              <div className="mt-6 space-y-4 border-t border-[#ECECE7] pt-4">
-                <div className="flex items-start gap-3">
-                  <UserRound className="mt-0.5 h-4 w-4 text-[#777784]" />
+              <div className="mt-4 space-y-3 border-t border-[#ECECE7] pt-3">
+                <div className="flex items-start gap-2.5">
+                  <UserRound className="mt-0.5 h-4 w-4 shrink-0 text-[#777784]" />
                   <div>
                     <p className="text-xs text-[#777784]">Client</p>
-                    <p className="mt-1 text-sm text-[#292934]">
+                    <p className="mt-0.5 text-sm text-[#292934]">
                       {project.clientName || "No client assigned"}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <CalendarDays className="mt-0.5 h-4 w-4 text-[#777784]" />
+                <div className="flex items-start gap-2.5">
+                  <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-[#777784]" />
                   <div>
                     <p className="text-xs text-[#777784]">Timeline</p>
-                    <p className="mt-1 text-sm text-[#292934]">
+                    <p className="mt-0.5 text-sm text-[#292934]">
                       {formatDate(project.startDate)} —{" "}
                       {formatDate(project.deadline)}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <Clock3 className="mt-0.5 h-4 w-4 text-[#777784]" />
+                <div className="flex items-start gap-2.5">
+                  <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-[#777784]" />
                   <div>
                     <p className="text-xs text-[#777784]">Created by</p>
-                    <p className="mt-1 text-sm text-[#292934]">
+                    <p className="mt-0.5 text-sm text-[#292934]">
                       {project.createdBy?.name ?? "Unknown"}
                     </p>
                     <p className="mt-0.5 text-xs text-[#92929D]">
@@ -191,24 +302,31 @@ export default function ProjectDetailModal({
               </div>
             </section>
 
-            <section className="flex min-h-[280px] min-w-0 flex-col overflow-hidden border-t border-[#ECECE7] md:min-h-0 md:border-l md:border-t-0">
-              <div className="flex h-[58px] shrink-0 items-center gap-2 border-b border-[#ECECE7] px-4 sm:px-6">
+            <section className="flex min-h-[240px] min-w-0 flex-col overflow-hidden border-t border-[#ECECE7] md:min-h-0 md:border-l md:border-t-0">
+              <div className="flex h-12 shrink-0 items-center gap-2 border-b border-[#ECECE7] px-4">
                 <FolderKanban className="h-4 w-4 text-[#168653]" />
                 <h3 className="text-sm font-semibold text-[#292934]">
                   Project tasks
                 </h3>
                 <span className="rounded-full bg-[#E7F5EF] px-2 py-0.5 text-xs text-[#168653]">
-                  {project.totalTasks ?? project.tasks.length}
+                  {totalTasks}
                 </span>
               </div>
 
-              <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+              <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-4">
+                {taskError && (
+                  <p
+                    role="alert"
+                    className="mb-3 rounded-lg border border-red-200 bg-red-50 p-2.5 text-xs text-red-700"
+                  >
+                    {taskError}
+                  </p>
+                )}
+
                 {project.tasks.length === 0 ? (
-                  <div className="flex h-full flex-col items-center justify-center px-4 py-10 text-center">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#E7F5EF]">
-                      <FolderKanban className="h-5 w-5 text-[#168653]" />
-                    </div>
-                    <p className="mt-3 text-sm font-medium text-[#353541]">
+                  <div className="flex h-full flex-col items-center justify-center px-4 py-8 text-center">
+                    <FolderKanban className="h-6 w-6 text-[#168653]" />
+                    <p className="mt-2 text-sm font-medium text-[#353541]">
                       No tasks linked yet
                     </p>
                     <p className="mt-1 text-xs leading-5 text-[#858591]">
@@ -216,42 +334,88 @@ export default function ProjectDetailModal({
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    {project.tasks.map((task) => (
-                      <article
-                        key={task.id}
-                        className="rounded-xl border border-[#E5E7EB] p-3"
-                      >
-                        <p className="break-words text-sm font-medium text-[#292934]">
-                          {task.title}
-                        </p>
+                  <div className="space-y-2">
+                    {project.tasks.map((task) => {
+                      const updating = updatingTaskIds.includes(task.id);
 
-                        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                          <span
-                            className={`rounded-md px-2 py-1 text-xs ${priorityStyles[task.priority]}`}
-                          >
-                            {priorityLabels[task.priority]} priority
-                          </span>
+                      return (
+                        <article
+                          key={task.id}
+                          className={`rounded-xl border p-3 transition ${
+                            task.isCompleted
+                              ? "border-[#D7EBDD] bg-[#FAFCFA]"
+                              : "border-[#E5E7EB] bg-white"
+                          }`}
+                        >
+                          <div className="flex items-start gap-2.5">
+                            <button
+                              type="button"
+                              aria-label={
+                                task.isCompleted
+                                  ? `Mark ${task.title} incomplete`
+                                  : `Mark ${task.title} complete`
+                              }
+                              aria-pressed={task.isCompleted}
+                              disabled={updating}
+                              onClick={() =>
+                                void handleTaskCompletion(
+                                  task.id,
+                                  !task.isCompleted,
+                                )
+                              }
+                              className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition disabled:cursor-wait disabled:opacity-60 ${
+                                task.isCompleted
+                                  ? "border-[#168653] bg-[#168653] text-white"
+                                  : "border-[#C8CCD0] bg-white text-transparent hover:border-[#168653]"
+                              }`}
+                            >
+                              {updating ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : task.isCompleted ? (
+                                <Check className="h-3.5 w-3.5" />
+                              ) : null}
+                            </button>
 
-                          <span className="text-xs text-[#777784]">
-                            {task.assignee?.name ?? "Unassigned"}
-                          </span>
-                        </div>
+                            <div className="min-w-0 flex-1">
+                              <p
+                                className={`break-words text-sm font-medium ${
+                                  task.isCompleted
+                                    ? "text-[#858797] line-through"
+                                    : "text-[#292934]"
+                                }`}
+                              >
+                                {task.title}
+                              </p>
 
-                        {task.dueDate && (
-                          <p className="mt-2 text-xs text-[#777784]">
-                            Due {formatDate(task.dueDate)}
-                          </p>
-                        )}
-                      </article>
-                    ))}
+                              <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                                <span
+                                  className={`rounded-md px-2 py-1 text-xs ${priorityStyles[task.priority]}`}
+                                >
+                                  {priorityLabels[task.priority]} priority
+                                </span>
+
+                                <span className="text-xs text-[#777784]">
+                                  {task.assignee?.name ?? "Unassigned"}
+                                </span>
+                              </div>
+
+                              {task.dueDate && (
+                                <p className="mt-1.5 text-xs text-[#777784]">
+                                  Due {formatDate(task.dueDate)}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </article>
+                      );
+                    })}
                   </div>
                 )}
               </div>
             </section>
           </div>
         ) : (
-          <div className="py-12 text-center text-sm text-[#777784]">
+          <div className="py-10 text-center text-sm text-[#777784]">
             Project not found.
           </div>
         )}
