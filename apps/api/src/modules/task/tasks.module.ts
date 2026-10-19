@@ -1,6 +1,9 @@
+
 import { Module } from '@nestjs/common';
 
 import { WorkspaceModule } from '../workspace/workspace.module';
+import { ProjectModule } from '../project/project.module';
+import { TaskRealtimeModule } from '../realtime/task-realtime.module';
 
 import { TasksController } from './controllers/tasks.controller';
 import { TaskListsController } from './controllers/task-lists.controller';
@@ -13,10 +16,13 @@ import { TaskCommentsRepository } from './repositories/task-comments.repository'
 import { TasksService } from './services/tasks.service';
 import { TaskListsService } from './services/task-lists.service';
 import { TaskCommentsService } from './services/task-comments.service';
-import { TaskRealtimeModule } from '../realtime/task-realtime.module';
 
 @Module({
-  imports: [WorkspaceModule, TaskRealtimeModule],
+  imports: [
+    WorkspaceModule,
+    ProjectModule,
+    TaskRealtimeModule,
+  ],
   controllers: [
     TasksController,
     TaskListsController,

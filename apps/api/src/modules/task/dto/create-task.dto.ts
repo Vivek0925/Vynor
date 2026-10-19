@@ -1,13 +1,14 @@
+
 import {
   IsDateString,
   IsEnum,
+  IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
 
 import { TaskPriority } from '@prisma/client';
-import { IsNotEmpty } from 'class-validator';
 
 export class CreateTaskDto {
   @IsString()
@@ -34,4 +35,9 @@ export class CreateTaskDto {
   @IsString()
   @IsNotEmpty()
   listId!: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  projectId?: string | null;
 }

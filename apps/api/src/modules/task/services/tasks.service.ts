@@ -14,6 +14,7 @@ import { UpdateTaskDto } from '../dto/update-task.dto';
 import { TaskListsRepository } from '../repositories/task-lists.repository';
 import { TasksRepository } from '../repositories/tasks.repository';
 import { TaskRealtimeService } from '../../realtime/services/task-realtime.service';
+import { ProjectRepository } from '../../project/repositories/project.repository';
 
 @Injectable()
 export class TasksService {
@@ -22,6 +23,7 @@ export class TasksService {
     private readonly taskListsRepository: TaskListsRepository,
     private readonly workspaceService: WorkspaceService,
     private readonly taskRealtimeService: TaskRealtimeService,
+    private readonly projectRepository: ProjectRepository,
   ) {}
 
   async create(userId: string, workspaceSlug: string, dto: CreateTaskDto) {
@@ -45,6 +47,8 @@ export class TasksService {
       list.id,
     );
 
+    await this.validateProject(workspace.id, dto.projectId);
+
     const createdTask = await this.tasksRepository.create({
       workspaceId: workspace.id,
       listId: list.id,
@@ -55,6 +59,7 @@ export class TasksService {
       dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
       position,
       createdById: userId,
+      projectId: dto.projectId ?? null,
     });
 
     this.taskRealtimeService.emitTaskCreated(workspace.id, createdTask);
@@ -103,6 +108,10 @@ export class TasksService {
       throw new NotFoundException('Task not found.');
     }
 
+    if (dto.projectId !== undefined) {
+      await this.validateProject(workspace.id, dto.projectId);
+    }
+
     await this.assertCanManageTask(workspace.id, userId, task);
 
     if (dto.assigneeId) {
@@ -144,6 +153,10 @@ export class TasksService {
 
       ...(dto.isCompleted !== undefined && {
         isCompleted: dto.isCompleted,
+      }),
+
+      ...(dto.projectId !== undefined && {
+        projectId: dto.projectId,
       }),
     };
 
@@ -294,6 +307,19 @@ export class TasksService {
     return {
       id: task.id,
     };
+  }
+
+  private async validateProject(
+    workspaceId: string,
+    projectId: string | null | undefined,
+  ) {
+    if (projectId == null) return;
+
+    const project = await this.projectRepository.findById(projectId);
+
+    if (!project || project.workspaceId !== workspaceId) {
+      throw new BadRequestException('Invalid project for this workspace.');
+    }
   }
 
   private async assertCanManageTask(

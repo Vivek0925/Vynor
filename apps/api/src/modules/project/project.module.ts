@@ -10,6 +10,6 @@ import { ProjectService } from './services/project.service';
   imports: [WorkspaceModule],
   controllers: [ProjectController],
   providers: [ProjectRepository, ProjectService],
-  exports: [ProjectService],
+  exports: [ProjectService, ProjectRepository],
 })
 export class ProjectModule {}
