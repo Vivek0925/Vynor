@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -10,6 +9,9 @@ import {
   Loader2,
   Pencil,
   UserRound,
+  Plus,
+  Link2,
+  Unlink,
 } from "lucide-react";
 
 import Modal from "@/components/ui/Modal";
@@ -20,12 +22,22 @@ import type {
   ProjectPriority,
   ProjectStatus,
 } from "@/lib/projects";
-import { updateTask } from "@/lib/tasks";
+import {
+  createTask,
+  getTaskLists,
+  getWorkspaceTasks,
+  updateTask,
+  type Task,
+  type TaskList,
+} from "@/lib/tasks";
 import {
   priorityStyles,
   statusLabels,
   statusStyles,
 } from "../_lib/project-types";
+
+import { useMemo } from "react";
+import CreateTaskModal from "../../tasks/_components/CreateTaskModal";
 
 type Props = {
   open: boolean;
@@ -68,6 +80,14 @@ export default function ProjectDetailModal({
   const [updatingTaskIds, setUpdatingTaskIds] = useState<string[]>([]);
   const [taskError, setTaskError] = useState<string | null>(null);
 
+  const [createTaskOpen, setCreateTaskOpen] = useState(false);
+  const [taskLists, setTaskLists] = useState<TaskList[]>([]);
+  const [workspaceTasks, setWorkspaceTasks] = useState<Task[]>([]);
+  const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
+  const [selectedListId, setSelectedListId] = useState("");
+  const [loadingTaskOptions, setLoadingTaskOptions] = useState(false);
+  const [linkingTasks, setLinkingTasks] = useState(false);
+
   const loadProject = useCallback(async () => {
     if (!projectId) return;
 
@@ -79,14 +99,22 @@ export default function ProjectDetailModal({
       setProject(result);
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Unable to load project details.",
+        err instanceof Error ? err.message : "Unable to load project details.",
       );
     } finally {
       setLoading(false);
     }
   }, [workspaceSlug, projectId]);
+
+  const availableTasks = useMemo(
+    () =>
+      workspaceTasks.filter(
+        (task) =>
+          !task.projectId &&
+          !project?.tasks.some((item) => item.id === task.id),
+      ),
+    [workspaceTasks, project],
+  );
 
   useEffect(() => {
     if (!open || !projectId) {
@@ -123,6 +151,43 @@ export default function ProjectDetailModal({
     };
   }, [open, workspaceSlug, projectId]);
 
+   const loadTaskOptions = useCallback(async () => {
+  setLoadingTaskOptions(true);
+  setTaskError(null);
+
+  try {
+    const [lists, tasks] = await Promise.all([
+      getTaskLists(workspaceSlug),
+      getWorkspaceTasks(workspaceSlug),
+    ]);
+
+    setTaskLists(lists);
+    setWorkspaceTasks(tasks);
+
+    setSelectedListId((current) => {
+      if (current && lists.some((list) => list.id === current)) {
+        return current;
+      }
+
+      return lists[0]?.id ?? "";
+    });
+  } catch (err) {
+    setTaskError(
+      err instanceof Error ? err.message : "Unable to load workspace tasks.",
+    );
+  } finally {
+    setLoadingTaskOptions(false);
+  }
+}, [workspaceSlug]);
+
+  useEffect(() => {
+  if (!open || !projectId) return;
+
+  void loadTaskOptions();
+}, [open, projectId, loadTaskOptions]);
+
+
+
   async function handleTaskCompletion(taskId: string, isCompleted: boolean) {
     if (!project || updatingTaskIds.includes(taskId)) return;
 
@@ -146,9 +211,7 @@ export default function ProjectDetailModal({
       completedTasks,
       totalTasks,
       progress:
-        totalTasks === 0
-          ? 0
-          : Math.round((completedTasks / totalTasks) * 100),
+        totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100),
     });
 
     try {
@@ -160,6 +223,61 @@ export default function ProjectDetailModal({
         err instanceof Error
           ? err.message
           : "Unable to update task completion.",
+      );
+    } finally {
+      setUpdatingTaskIds((ids) => ids.filter((id) => id !== taskId));
+    }
+  }
+
+ 
+
+  async function handleTasksCreated() {
+    setCreateTaskOpen(false);
+    await Promise.all([loadProject(), loadTaskOptions()]);
+  }
+
+  async function handleLinkTasks() {
+    if (!project || selectedTaskIds.length === 0) return;
+
+    setLinkingTasks(true);
+    setTaskError(null);
+
+    try {
+      await Promise.all(
+        selectedTaskIds.map((taskId) =>
+          updateTask(workspaceSlug, taskId, {
+            projectId: project.id,
+          }),
+        ),
+      );
+
+      setSelectedTaskIds([]);
+      await Promise.all([loadProject(), loadTaskOptions()]);
+    } catch (err) {
+      setTaskError(
+        err instanceof Error ? err.message : "Unable to link tasks.",
+      );
+      await Promise.all([loadProject(), loadTaskOptions()]);
+    } finally {
+      setLinkingTasks(false);
+    }
+  }
+
+  async function handleUnlinkTask(taskId: string) {
+    if (!project) return;
+
+    setTaskError(null);
+    setUpdatingTaskIds((ids) => [...ids, taskId]);
+
+    try {
+      await updateTask(workspaceSlug, taskId, {
+        projectId: null,
+      });
+
+      await Promise.all([loadProject(), loadTaskOptions()]);
+    } catch (err) {
+      setTaskError(
+        err instanceof Error ? err.message : "Unable to unlink task.",
       );
     } finally {
       setUpdatingTaskIds((ids) => ids.filter((id) => id !== taskId));
@@ -184,6 +302,8 @@ export default function ProjectDetailModal({
         );
 
   return (
+
+    <>
     <Modal open={open} onClose={onClose} title="Project details">
       <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
         {loading && !project ? (
@@ -303,14 +423,112 @@ export default function ProjectDetailModal({
             </section>
 
             <section className="flex min-h-[240px] min-w-0 flex-col overflow-hidden border-t border-[#ECECE7] md:min-h-0 md:border-l md:border-t-0">
-              <div className="flex h-12 shrink-0 items-center gap-2 border-b border-[#ECECE7] px-4">
-                <FolderKanban className="h-4 w-4 text-[#168653]" />
-                <h3 className="text-sm font-semibold text-[#292934]">
-                  Project tasks
-                </h3>
-                <span className="rounded-full bg-[#E7F5EF] px-2 py-0.5 text-xs text-[#168653]">
-                  {totalTasks}
-                </span>
+              <div className="flex shrink-0 flex-col gap-3 border-b border-[#ECECE7] px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <FolderKanban className="h-4 w-4 text-[#168653]" />
+
+                  <h3 className="text-sm font-semibold text-[#292934]">
+                    Project tasks
+                  </h3>
+
+                  <span className="rounded-full bg-[#E7F5EF] px-2 py-0.5 text-xs text-[#168653]">
+                    {totalTasks}
+                  </span>
+
+                  <div className="flex-1" />
+
+                  <button
+                    type="button"
+                    onClick={() => setCreateTaskOpen(true)}
+                    disabled={taskLists.length === 0 || loadingTaskOptions}
+                    className="inline-flex items-center gap-1 rounded-lg bg-[#168653] px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-[#116D43] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Create task
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <select
+                    aria-label="Task list for new tasks"
+                    value={selectedListId}
+                    onChange={(event) => setSelectedListId(event.target.value)}
+                    disabled={loadingTaskOptions || taskLists.length === 0}
+                    className="h-9 min-w-0 flex-1 rounded-lg border border-[#DEDFE8] bg-white px-2.5 text-xs text-[#292934] outline-none focus:border-[#168653]"
+                  >
+                    {taskLists.length === 0 && (
+                      <option value="">No task lists available</option>
+                    )}
+
+                    {taskLists.map((list) => (
+                      <option key={list.id} value={list.id}>
+                        {list.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={() => void handleLinkTasks()}
+                    disabled={
+                      loadingTaskOptions ||
+                      linkingTasks ||
+                      selectedTaskIds.length === 0
+                    }
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[#D8E7DD] px-3 text-xs font-medium text-[#168653] transition hover:bg-[#F0F8F3] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {linkingTasks ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Link2 className="h-3.5 w-3.5" />
+                    )}
+                    Add selected ({selectedTaskIds.length})
+                  </button>
+                </div>
+
+                {loadingTaskOptions ? (
+                  <p className="text-xs text-[#777784]">
+                    Loading workspace tasks...
+                  </p>
+                ) : availableTasks.length > 0 ? (
+                  <div className="max-h-32 space-y-1 overflow-y-auto rounded-lg border border-[#ECECE7] p-2">
+                    <p className="mb-1 text-[11px] font-medium text-[#777784]">
+                      Existing unlinked tasks
+                    </p>
+
+                    {availableTasks.map((task) => (
+                      <label
+                        key={task.id}
+                        className="flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1.5 hover:bg-[#F7F9F7]"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedTaskIds.includes(task.id)}
+                          onChange={(event) => {
+                            setSelectedTaskIds((current) =>
+                              event.target.checked
+                                ? [...current, task.id]
+                                : current.filter((id) => id !== task.id),
+                            );
+                          }}
+                          className="h-3.5 w-3.5 accent-[#168653]"
+                        />
+
+                        <span className="min-w-0 flex-1 truncate text-xs text-[#353541]">
+                          {task.title}
+                        </span>
+
+                        <span className="shrink-0 text-[10px] text-[#858591]">
+                          {task.list?.name ?? "Task"}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-[#858591]">
+                    No unlinked workspace tasks available.
+                  </p>
+                )}
               </div>
 
               <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-4">
@@ -421,5 +639,17 @@ export default function ProjectDetailModal({
         )}
       </div>
     </Modal>
+
+    <CreateTaskModal
+      open={createTaskOpen}
+      workspaceSlug={workspaceSlug}
+      listId={selectedListId}
+      projectId={projectId ?? undefined}
+      onClose={() => setCreateTaskOpen(false)}
+      onCreated={() => void handleTasksCreated()}
+    />
+  </>
+
+    
   );
 }

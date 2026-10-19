@@ -465,10 +465,10 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
   }
 
   return (
-    <div 
-    
-    data-tasks-board="true"
-    className="flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border border-[#DCE5DA] bg-[#E8EFE6] shadow-[0_12px_36px_rgba(35,55,38,0.07)] sm:rounded-[28px]">
+    <div
+      data-tasks-board="true"
+      className="flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border border-[#DCE5DA] bg-[#E8EFE6] shadow-[0_12px_36px_rgba(35,55,38,0.07)] sm:rounded-[28px]"
+    >
       {/* Board top bar */}
 
       <header className="flex min-h-[60px] shrink-0 items-center justify-between gap-4 border-b border-[#E1E8DE] bg-[#FAFCF9] px-4 py-2 text-[#202A22] sm:px-5">

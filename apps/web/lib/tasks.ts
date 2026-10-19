@@ -17,11 +17,10 @@ export type Task = {
   projectId: string | null;
   listId: string;
   list: {
-    id: string;
-    name: string;
-    position: number;
-    isCompleted: boolean;
-  };
+  id: string;
+  name: string;
+  position: number;
+};
   title: string;
   description: string | null;
   priority: TaskPriority;
