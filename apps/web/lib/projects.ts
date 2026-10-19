@@ -43,6 +43,8 @@ export interface ProjectTask {
   title: string;
   description: string | null;
   priority: ProjectPriority;
+  isCompleted: boolean;
+  projectId?: string | null;
   dueDate: string | null;
   assigneeId: string | null;
   assignee: {
@@ -68,10 +70,7 @@ export interface CreateProjectPayload {
 
 export type UpdateProjectPayload = Partial<CreateProjectPayload>;
 
-async function request<T>(
-  endpoint: string,
-  options: RequestInit,
-): Promise<T> {
+async function request<T>(endpoint: string, options: RequestInit): Promise<T> {
   return api<T>(endpoint, options);
 }
 
@@ -81,10 +80,7 @@ export function getProjects(workspaceSlug: string) {
   });
 }
 
-export function getProject(
-  workspaceSlug: string,
-  projectId: string,
-) {
+export function getProject(workspaceSlug: string, projectId: string) {
   return request<ProjectDetails>(
     `/workspaces/${encodeURIComponent(workspaceSlug)}/projects/${encodeURIComponent(projectId)}`,
     { method: "GET" },

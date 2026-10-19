@@ -17,6 +17,7 @@ type CreateTaskModalProps = {
   open: boolean;
   workspaceSlug: string;
   listId: string;
+  projectId?: string;
   onClose: () => void;
   onCreated: () => void;
 };
@@ -25,6 +26,7 @@ export default function CreateTaskModal({
   open,
   workspaceSlug,
   listId,
+  projectId,
   onClose,
   onCreated,
 }: CreateTaskModalProps) {
@@ -118,6 +120,7 @@ export default function CreateTaskModal({
         priority,
         assigneeId: assigneeId || undefined,
         dueDate: dueDate || undefined,
+        projectId,
       });
 
       resetForm();

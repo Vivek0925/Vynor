@@ -1,10 +1,6 @@
 import { api } from "@/lib/api";
 
-export type TaskStatus =
-  | "TODO"
-  | "IN_PROGRESS"
-  | "DONE";
-
+export type TaskStatus = "TODO" | "IN_PROGRESS" | "DONE";
 
 export type TaskPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
@@ -18,32 +14,26 @@ export type TaskUser = {
 export type Task = {
   id: string;
   workspaceId: string;
-
+  projectId: string | null;
   listId: string;
   list: {
-  id: string;
-  name: string;
-  position: number;
-  isCompleted: boolean;
-};
-
+    id: string;
+    name: string;
+    position: number;
+    isCompleted: boolean;
+  };
   title: string;
   description: string | null;
-
   priority: TaskPriority;
   position: number;
-
+  isCompleted: boolean;
   assigneeId: string | null;
   assignee: TaskUser | null;
-
   createdById: string;
   createdBy: TaskUser;
-
   dueDate: string | null;
-
   createdAt: string;
   updatedAt: string;
-  
 };
 
 export type TaskList = {
@@ -51,12 +41,9 @@ export type TaskList = {
   workspaceId: string;
   name: string;
   position: number;
-
   createdById: string;
   createdBy: TaskUser;
-
   tasks: Task[];
-
   createdAt: string;
   updatedAt: string;
 };
@@ -68,6 +55,7 @@ export type CreateTaskInput = {
   priority?: TaskPriority;
   assigneeId?: string;
   dueDate?: string;
+  projectId?: string | null;
 };
 
 export type WorkspaceMember = {
@@ -105,7 +93,7 @@ export async function updateTaskList(
   name: string,
 ) {
   return api<TaskList>(
-    `/workspaces/${encodeURIComponent(workspaceSlug)}/task-lists/${listId}`,
+    `/workspaces/${encodeURIComponent(workspaceSlug)}/task-lists/${encodeURIComponent(listId)}`,
     {
       method: "PATCH",
       body: JSON.stringify({ name }),
@@ -119,7 +107,7 @@ export async function moveTaskList(
   position: number,
 ) {
   return api<TaskList>(
-    `/workspaces/${encodeURIComponent(workspaceSlug)}/task-lists/${listId}/move`,
+    `/workspaces/${encodeURIComponent(workspaceSlug)}/task-lists/${encodeURIComponent(listId)}/move`,
     {
       method: "PATCH",
       body: JSON.stringify({ position }),
@@ -139,26 +127,19 @@ export async function deleteTaskList(
   );
 }
 
-export async function getWorkspaceTasks(
-  workspaceSlug: string,
-) {
+export async function getWorkspaceTasks(workspaceSlug: string) {
   return api<Task[]>(
     `/workspaces/${encodeURIComponent(workspaceSlug)}/tasks`,
   );
 }
 
-export async function getMyTasks(
-  workspaceSlug: string,
-) {
+export async function getMyTasks(workspaceSlug: string) {
   return api<Task[]>(
     `/workspaces/${encodeURIComponent(workspaceSlug)}/tasks/my`,
   );
 }
 
-
-export async function getWorkspaceMembers(
-  workspaceSlug: string,
-) {
+export async function getWorkspaceMembers(workspaceSlug: string) {
   return api<WorkspaceMember[]>(
     `/workspaces/${encodeURIComponent(workspaceSlug)}/members`,
   );
@@ -182,25 +163,25 @@ export async function deleteTask(
   taskId: string,
 ) {
   return api<{ id: string }>(
-    `/workspaces/${encodeURIComponent(workspaceSlug)}/tasks/${taskId}`,
+    `/workspaces/${encodeURIComponent(workspaceSlug)}/tasks/${encodeURIComponent(taskId)}`,
     {
       method: "DELETE",
     },
   );
 }
 
-
 export async function updateTask(
   workspaceSlug: string,
   taskId: string,
   input: {
     title?: string;
-    description?: string;
+    description?: string | null;
     priority?: TaskPriority;
     isCompleted?: boolean;
     listId?: string;
     assigneeId?: string | null;
     dueDate?: string | null;
+    projectId?: string | null;
   },
 ) {
   return api<Task>(
@@ -212,7 +193,6 @@ export async function updateTask(
   );
 }
 
-
 export async function moveTask(
   workspaceSlug: string,
   taskId: string,
@@ -220,17 +200,13 @@ export async function moveTask(
   position: number,
 ) {
   return api<Task>(
-    `/workspaces/${encodeURIComponent(workspaceSlug)}/tasks/${taskId}/move`,
+    `/workspaces/${encodeURIComponent(workspaceSlug)}/tasks/${encodeURIComponent(taskId)}/move`,
     {
       method: "PATCH",
-      body: JSON.stringify({
-        listId,
-        position,
-      }),
+      body: JSON.stringify({ listId, position }),
     },
   );
 }
-
 
 export interface TaskComment {
   id: string;
