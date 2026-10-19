@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsNotEmpty,
@@ -23,6 +24,10 @@ export class UpdateTaskDto {
   @IsOptional()
   @IsEnum(TaskPriority)
   priority?: TaskPriority;
+
+  @IsOptional()
+  @IsBoolean()
+  isCompleted?: boolean;
 
   @IsOptional()
   @IsString()

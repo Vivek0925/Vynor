@@ -141,6 +141,10 @@ export class TasksService {
       ...(dto.listId !== undefined && {
         listId: dto.listId,
       }),
+
+      ...(dto.isCompleted !== undefined && {
+        isCompleted: dto.isCompleted,
+      }),
     };
 
     const updatedTask = await this.tasksRepository.update(taskId, data);
