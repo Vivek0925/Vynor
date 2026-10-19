@@ -47,10 +47,25 @@ export class ProjectService {
       workspace.id,
     );
 
-    return projects.map((project) => ({
-      ...project,
-      progress: 0,
-    }));
+    return Promise.all(
+      projects.map(async (project) => {
+        const completedTasks = await this.projectRepository.countCompletedTasks(
+          project.id,
+        );
+
+        const totalTasks = project._count.tasks;
+
+        return {
+          ...project,
+          completedTasks,
+          totalTasks,
+          progress:
+            totalTasks === 0
+              ? 0
+              : Math.round((completedTasks / totalTasks) * 100),
+        };
+      }),
+    );
   }
 
   async findOne(userId: string, workspaceSlug: string, projectId: string) {
@@ -61,62 +76,67 @@ export class ProjectService {
     );
 
     const totalTasks = project.tasks.length;
+    const completedTasks = project.tasks.filter(
+      (task) => task.isCompleted,
+    ).length;
 
     return {
       ...project,
-      progress: 0,
+      completedTasks,
       totalTasks,
+      progress:
+        totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100),
     };
   }
-
- async update(
-  userId: string,
-  workspaceSlug: string,
-  projectId: string,
-  dto: UpdateProjectDto,
-) {
-  const project = await this.getAccessibleProject(
-    userId,
-    workspaceSlug,
-    projectId,
-  );
-
-  const startDate =
-    dto.startDate === undefined
-      ? project.startDate
-      : dto.startDate
-        ? new Date(dto.startDate)
-        : null;
-
-  const deadline =
-    dto.deadline === undefined
-      ? project.deadline
-      : dto.deadline
-        ? new Date(dto.deadline)
-        : null;
-
-  if (startDate && deadline && deadline < startDate) {
-    throw new BadRequestException(
-      'Project deadline cannot be before its start date.',
+  
+  async update(
+    userId: string,
+    workspaceSlug: string,
+    projectId: string,
+    dto: UpdateProjectDto,
+  ) {
+    const project = await this.getAccessibleProject(
+      userId,
+      workspaceSlug,
+      projectId,
     );
-  }
 
-  return this.projectRepository.update(projectId, {
-    ...dto,
-    startDate:
+    const startDate =
       dto.startDate === undefined
-        ? undefined
+        ? project.startDate
         : dto.startDate
           ? new Date(dto.startDate)
-          : null,
-    deadline:
+          : null;
+
+    const deadline =
       dto.deadline === undefined
-        ? undefined
+        ? project.deadline
         : dto.deadline
           ? new Date(dto.deadline)
-          : null,
-  });
-}
+          : null;
+
+    if (startDate && deadline && deadline < startDate) {
+      throw new BadRequestException(
+        'Project deadline cannot be before its start date.',
+      );
+    }
+
+    return this.projectRepository.update(projectId, {
+      ...dto,
+      startDate:
+        dto.startDate === undefined
+          ? undefined
+          : dto.startDate
+            ? new Date(dto.startDate)
+            : null,
+      deadline:
+        dto.deadline === undefined
+          ? undefined
+          : dto.deadline
+            ? new Date(dto.deadline)
+            : null,
+    });
+  }
 
   async delete(userId: string, workspaceSlug: string, projectId: string) {
     await this.getAccessibleProject(userId, workspaceSlug, projectId);

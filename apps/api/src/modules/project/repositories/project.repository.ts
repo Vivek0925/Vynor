@@ -130,4 +130,15 @@ export class ProjectRepository {
       where: { id },
     });
   }
+
+  async countCompletedTasks(projectId: string) {
+  return this.prisma.task.count({
+    where: {
+      projectId,
+      isCompleted: true,
+    },
+  });
 }
+}
+
+
