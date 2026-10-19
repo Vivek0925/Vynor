@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -7,6 +8,7 @@ import {
   MoreHorizontal,
   UserRound,
 } from "lucide-react";
+import { useEffect, useRef } from "react";
 import type { Project } from "@/lib/projects";
 import {
   formatDate,
@@ -15,7 +17,6 @@ import {
   statusLabels,
   statusStyles,
 } from "../_lib/project-types";
-import { useEffect, useRef } from "react";
 
 type Props = {
   project: Project;
@@ -31,38 +32,44 @@ export default function ProjectCard({
   onDelete,
 }: Props) {
   const daysRemaining = getDaysRemaining(project.deadline ?? "");
-
   const menuRef = useRef<HTMLDetailsElement>(null);
 
-useEffect(() => {
-  function handleOutsideClick(event: MouseEvent) {
-    if (
-      menuRef.current &&
-      !menuRef.current.contains(event.target as Node)
-    ) {
-      menuRef.current.open = false;
+  const totalTasks = project.totalTasks ?? project._count?.tasks ?? 0;
+  const completedTasks = project.completedTasks ?? 0;
+  const progress =
+    totalTasks === 0
+      ? 0
+      : Math.min(100, Math.max(0, project.progress ?? 0));
+
+  useEffect(() => {
+    function handleOutsideClick(event: MouseEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
+        menuRef.current.open = false;
+      }
     }
-  }
 
-  function handleEscape(event: KeyboardEvent) {
-    if (event.key === "Escape" && menuRef.current) {
-      menuRef.current.open = false;
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape" && menuRef.current) {
+        menuRef.current.open = false;
+      }
     }
-  }
 
-  document.addEventListener("mousedown", handleOutsideClick);
-  document.addEventListener("keydown", handleEscape);
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
 
-  return () => {
-    document.removeEventListener("mousedown", handleOutsideClick);
-    document.removeEventListener("keydown", handleEscape);
-  };
-}, []);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   return (
     <article
       onClick={() => onOpen(project)}
-      className="group cursor-pointer rounded-2xl border border-[#E8E8EF] bg-white p-5 transition hover:border-[#C9C9F5] hover:shadow-[0_6px_24px_rgba(40,40,90,0.06)]"
+      className="group cursor-pointer rounded-2xl border border-[#E8E8EF] bg-white p-4 transition hover:border-[#B9E4CF] hover:shadow-[0_6px_24px_rgba(40,40,90,0.06)]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -116,7 +123,7 @@ useEffect(() => {
       </div>
 
       {project.description && (
-        <p className="mt-4 line-clamp-2 min-h-10 text-sm leading-5 text-[#696B7C]">
+        <p className="mt-2 line-clamp-2 min-h-0 text-sm leading-5 text-[#696B7C]">
           {project.description}
         </p>
       )}
@@ -141,20 +148,52 @@ useEffect(() => {
         </span>
       </div>
 
-      <div className="mt-5 border-t border-[#EEEEF2] pt-4">
-        <div className="flex items-center justify-between gap-3 text-sm text-[#77798A]">
-          <span className="inline-flex items-center gap-1.5">
-            <CircleCheck size={15} />
-            {project._count?.tasks ?? 0} tasks
+      {/* Project progress */}
+      <div className="mt-3">
+        <div className="mb-1.5 flex items-center justify-between gap-3">
+          <span className="text-xs font-medium text-[#696B7C]">
+            Progress
           </span>
-
-          <span className="inline-flex items-center gap-1.5">
-            <UserRound size={15} />
-            {project.createdBy?.name ?? "Creator unavailable"}
+          <span className="text-xs font-semibold tabular-nums text-[#168653]">
+            {progress}%
           </span>
         </div>
 
-        <div className="mt-3 flex items-center justify-between gap-3">
+        <div
+          role="progressbar"
+          aria-label={`${project.name} progress`}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progress}
+          className="h-1.5 overflow-hidden rounded-full bg-[#E8F3ED]"
+        >
+          <div
+            className="h-full rounded-full bg-[#168653] transition-[width] duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        <p className="mt-1 text-xs text-[#858797]">
+          {completedTasks} of {totalTasks} tasks completed
+        </p>
+      </div>
+
+      <div className="mt-2 border-t border-[#EEEEF2] pt-3">
+        <div className="flex items-center justify-between gap-3 text-sm text-[#77798A]">
+          <span className="inline-flex items-center gap-1.5">
+            <CircleCheck size={15} />
+            {totalTasks} tasks
+          </span>
+
+          <span className="inline-flex min-w-0 items-center gap-1.5">
+            <UserRound size={15} />
+            <span className="truncate">
+              {project.createdBy?.name ?? "Creator unavailable"}
+            </span>
+          </span>
+        </div>
+
+        <div className="mt-2 flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-1.5 text-xs text-[#77798A]">
             <CalendarDays size={14} />
             {project.deadline ? formatDate(project.deadline) : "No deadline"}

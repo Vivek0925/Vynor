@@ -23,6 +23,11 @@ export interface Project {
   createdById: string;
   createdAt: string;
   updatedAt: string;
+
+  progress: number;
+  totalTasks: number;
+  completedTasks: number;
+
   _count?: {
     tasks: number;
   };
@@ -49,8 +54,6 @@ export interface ProjectTask {
 
 export interface ProjectDetails extends Project {
   tasks: ProjectTask[];
-  progress: number;
-  totalTasks: number;
 }
 
 export interface CreateProjectPayload {
