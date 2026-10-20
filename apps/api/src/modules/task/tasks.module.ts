@@ -16,12 +16,14 @@ import { TaskCommentsRepository } from './repositories/task-comments.repository'
 import { TasksService } from './services/tasks.service';
 import { TaskListsService } from './services/task-lists.service';
 import { TaskCommentsService } from './services/task-comments.service';
+import { ProjectRealtimeModule } from '../realtime/project-realtime.module';
 
 @Module({
   imports: [
     WorkspaceModule,
     ProjectModule,
     TaskRealtimeModule,
+    ProjectRealtimeModule,
   ],
   controllers: [
     TasksController,
