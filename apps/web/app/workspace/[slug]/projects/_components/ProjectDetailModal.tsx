@@ -189,57 +189,57 @@ export default function ProjectDetailModal({
     void loadTaskOptions();
   }, [open, projectId, loadTaskOptions]);
 
-  async function handleTaskCompletion(
-  taskId: string,
-  isCompleted: boolean,
-) {
-  if (!project || updatingTaskIds.includes(taskId)) return;
+  async function handleTaskCompletion(taskId: string, isCompleted: boolean) {
+    if (!project || updatingTaskIds.includes(taskId)) return;
 
-  const task = project.tasks.find((item) => item.id === taskId);
-  const workspaceTask = workspaceTasks.find((item) => item.id === taskId);
+    const task = project.tasks.find((item) => item.id === taskId);
+    const workspaceTask = workspaceTasks.find((item) => item.id === taskId);
 
-  if (!task || !workspaceTask) {
-    setTaskError("Unable to find this task in Workspace Tasks.");
-    return;
-  }
-
-  const targetName = isCompleted ? "DONE" : "TODO";
-  const targetList = taskLists.find(
-    (list) => list.name.trim().toUpperCase() === targetName,
-  );
-
-  if (!targetList) {
-    setTaskError(`Please create a "${targetName}" list first.`);
-    return;
-  }
-
-  const previousProject = project;
-  setTaskError(null);
-  setUpdatingTaskIds((ids) => [...ids, taskId]);
-
-  try {
-    if (workspaceTask.listId !== targetList.id) {
-      await moveTask(
-        workspaceSlug,
-        taskId,
-        targetList.id,
-        targetList.tasks.length,
-      );
+    if (!task || !workspaceTask) {
+      setTaskError("Unable to find this task in Workspace Tasks.");
+      return;
     }
 
-    await updateTask(workspaceSlug, taskId, { isCompleted });
-
-    await Promise.all([loadProject(), loadTaskOptions()]);
-  } catch (err) {
-    setProject(previousProject);
-    setTaskError(
-      err instanceof Error ? err.message : "Unable to update task completion.",
+    const targetName = isCompleted ? "DONE" : "TODO";
+    const targetList = taskLists.find(
+      (list) => list.name.trim().toUpperCase() === targetName,
     );
-    await Promise.all([loadProject(), loadTaskOptions()]);
-  } finally {
-    setUpdatingTaskIds((ids) => ids.filter((id) => id !== taskId));
+
+    if (!targetList) {
+      setTaskError(`Please create a "${targetName}" list first.`);
+      return;
+    }
+
+    const previousProject = project;
+    const targetPosition =
+      workspaceTask.listId === targetList.id
+        ? workspaceTask.position
+        : targetList.tasks.length;
+
+    setTaskError(null);
+    setUpdatingTaskIds((ids) => [...ids, taskId]);
+
+    try {
+      await updateTask(workspaceSlug, taskId, {
+        listId: targetList.id,
+        position: targetPosition,
+        isCompleted,
+      });
+
+      await Promise.all([loadProject(), loadTaskOptions()]);
+    } catch (err) {
+      setProject(previousProject);
+      setTaskError(
+        err instanceof Error
+          ? err.message
+          : "Unable to update task completion.",
+      );
+
+      await Promise.all([loadProject(), loadTaskOptions()]);
+    } finally {
+      setUpdatingTaskIds((ids) => ids.filter((id) => id !== taskId));
+    }
   }
-}
 
   async function handleTasksCreated() {
     setCreateTaskOpen(false);
