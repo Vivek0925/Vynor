@@ -15,6 +15,7 @@ import { TaskListsRepository } from '../repositories/task-lists.repository';
 import { TasksRepository } from '../repositories/tasks.repository';
 import { TaskRealtimeService } from '../../realtime/services/task-realtime.service';
 import { ProjectRepository } from '../../project/repositories/project.repository';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TasksService {
@@ -92,80 +93,75 @@ export class TasksService {
   }
 
   async update(
-    userId: string,
-    workspaceSlug: string,
-    taskId: string,
-    dto: UpdateTaskDto,
-  ) {
-    const workspace = await this.workspaceService.findAccessibleWorkspace(
-      userId,
-      workspaceSlug,
-    );
+  userId: string,
+  workspaceSlug: string,
+  taskId: string,
+  dto: UpdateTaskDto,
+) {
+  const workspace = await this.workspaceService.findAccessibleWorkspace(
+    userId,
+    workspaceSlug,
+  );
 
-    const task = await this.tasksRepository.findById(taskId);
+  const task = await this.tasksRepository.findById(taskId);
 
-    if (!task || task.workspaceId !== workspace.id) {
-      throw new NotFoundException('Task not found.');
-    }
-
-    if (dto.projectId !== undefined) {
-      await this.validateProject(workspace.id, dto.projectId);
-    }
-
-    await this.assertCanManageTask(workspace.id, userId, task);
-
-    if (dto.assigneeId) {
-      await this.validateAssignee(workspace.id, dto.assigneeId);
-    }
-
-    if (dto.listId !== undefined) {
-      const list = await this.taskListsRepository.findById(dto.listId);
-
-      if (!list || list.workspaceId !== workspace.id) {
-        throw new BadRequestException('Invalid task list.');
-      }
-    }
-
-    const data = {
-      ...(dto.title !== undefined && {
-        title: dto.title.trim(),
-      }),
-
-      ...(dto.description !== undefined && {
-        description: dto.description?.trim() || null,
-      }),
-
-      ...(dto.priority !== undefined && {
-        priority: dto.priority,
-      }),
-
-      ...(dto.assigneeId !== undefined && {
-        assigneeId: dto.assigneeId,
-      }),
-
-      ...(dto.dueDate !== undefined && {
-        dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
-      }),
-
-      ...(dto.listId !== undefined && {
-        listId: dto.listId,
-      }),
-
-      ...(dto.isCompleted !== undefined && {
-        isCompleted: dto.isCompleted,
-      }),
-
-      ...(dto.projectId !== undefined && {
-        projectId: dto.projectId,
-      }),
-    };
-
-    const updatedTask = await this.tasksRepository.update(taskId, data);
-
-    this.taskRealtimeService.emitTaskUpdated(workspace.id, updatedTask);
-
-    return updatedTask;
+  if (!task || task.workspaceId !== workspace.id) {
+    throw new NotFoundException('Task not found.');
   }
+
+  await this.assertCanManageTask(workspace.id, userId, task);
+
+  if (dto.projectId !== undefined) {
+    await this.validateProject(workspace.id, dto.projectId);
+  }
+
+  if (dto.assigneeId) {
+    await this.validateAssignee(workspace.id, dto.assigneeId);
+  }
+
+  const targetListId = dto.listId ?? task.listId;
+
+  if (dto.listId !== undefined) {
+    const list = await this.taskListsRepository.findById(dto.listId);
+
+    if (!list || list.workspaceId !== workspace.id) {
+      throw new BadRequestException('Invalid task list.');
+    }
+  }
+
+  const data: Prisma.TaskUncheckedUpdateInput = {
+    ...(dto.title !== undefined && { title: dto.title.trim() }),
+    ...(dto.description !== undefined && {
+      description: dto.description?.trim() || null,
+    }),
+    ...(dto.priority !== undefined && { priority: dto.priority }),
+    ...(dto.assigneeId !== undefined && { assigneeId: dto.assigneeId }),
+    ...(dto.dueDate !== undefined && {
+      dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+    }),
+    ...(dto.isCompleted !== undefined && {
+      isCompleted: dto.isCompleted,
+    }),
+    ...(dto.projectId !== undefined && { projectId: dto.projectId }),
+  };
+
+  const updatedTask =
+    dto.listId !== undefined || dto.position !== undefined
+      ? await this.tasksRepository.moveAndUpdate(
+          workspace.id,
+          task.id,
+          task.listId,
+          task.position,
+          targetListId,
+          dto.position ?? task.position,
+          data,
+        )
+      : await this.tasksRepository.update(task.id, data);
+
+  this.taskRealtimeService.emitTaskUpdated(workspace.id, updatedTask);
+
+  return updatedTask;
+}
 
   async move(
     userId: string,

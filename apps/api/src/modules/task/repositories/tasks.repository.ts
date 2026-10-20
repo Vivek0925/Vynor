@@ -133,6 +133,112 @@ export class TasksRepository {
     });
   }
 
+  async moveAndUpdate(
+  workspaceId: string,
+  taskId: string,
+  currentListId: string,
+  currentPosition: number,
+  targetListId: string,
+  targetPosition: number,
+  data: Prisma.TaskUncheckedUpdateInput = {},
+) {
+  return this.prisma.$transaction(async (tx) => {
+    const position = Math.max(0, targetPosition);
+
+    if (currentListId === targetListId) {
+      if (position < currentPosition) {
+        await tx.task.updateMany({
+          where: {
+            workspaceId,
+            listId: currentListId,
+            position: {
+              gte: position,
+              lt: currentPosition,
+            },
+            id: { not: taskId },
+          },
+          data: {
+            position: { increment: 1 },
+          },
+        });
+      } else if (position > currentPosition) {
+        await tx.task.updateMany({
+          where: {
+            workspaceId,
+            listId: currentListId,
+            position: {
+              gt: currentPosition,
+              lte: position,
+            },
+            id: { not: taskId },
+          },
+          data: {
+            position: { decrement: 1 },
+          },
+        });
+      }
+    } else {
+      await tx.task.updateMany({
+        where: {
+          workspaceId,
+          listId: currentListId,
+          position: { gt: currentPosition },
+          id: { not: taskId },
+        },
+        data: {
+          position: { decrement: 1 },
+        },
+      });
+
+      await tx.task.updateMany({
+        where: {
+          workspaceId,
+          listId: targetListId,
+          position: { gte: position },
+          id: { not: taskId },
+        },
+        data: {
+          position: { increment: 1 },
+        },
+      });
+    }
+
+    return tx.task.update({
+      where: { id: taskId },
+      data: {
+        ...data,
+        listId: targetListId,
+        position,
+      },
+      include: {
+        assignee: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatar: true,
+          },
+        },
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatar: true,
+          },
+        },
+        list: {
+          select: {
+            id: true,
+            name: true,
+            position: true,
+          },
+        },
+      },
+    });
+  });
+}
+
   async delete(id: string) {
     return this.prisma.task.delete({
       where: { id },

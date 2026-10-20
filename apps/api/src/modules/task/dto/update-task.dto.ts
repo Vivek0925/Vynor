@@ -2,10 +2,12 @@ import {
   IsBoolean,
   IsDateString,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
+  Min,
 } from 'class-validator';
 
 import { TaskPriority } from '@prisma/client';
@@ -46,4 +48,9 @@ export class UpdateTaskDto {
   @IsString()
   @IsNotEmpty()
   projectId?: string | null;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  position?: number;
 }
