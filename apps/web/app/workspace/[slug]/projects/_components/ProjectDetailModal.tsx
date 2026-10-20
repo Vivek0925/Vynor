@@ -48,6 +48,7 @@ type Props = {
   projectId: string | null;
   onClose: () => void;
   onEdit: (project: ProjectDetails) => void;
+  onProjectUpdated?: () => void;
 };
 
 const priorityLabels: Record<ProjectPriority, string> = {
@@ -76,6 +77,7 @@ export default function ProjectDetailModal({
   projectId,
   onClose,
   onEdit,
+  onProjectUpdated,
 }: Props) {
   const [project, setProject] = useState<ProjectDetails | null>(null);
   const [loading, setLoading] = useState(false);
@@ -227,6 +229,7 @@ export default function ProjectDetailModal({
       });
 
       await Promise.all([loadProject(), loadTaskOptions()]);
+      onProjectUpdated?.();
     } catch (err) {
       setProject(previousProject);
       setTaskError(

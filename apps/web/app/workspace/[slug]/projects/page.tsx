@@ -202,6 +202,7 @@ export default function ProjectsPage() {
         workspaceSlug={slug}
         projectId={selectedProjectId}
         onClose={() => setSelectedProjectId(null)}
+        onProjectUpdated={() => void loadProjects()}
         onEdit={(project) => {
           setSelectedProjectId(null);
           setEditingProject(project);
