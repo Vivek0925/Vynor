@@ -5,11 +5,12 @@ import { SocketAuthService } from './services/socket-auth.service';
 import { PrismaModule } from '../../database/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { ChatModule } from '../chat/chat.module';
-import { MeetingModule } from "../meeting/meeting.module";
+import { MeetingModule } from '../meeting/meeting.module';
 import { WorkspaceModule } from '../workspace/workspace.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { TaskRealtimeService } from './services/task-realtime.service';
 import { TaskRealtimeModule } from './task-realtime.module';
+import { ProjectRealtimeModule } from './project-realtime.module';
 
 @Module({
   imports: [
@@ -20,11 +21,8 @@ import { TaskRealtimeModule } from './task-realtime.module';
     WorkspaceModule,
     NotificationsModule,
     TaskRealtimeModule,
+    ProjectRealtimeModule,
   ],
-  providers: [
-    RealtimeGateway,
-    PresenceService,
-    SocketAuthService,
-  ],
+  providers: [RealtimeGateway, PresenceService, SocketAuthService],
 })
 export class RealtimeModule {}

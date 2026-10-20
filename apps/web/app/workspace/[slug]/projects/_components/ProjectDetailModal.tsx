@@ -246,7 +246,9 @@ export default function ProjectDetailModal({
 
   async function handleTasksCreated() {
     setCreateTaskOpen(false);
+
     await Promise.all([loadProject(), loadTaskOptions()]);
+    onProjectUpdated?.();
   }
 
   async function handleLinkTasks() {
@@ -266,6 +268,7 @@ export default function ProjectDetailModal({
 
       setSelectedTaskIds([]);
       await Promise.all([loadProject(), loadTaskOptions()]);
+      onProjectUpdated?.();
     } catch (err) {
       setTaskError(
         err instanceof Error ? err.message : "Unable to link tasks.",
@@ -288,6 +291,7 @@ export default function ProjectDetailModal({
       });
 
       await Promise.all([loadProject(), loadTaskOptions()]);
+      onProjectUpdated?.();
     } catch (err) {
       setTaskError(
         err instanceof Error ? err.message : "Unable to unlink task.",
@@ -313,6 +317,7 @@ export default function ProjectDetailModal({
       await deleteTask(workspaceSlug, taskId);
 
       await Promise.all([loadProject(), loadTaskOptions()]);
+      onProjectUpdated?.();
     } catch (err) {
       setTaskError(
         err instanceof Error ? err.message : "Unable to delete task.",
