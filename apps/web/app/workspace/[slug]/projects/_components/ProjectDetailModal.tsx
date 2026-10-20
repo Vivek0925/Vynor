@@ -12,6 +12,7 @@ import {
   Plus,
   Link2,
   Unlink,
+  Trash2,
 } from "lucide-react";
 
 import Modal from "@/components/ui/Modal";
@@ -24,6 +25,7 @@ import type {
 } from "@/lib/projects";
 import {
   createTask,
+  deleteTask,
   getTaskLists,
   getWorkspaceTasks,
   updateTask,
@@ -274,6 +276,31 @@ export default function ProjectDetailModal({
     } catch (err) {
       setTaskError(
         err instanceof Error ? err.message : "Unable to unlink task.",
+      );
+    } finally {
+      setUpdatingTaskIds((ids) => ids.filter((id) => id !== taskId));
+    }
+  }
+
+  async function handleDeleteTask(taskId: string, taskTitle: string) {
+    if (!project) return;
+
+    const confirmed = window.confirm(
+      `Delete "${taskTitle}" permanently? This will also remove it from Workspace Tasks.`,
+    );
+
+    if (!confirmed) return;
+
+    setTaskError(null);
+    setUpdatingTaskIds((ids) => [...ids, taskId]);
+
+    try {
+      await deleteTask(workspaceSlug, taskId);
+
+      await Promise.all([loadProject(), loadTaskOptions()]);
+    } catch (err) {
+      setTaskError(
+        err instanceof Error ? err.message : "Unable to delete task.",
       );
     } finally {
       setUpdatingTaskIds((ids) => ids.filter((id) => id !== taskId));
@@ -634,6 +661,19 @@ export default function ProjectDetailModal({
                                 ) : (
                                   <Unlink className="h-4 w-4" />
                                 )}
+                              </button>
+
+                              <button
+                                type="button"
+                                title="Delete task permanently"
+                                aria-label={`Delete ${task.title}`}
+                                disabled={updating}
+                                onClick={() =>
+                                  void handleDeleteTask(task.id, task.title)
+                                }
+                                className="mt-0.5 shrink-0 rounded-lg p-1.5 text-[#777784] transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
                               </button>
                             </div>
                           </article>
