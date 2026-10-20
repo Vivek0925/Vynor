@@ -262,9 +262,19 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
 
       await moveTask(workspaceSlug, taskId, targetList.id, newPosition);
 
-      /*
-       * Backend is the source of truth.
-       */
+      // Preserve the original board workflow:
+      // moving into DONE completes the task;
+      // moving out of DONE reopens it.
+      const sourceIsDone = sourceList.name.trim().toUpperCase() === "DONE";
+
+      const targetIsDone = targetList.name.trim().toUpperCase() === "DONE";
+
+      if (sourceIsDone !== targetIsDone) {
+        await updateTask(workspaceSlug, taskId, {
+          isCompleted: targetIsDone,
+        });
+      }
+
       await loadLists();
     } catch (error) {
       console.error("Failed to move task:", error);
@@ -315,35 +325,50 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
   }
 
   async function handleToggleComplete(task: Task) {
-  if (movingTaskId) return;
+    if (movingTaskId) return;
 
-  const isCompleted = !task.isCompleted;
-  const previousLists = lists;
+    const sourceList = lists.find((list) =>
+      list.tasks.some((item) => item.id === task.id),
+    );
 
-  setMovingTaskId(task.id);
+    if (!sourceList) return;
 
-  // Update the UI immediately.
-  setLists((current) =>
-    current.map((list) => ({
-      ...list,
-      tasks: list.tasks.map((item) =>
-        item.id === task.id ? { ...item, isCompleted } : item,
-      ),
-    })),
-  );
+    const isCompleted = !task.isCompleted;
+    const targetName = isCompleted ? "DONE" : "TODO";
 
-  try {
-    await updateTask(workspaceSlug, task.id, { isCompleted });
+    const targetList = lists.find(
+      (list) => list.name.trim().toUpperCase() === targetName,
+    );
 
-    // Refresh from the backend to keep the board in sync.
-    await loadLists();
-  } catch (error) {
-    console.error("Failed to toggle task completion:", error);
-    setLists(previousLists);
-  } finally {
-    setMovingTaskId(null);
+    if (!targetList) {
+      window.alert(`Please create a "${targetName}" list first.`);
+      return;
+    }
+
+    const previousLists = lists;
+    const targetPosition =
+      sourceList.id === targetList.id ? task.position : targetList.tasks.length;
+
+    setMovingTaskId(task.id);
+
+    try {
+      if (sourceList.id !== targetList.id) {
+        await moveTask(workspaceSlug, task.id, targetList.id, targetPosition);
+      }
+
+      await updateTask(workspaceSlug, task.id, {
+        isCompleted,
+      });
+
+      await loadLists();
+    } catch (error) {
+      console.error("Failed to toggle task completion:", error);
+      setLists(previousLists);
+      await loadLists();
+    } finally {
+      setMovingTaskId(null);
+    }
   }
-}
   async function handleRenameList(listId: string) {
     const name = editingListName.trim();
 
