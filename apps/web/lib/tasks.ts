@@ -17,10 +17,10 @@ export type Task = {
   projectId: string | null;
   listId: string;
   list: {
-  id: string;
-  name: string;
-  position: number;
-};
+    id: string;
+    name: string;
+    position: number;
+  };
   title: string;
   description: string | null;
   priority: TaskPriority;
@@ -73,10 +73,7 @@ export async function getTaskLists(workspaceSlug: string) {
   );
 }
 
-export async function createTaskList(
-  workspaceSlug: string,
-  name: string,
-) {
+export async function createTaskList(workspaceSlug: string, name: string) {
   return api<TaskList>(
     `/workspaces/${encodeURIComponent(workspaceSlug)}/task-lists`,
     {
@@ -114,10 +111,7 @@ export async function moveTaskList(
   );
 }
 
-export async function deleteTaskList(
-  workspaceSlug: string,
-  listId: string,
-) {
+export async function deleteTaskList(workspaceSlug: string, listId: string) {
   return api<{ id: string }>(
     `/workspaces/${encodeURIComponent(workspaceSlug)}/task-lists/${encodeURIComponent(listId)}`,
     {
@@ -127,9 +121,7 @@ export async function deleteTaskList(
 }
 
 export async function getWorkspaceTasks(workspaceSlug: string) {
-  return api<Task[]>(
-    `/workspaces/${encodeURIComponent(workspaceSlug)}/tasks`,
-  );
+  return api<Task[]>(`/workspaces/${encodeURIComponent(workspaceSlug)}/tasks`);
 }
 
 export async function getMyTasks(workspaceSlug: string) {
@@ -148,19 +140,13 @@ export async function createTask(
   workspaceSlug: string,
   input: CreateTaskInput,
 ) {
-  return api<Task>(
-    `/workspaces/${encodeURIComponent(workspaceSlug)}/tasks`,
-    {
-      method: "POST",
-      body: JSON.stringify(input),
-    },
-  );
+  return api<Task>(`/workspaces/${encodeURIComponent(workspaceSlug)}/tasks`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 }
 
-export async function deleteTask(
-  workspaceSlug: string,
-  taskId: string,
-) {
+export async function deleteTask(workspaceSlug: string, taskId: string) {
   return api<{ id: string }>(
     `/workspaces/${encodeURIComponent(workspaceSlug)}/tasks/${encodeURIComponent(taskId)}`,
     {
@@ -178,6 +164,7 @@ export async function updateTask(
     priority?: TaskPriority;
     isCompleted?: boolean;
     listId?: string;
+    position?: number;
     assigneeId?: string | null;
     dueDate?: string | null;
     projectId?: string | null;

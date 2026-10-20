@@ -115,178 +115,150 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
     setActiveTask(null);
   }
 
-  async function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
+ async function handleDragEnd(event: DragEndEvent) {
+  const { active, over } = event;
 
-    setActiveTask(null);
+  setActiveTask(null);
 
-    if (!over) {
-      return;
-    }
+  if (!over || movingTaskId) return;
 
-    const taskId = String(active.id);
-    const overId = String(over.id);
+  const taskId = String(active.id);
+  const overId = String(over.id);
 
-    const sourceList = lists.find((list) =>
-      list.tasks.some((task) => task.id === taskId),
-    );
+  const sourceList = lists.find((list) =>
+    list.tasks.some((task) => task.id === taskId),
+  );
 
-    if (!sourceList) {
-      return;
-    }
+  if (!sourceList) return;
 
-    const task = sourceList.tasks.find((item) => item.id === taskId);
+  const task = sourceList.tasks.find((item) => item.id === taskId);
 
-    if (!task) {
-      return;
-    }
+  if (!task) return;
 
-    /*
-     * `over.id` can be:
-     * 1. another task
-     * 2. a list itself
-     */
+  let targetList = lists.find((list) =>
+    list.tasks.some((item) => item.id === overId),
+  );
 
-    let targetList = lists.find((list) =>
-      list.tasks.some((item) => item.id === overId),
-    );
+  if (!targetList) {
+    targetList = lists.find((list) => list.id === overId);
+  }
 
-    if (!targetList) {
-      targetList = lists.find((list) => list.id === overId);
-    }
+  if (!targetList) return;
 
-    if (!targetList) {
-      return;
-    }
+  const targetTasks = [...targetList.tasks]
+    .filter((item) => item.id !== taskId)
+    .sort((a, b) => a.position - b.position);
 
-    /*
-     * Remove the dragged task from the target ordering
-     * before calculating its new position.
-     */
-    const targetTasks = [...targetList.tasks]
-      .filter((item) => item.id !== taskId)
-      .sort((a, b) => a.position - b.position);
+  let newPosition = targetTasks.length;
 
-    let newPosition = targetTasks.length;
+  const overTaskIndex = targetTasks.findIndex(
+    (item) => item.id === overId,
+  );
 
-    /*
-     * If we're dropping over another card,
-     * insert before that card.
-     */
-    const overTaskIndex = targetTasks.findIndex((item) => item.id === overId);
+  if (overTaskIndex !== -1) {
+    newPosition = overTaskIndex;
+  }
 
-    if (overTaskIndex !== -1) {
-      newPosition = overTaskIndex;
-    }
+  if (
+    sourceList.id === targetList.id &&
+    task.position === newPosition
+  ) {
+    return;
+  }
 
-    /*
-     * Same list + same position = nothing to do.
-     */
-    if (sourceList.id === targetList.id && task.position === newPosition) {
-      return;
-    }
+  const previousLists = lists;
 
-    /*
-     * Optimistic UI update.
-     */
-    setLists((current) =>
-      current.map((list) => {
-        /*
-         * Same-list reorder.
-         */
-        if (list.id === sourceList.id && list.id === targetList.id) {
-          const reordered = list.tasks
-            .filter((item) => item.id !== taskId)
-            .sort((a, b) => a.position - b.position);
+  const sourceIsDone =
+    sourceList.name.trim().toUpperCase() === "DONE";
 
-          reordered.splice(newPosition, 0, {
-            ...task,
-            listId: list.id,
-            position: newPosition,
-          });
+  const targetIsDone =
+    targetList.name.trim().toUpperCase() === "DONE";
 
-          return {
-            ...list,
-            tasks: reordered.map((item, index) => ({
-              ...item,
-              position: index,
-            })),
-          };
-        }
+  const isCompleted =
+    sourceIsDone !== targetIsDone
+      ? targetIsDone
+      : task.isCompleted;
 
-        /*
-         * Remove from source list.
-         */
-        if (list.id === sourceList.id) {
-          return {
-            ...list,
-            tasks: list.tasks
-              .filter((item) => item.id !== taskId)
-              .sort((a, b) => a.position - b.position)
-              .map((item, index) => ({
-                ...item,
-                position: index,
-              })),
-          };
-        }
+  // Optimistic UI update.
+  setLists((current) =>
+    current.map((list) => {
+      if (list.id === sourceList.id && list.id === targetList.id) {
+        const reordered = list.tasks
+          .filter((item) => item.id !== taskId)
+          .sort((a, b) => a.position - b.position);
 
-        /*
-         * Insert into target list.
-         */
-        if (list.id === targetList.id) {
-          const updatedTasks = list.tasks
-            .filter((item) => item.id !== taskId)
-            .sort((a, b) => a.position - b.position);
-
-          updatedTasks.splice(newPosition, 0, {
-            ...task,
-            listId: targetList.id,
-            position: newPosition,
-          });
-
-          return {
-            ...list,
-            tasks: updatedTasks.map((item, index) => ({
-              ...item,
-              position: index,
-            })),
-          };
-        }
-
-        return list;
-      }),
-    );
-
-    try {
-      setMovingTaskId(taskId);
-
-      await moveTask(workspaceSlug, taskId, targetList.id, newPosition);
-
-      // Preserve the original board workflow:
-      // moving into DONE completes the task;
-      // moving out of DONE reopens it.
-      const sourceIsDone = sourceList.name.trim().toUpperCase() === "DONE";
-
-      const targetIsDone = targetList.name.trim().toUpperCase() === "DONE";
-
-      if (sourceIsDone !== targetIsDone) {
-        await updateTask(workspaceSlug, taskId, {
-          isCompleted: targetIsDone,
+        reordered.splice(newPosition, 0, {
+          ...task,
+          listId: list.id,
+          position: newPosition,
+          isCompleted,
         });
+
+        return {
+          ...list,
+          tasks: reordered.map((item, index) => ({
+            ...item,
+            position: index,
+          })),
+        };
       }
 
-      await loadLists();
-    } catch (error) {
-      console.error("Failed to move task:", error);
+      if (list.id === sourceList.id) {
+        return {
+          ...list,
+          tasks: list.tasks
+            .filter((item) => item.id !== taskId)
+            .sort((a, b) => a.position - b.position)
+            .map((item, index) => ({
+              ...item,
+              position: index,
+            })),
+        };
+      }
 
-      /*
-       * Restore server state.
-       */
-      await loadLists();
-    } finally {
-      setMovingTaskId(null);
-    }
+      if (list.id === targetList.id) {
+        const updatedTasks = list.tasks
+          .filter((item) => item.id !== taskId)
+          .sort((a, b) => a.position - b.position);
+
+        updatedTasks.splice(newPosition, 0, {
+          ...task,
+          listId: targetList.id,
+          position: newPosition,
+          isCompleted,
+        });
+
+        return {
+          ...list,
+          tasks: updatedTasks.map((item, index) => ({
+            ...item,
+            position: index,
+          })),
+        };
+      }
+
+      return list;
+    }),
+  );
+
+  setMovingTaskId(taskId);
+
+  try {
+    await updateTask(workspaceSlug, taskId, {
+      listId: targetList.id,
+      position: newPosition,
+      isCompleted,
+    });
+
+    await loadLists();
+  } catch (error) {
+    console.error("Failed to move task:", error);
+    setLists(previousLists);
+    await loadLists();
+  } finally {
+    setMovingTaskId(null);
   }
+}
 
   function handleAddTask(listId: string) {
     setCreateTaskListId(listId);
@@ -325,50 +297,51 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
   }
 
   async function handleToggleComplete(task: Task) {
-    if (movingTaskId) return;
+  if (movingTaskId) return;
 
-    const sourceList = lists.find((list) =>
-      list.tasks.some((item) => item.id === task.id),
-    );
+  const sourceList = lists.find((list) =>
+    list.tasks.some((item) => item.id === task.id),
+  );
 
-    if (!sourceList) return;
+  if (!sourceList) return;
 
-    const isCompleted = !task.isCompleted;
-    const targetName = isCompleted ? "DONE" : "TODO";
+  const isCompleted = !task.isCompleted;
+  const targetName = isCompleted ? "DONE" : "TODO";
 
-    const targetList = lists.find(
-      (list) => list.name.trim().toUpperCase() === targetName,
-    );
+  const targetList = lists.find(
+    (list) => list.name.trim().toUpperCase() === targetName,
+  );
 
-    if (!targetList) {
-      window.alert(`Please create a "${targetName}" list first.`);
-      return;
-    }
-
-    const previousLists = lists;
-    const targetPosition =
-      sourceList.id === targetList.id ? task.position : targetList.tasks.length;
-
-    setMovingTaskId(task.id);
-
-    try {
-      if (sourceList.id !== targetList.id) {
-        await moveTask(workspaceSlug, task.id, targetList.id, targetPosition);
-      }
-
-      await updateTask(workspaceSlug, task.id, {
-        isCompleted,
-      });
-
-      await loadLists();
-    } catch (error) {
-      console.error("Failed to toggle task completion:", error);
-      setLists(previousLists);
-      await loadLists();
-    } finally {
-      setMovingTaskId(null);
-    }
+  if (!targetList) {
+    window.alert(`Please create a "${targetName}" list first.`);
+    return;
   }
+
+  const previousLists = lists;
+  const targetPosition =
+    sourceList.id === targetList.id
+      ? task.position
+      : targetList.tasks.length;
+
+  setMovingTaskId(task.id);
+
+  try {
+    await updateTask(workspaceSlug, task.id, {
+      listId: targetList.id,
+      position: targetPosition,
+      isCompleted,
+    });
+
+    await loadLists();
+  } catch (error) {
+    console.error("Failed to toggle task completion:", error);
+    setLists(previousLists);
+    await loadLists();
+  } finally {
+    setMovingTaskId(null);
+  }
+}
+
   async function handleRenameList(listId: string) {
     const name = editingListName.trim();
 
