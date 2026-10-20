@@ -18,6 +18,7 @@ import {
   getTaskLists,
   moveTask,
   moveTaskList,
+  updateTask,
   updateTaskList,
 } from "@/lib/tasks";
 
@@ -314,75 +315,35 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
   }
 
   async function handleToggleComplete(task: Task) {
-    const sourceList = lists.find((list) =>
-      list.tasks.some((item) => item.id === task.id),
-    );
+  if (movingTaskId) return;
 
-    if (!sourceList || movingTaskId) return;
+  const isCompleted = !task.isCompleted;
+  const previousLists = lists;
 
-    const isCompleted = sourceList.name.trim().toUpperCase() === "DONE";
+  setMovingTaskId(task.id);
 
-    const targetList = isCompleted
-      ? lists.find((list) => list.name.trim().toUpperCase() === "TODO")
-      : lists.find((list) => list.name.trim().toUpperCase() === "DONE");
+  // Update the UI immediately.
+  setLists((current) =>
+    current.map((list) => ({
+      ...list,
+      tasks: list.tasks.map((item) =>
+        item.id === task.id ? { ...item, isCompleted } : item,
+      ),
+    })),
+  );
 
-    if (!targetList || targetList.id === sourceList.id) return;
+  try {
+    await updateTask(workspaceSlug, task.id, { isCompleted });
 
-    const targetPosition = targetList.tasks.length;
-
-    const previousLists = lists;
-
-    setMovingTaskId(task.id);
-
-    setLists((current) =>
-      current.map((list) => {
-        if (list.id === sourceList.id) {
-          return {
-            ...list,
-            tasks: list.tasks
-              .filter((item) => item.id !== task.id)
-              .map((item, index) => ({
-                ...item,
-                position: index,
-              })),
-          };
-        }
-
-        if (list.id === targetList.id) {
-          return {
-            ...list,
-            tasks: [
-              ...list.tasks,
-              {
-                ...task,
-                listId: targetList.id,
-                list: {
-                  id: targetList.id,
-                  name: targetList.name,
-                  position: targetList.position,
-                },
-                position: targetPosition,
-              },
-            ],
-          };
-        }
-
-        return list;
-      }),
-    );
-
-    try {
-      await moveTask(workspaceSlug, task.id, targetList.id, targetPosition);
-
-      await loadLists();
-    } catch (error) {
-      console.error("Failed to toggle task completion:", error);
-      setLists(previousLists);
-    } finally {
-      setMovingTaskId(null);
-    }
+    // Refresh from the backend to keep the board in sync.
+    await loadLists();
+  } catch (error) {
+    console.error("Failed to toggle task completion:", error);
+    setLists(previousLists);
+  } finally {
+    setMovingTaskId(null);
   }
-
+}
   async function handleRenameList(listId: string) {
     const name = editingListName.trim();
 
@@ -620,9 +581,7 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
             <div className="w-[310px]">
               <TaskCard
                 task={activeTask}
-                isCompleted={
-                  activeTask.list?.name.trim().toUpperCase() === "DONE"
-                }
+                isCompleted={activeTask.isCompleted}
               />
             </div>
           ) : null}

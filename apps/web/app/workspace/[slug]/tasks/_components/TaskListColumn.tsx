@@ -238,7 +238,7 @@ export default function TaskListColumn({
                 task={task}
                 onClick={onTaskClick}
                 onToggleComplete={onToggleComplete}
-                isCompleted={list.name.trim().toUpperCase() === "DONE"}
+                isCompleted={task.isCompleted}
               />
             </div>
           ))}
