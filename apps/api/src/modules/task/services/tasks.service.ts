@@ -16,6 +16,7 @@ import { TasksRepository } from '../repositories/tasks.repository';
 import { TaskRealtimeService } from '../../realtime/services/task-realtime.service';
 import { ProjectRepository } from '../../project/repositories/project.repository';
 import { Prisma } from '@prisma/client';
+import { ProjectRealtimeService } from '../../realtime/services/project-realtime.service';
 
 @Injectable()
 export class TasksService {
@@ -25,6 +26,7 @@ export class TasksService {
     private readonly workspaceService: WorkspaceService,
     private readonly taskRealtimeService: TaskRealtimeService,
     private readonly projectRepository: ProjectRepository,
+    private readonly projectRealtimeService: ProjectRealtimeService,
   ) {}
 
   async create(userId: string, workspaceSlug: string, dto: CreateTaskDto) {
@@ -304,6 +306,20 @@ export class TasksService {
       id: task.id,
     };
   }
+
+ private emitProjectUpdated(
+  workspaceId: string,
+  ...projectIds: (string | null | undefined)[]
+) {
+  for (const projectId of new Set(projectIds)) {
+    if (projectId) {
+      this.projectRealtimeService.emitProjectUpdated(
+        workspaceId,
+        projectId,
+      );
+    }
+  }
+}
 
   private async validateProject(
     workspaceId: string,

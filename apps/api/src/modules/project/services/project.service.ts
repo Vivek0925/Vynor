@@ -8,12 +8,14 @@ import { ProjectRepository } from '../repositories/project.repository';
 import { WorkspaceService } from '../../workspace/services/workspace.service';
 import { CreateProjectDto } from '../dto/create-project.dto';
 import { UpdateProjectDto } from '../dto/update-project.dto';
+import { ProjectRealtimeService } from '../../realtime/services/project-realtime.service';
 
 @Injectable()
 export class ProjectService {
   constructor(
     private readonly projectRepository: ProjectRepository,
     private readonly workspaceService: WorkspaceService,
+    private readonly projectRealtimeService: ProjectRealtimeService,
   ) {}
 
   async create(userId: string, workspaceSlug: string, dto: CreateProjectDto) {
@@ -24,7 +26,7 @@ export class ProjectService {
 
     this.validateDates(dto.startDate, dto.deadline);
 
-    return this.projectRepository.create({
+    const project = await this.projectRepository.create({
       name: dto.name,
       description: dto.description,
       clientName: dto.clientName,
@@ -35,6 +37,10 @@ export class ProjectService {
       workspaceId: workspace.id,
       createdById: userId,
     });
+
+    this.projectRealtimeService.emitProjectCreated(workspace.id, project.id);
+
+    return project;
   }
 
   async findAll(userId: string, workspaceSlug: string) {
@@ -88,7 +94,7 @@ export class ProjectService {
         totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100),
     };
   }
-  
+
   async update(
     userId: string,
     workspaceSlug: string,
@@ -121,7 +127,7 @@ export class ProjectService {
       );
     }
 
-    return this.projectRepository.update(projectId, {
+    const updatedProject = await this.projectRepository.update(projectId, {
       ...dto,
       startDate:
         dto.startDate === undefined
@@ -136,13 +142,31 @@ export class ProjectService {
             ? new Date(dto.deadline)
             : null,
     });
+
+    this.projectRealtimeService.emitProjectUpdated(
+      project.workspaceId,
+      updatedProject.id,
+    );
+
+    return updatedProject;
   }
 
-  async delete(userId: string, workspaceSlug: string, projectId: string) {
-    await this.getAccessibleProject(userId, workspaceSlug, projectId);
+ async delete(userId: string, workspaceSlug: string, projectId: string) {
+  const project = await this.getAccessibleProject(
+    userId,
+    workspaceSlug,
+    projectId,
+  );
 
-    return this.projectRepository.delete(projectId);
-  }
+  const deletedProject = await this.projectRepository.delete(projectId);
+
+  this.projectRealtimeService.emitProjectDeleted(
+    project.workspaceId,
+    projectId,
+  );
+
+  return deletedProject;
+}
 
   private async getAccessibleProject(
     userId: string,

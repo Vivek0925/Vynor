@@ -31,6 +31,7 @@ import { WorkspaceService } from '../../workspace/services/workspace.service';
 import { AuthSessionRegistry } from '../../auth/services/auth-session-registry.service';
 import { NotificationRealtimeService } from '../../notifications/notification-realtime.service';
 import { TaskRealtimeService } from '../services/task-realtime.service';
+import { ProjectRealtimeService } from '../services/project-realtime.service';
 
 @WebSocketGateway({
   cors: {
@@ -57,6 +58,7 @@ export class RealtimeGateway
     private readonly authSessionRegistry: AuthSessionRegistry,
     private readonly notificationRealtime: NotificationRealtimeService,
     private readonly taskRealtimeService: TaskRealtimeService,
+    private readonly projectRealtimeService: ProjectRealtimeService,
   ) {}
 
   // =========================================================
@@ -67,6 +69,9 @@ export class RealtimeGateway
     try {
       this.notificationRealtime.setServer(this.server);
       this.taskRealtimeService.setServer(this.server);
+      this.projectRealtimeService.setServer(this.server);
+      
+      
       const currentUser = await this.socketAuthService.authenticate(socket);
 
       socket.data.currentUser = currentUser;
