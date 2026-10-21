@@ -41,6 +41,7 @@ import {
 
 import { useMemo } from "react";
 import CreateTaskModal from "../../tasks/_components/CreateTaskModal";
+import { socket } from "@/lib/socket";
 
 type Props = {
   open: boolean;
@@ -156,6 +157,8 @@ export default function ProjectDetailModal({
     };
   }, [open, workspaceSlug, projectId]);
 
+
+
   const loadTaskOptions = useCallback(async () => {
     setLoadingTaskOptions(true);
     setTaskError(null);
@@ -190,6 +193,23 @@ export default function ProjectDetailModal({
 
     void loadTaskOptions();
   }, [open, projectId, loadTaskOptions]);
+
+    useEffect(() => {
+  if (!open || !projectId) return;
+
+  const refreshProject = (event: { projectId: string }) => {
+    if (event.projectId !== projectId) return;
+
+    void loadProject();
+    void loadTaskOptions();
+  };
+
+  socket.on("project:updated", refreshProject);
+
+  return () => {
+    socket.off("project:updated", refreshProject);
+  };
+}, [open, projectId, loadProject, loadTaskOptions]);
 
   async function handleTaskCompletion(taskId: string, isCompleted: boolean) {
     if (!project || updatingTaskIds.includes(taskId)) return;

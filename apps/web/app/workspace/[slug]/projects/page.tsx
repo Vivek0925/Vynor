@@ -37,6 +37,9 @@ export default function ProjectsPage() {
     null,
   );
 
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [notification, setNotification] = useState("");
+
   const loadProjects = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -52,20 +55,29 @@ export default function ProjectsPage() {
   }, [slug]);
 
   useEffect(() => {
-  const handleProjectChange = () => {
-    void loadProjects();
-  };
+    const handleProjectChange = () => {
+      void loadProjects();
+    };
 
-  socket.on("project:created", handleProjectChange);
-  socket.on("project:updated", handleProjectChange);
-  socket.on("project:deleted", handleProjectChange);
+    const handleProjectDeleted = (event: { projectId: string }) => {
+      handleProjectChange();
 
-  return () => {
-    socket.off("project:created", handleProjectChange);
-    socket.off("project:updated", handleProjectChange);
-    socket.off("project:deleted", handleProjectChange);
-  };
-}, [loadProjects]);
+      if (selectedProjectId === event.projectId) {
+        setSelectedProjectId(null);
+        setNotification("This project was deleted in another tab.");
+      }
+    };
+
+    socket.on("project:created", handleProjectChange);
+    socket.on("project:updated", handleProjectChange);
+    socket.on("project:deleted", handleProjectDeleted);
+
+    return () => {
+      socket.off("project:created", handleProjectChange);
+      socket.off("project:updated", handleProjectChange);
+      socket.off("project:deleted", handleProjectDeleted);
+    };
+  }, [loadProjects, selectedProjectId]);
 
   useEffect(() => {
     void loadProjects();
@@ -120,20 +132,25 @@ export default function ProjectsPage() {
     }
   }
 
-  async function handleDelete(project: Project) {
-    const confirmed = window.confirm(
-      `Delete "${project.name}"? This action cannot be undone.`,
-    );
+  async function handleDelete() {
+    if (!projectToDelete) return;
 
-    if (!confirmed) return;
-
+    const project = projectToDelete;
     setError("");
 
     try {
       await deleteProject(slug, project.id);
+
       setProjects((current) =>
         current.filter((item) => item.id !== project.id),
       );
+
+      if (selectedProjectId === project.id) {
+        setSelectedProjectId(null);
+      }
+
+      setProjectToDelete(null);
+      setNotification(`Project "${project.name}" was deleted.`);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Could not delete the project.",
@@ -191,7 +208,7 @@ export default function ProjectsPage() {
             hasProjects={projects.length > 0}
             onOpen={handleOpen}
             onEdit={openEditModal}
-            onDelete={(project) => void handleDelete(project)}
+            onDelete={(project) => setProjectToDelete(project)}
             onCreateProject={openCreateModal}
             onClearFilters={() => {
               setSearch("");
@@ -226,6 +243,66 @@ export default function ProjectsPage() {
           setModalOpen(true);
         }}
       />
+
+      {notification && (
+        <div
+          role="status"
+          className="fixed bottom-6 right-6 z-[100] flex items-center gap-3 rounded-xl border border-emerald-200 bg-white px-5 py-3 text-sm text-emerald-800 shadow-xl"
+        >
+          <span>{notification}</span>
+          <button
+            type="button"
+            onClick={() => setNotification("")}
+            className="font-medium hover:underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {projectToDelete && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4">
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-project-title"
+            aria-describedby="delete-project-description"
+            className="w-full max-w-md rounded-2xl border border-[#E8E8ED] bg-white p-6 shadow-2xl"
+          >
+            <h2
+              id="delete-project-title"
+              className="text-lg font-semibold text-[#20212B]"
+            >
+              Delete project?
+            </h2>
+
+            <p
+              id="delete-project-description"
+              className="mt-2 text-sm leading-6 text-[#77798A]"
+            >
+              Delete "{projectToDelete.name}"? This action cannot be undone.
+            </p>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setProjectToDelete(null)}
+                className="rounded-xl border border-[#E8E8ED] px-4 py-2 text-sm font-medium text-[#555667] transition hover:bg-[#F7F7FA]"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={() => void handleDelete()}
+                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+              >
+                Delete project
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </WorkspaceSectionPage>
   );
 }
