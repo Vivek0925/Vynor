@@ -18,6 +18,7 @@ import {
 } from "@/lib/projects";
 import type { Project, CreateProjectPayload } from "@/lib/projects";
 import ProjectDetailModal from "./_components/ProjectDetailModal";
+import { socket } from "@/lib/socket";
 
 export default function ProjectsPage() {
   const params = useParams<{ slug: string }>();
@@ -49,6 +50,22 @@ export default function ProjectsPage() {
       setLoading(false);
     }
   }, [slug]);
+
+  useEffect(() => {
+  const handleProjectChange = () => {
+    void loadProjects();
+  };
+
+  socket.on("project:created", handleProjectChange);
+  socket.on("project:updated", handleProjectChange);
+  socket.on("project:deleted", handleProjectChange);
+
+  return () => {
+    socket.off("project:created", handleProjectChange);
+    socket.off("project:updated", handleProjectChange);
+    socket.off("project:deleted", handleProjectChange);
+  };
+}, [loadProjects]);
 
   useEffect(() => {
     void loadProjects();
