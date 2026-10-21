@@ -36,19 +36,23 @@ export class NotificationsService {
 
     if (members.length === 0) return;
 
-    const formattedDate = scheduledAt.toLocaleString('en-US', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-      timeZone: 'UTC',
+    const formattedDate = scheduledAt.toLocaleString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'Asia/Kolkata',
     });
 
     const notifications = members.map(({ userId }) => ({
-        userId,
-        type: NotificationType.MEETING_SCHEDULED,
-        title: 'New meeting scheduled',
-        message: `${title} starts on ${formattedDate} UTC.`,
-        meetingId,
-      }));
+      userId,
+      type: NotificationType.MEETING_SCHEDULED,
+      title: 'New meeting scheduled',
+      message: `${title} starts on ${formattedDate} IST.`,
+      meetingId,
+    }));
 
     await this.prisma.notification.createMany({ data: notifications });
 
