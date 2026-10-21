@@ -363,7 +363,9 @@ export default function WhiteboardCanvas({
   }
 
   return (
-    <div className="relative flex h-full min-h-[360px] min-w-0 w-full flex-col overflow-hidden rounded-lg border border-[#DCE5DA] bg-white sm:min-h-0 sm:rounded-xl">
+    <div 
+    data-whiteboard-canvas="true"
+    className="relative flex h-full min-h-[360px] min-w-0 w-full flex-col overflow-hidden rounded-lg border border-[#DCE5DA] bg-white sm:min-h-0 sm:rounded-xl">
       <div className="absolute right-6 top-14 z-10 rounded-md bg-white/90 px-2 py-1 text-xs text-[#536657]">
         {syncStatus === "connected"
           ? "Live sync"

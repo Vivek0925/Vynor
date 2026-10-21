@@ -16,6 +16,7 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
   const params = useParams<{ slug: string }>();
   const pathname = usePathname();
   const isTasksPage = pathname.includes("/tasks");
+  const isWhiteboardPage = pathname.includes("/whiteboard");
   const slug = typeof params?.slug === "string" ? params.slug : "";
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,28 +27,35 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
   const touchStartY = useRef<number | null>(null);
 
   function handleShellTouchStart(event: React.TouchEvent<HTMLDivElement>) {
-    if (sidebarOpen) {
-      return;
-    }
+  if (sidebarOpen) return;
 
-    const touch = event.touches[0];
-    if (!touch) return;
+  const touch = event.touches[0];
+  if (!touch) return;
 
-    const target = event.target as HTMLElement;
-    const startedInsideTasksBoard = Boolean(
-      target.closest('[data-tasks-board="true"]'),
-    );
+  const target = event.target as HTMLElement;
 
-    // On Tasks, only allow sidebar swipes from the left edge.
-    if (isTasksPage && startedInsideTasksBoard && touch.clientX > 55) {
-      touchStartX.current = null;
-      touchStartY.current = null;
-      return;
-    }
+  const startedInsideTasksBoard = Boolean(
+    target.closest('[data-tasks-board="true"]'),
+  );
 
-    touchStartX.current = touch.clientX;
-    touchStartY.current = touch.clientY;
+  const startedInsideWhiteboard = Boolean(
+    target.closest('[data-whiteboard-canvas="true"]'),
+  );
+
+  // Tasks and Whiteboard: only allow sidebar swipes from the left edge.
+  if (
+    ((isTasksPage && startedInsideTasksBoard) ||
+      (isWhiteboardPage && startedInsideWhiteboard)) &&
+    touch.clientX > 55
+  ) {
+    touchStartX.current = null;
+    touchStartY.current = null;
+    return;
   }
+
+  touchStartX.current = touch.clientX;
+  touchStartY.current = touch.clientY;
+}
 
   function handleShellTouchEnd(event: React.TouchEvent<HTMLDivElement>) {
     if (touchStartX.current === null || touchStartY.current === null) {
