@@ -172,6 +172,7 @@ export default function TaskDetailModal({
   const [commentsError, setCommentsError] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
   const [postingComment, setPostingComment] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const loadComments = useCallback(async () => {
     if (!task) return;
@@ -327,13 +328,7 @@ export default function TaskDetailModal({
   }
 
   async function handleDelete() {
-    if (!task || !canManage) return;
-
-    const confirmed = window.confirm(
-      "Delete this task? This cannot be undone.",
-    );
-
-    if (!confirmed) return;
+    if (!task || !canManage || deleting) return;
 
     try {
       setDeleting(true);
@@ -341,6 +336,7 @@ export default function TaskDetailModal({
 
       await deleteTask(workspaceSlug, task.id);
 
+      setConfirmDelete(false);
       onUpdated();
       onClose();
     } catch (err) {
@@ -503,7 +499,7 @@ export default function TaskDetailModal({
                         <Button
                           type="button"
                           variant="ghost"
-                          onClick={handleDelete}
+                          onClick={() => setConfirmDelete(true)}
                           disabled={deleting}
                           className="text-red-600 hover:bg-red-50 hover:text-red-700"
                         >
@@ -808,6 +804,57 @@ export default function TaskDetailModal({
               </section>
             </div>
           </>
+        )}
+
+        {confirmDelete && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4">
+            <div
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="confirm-delete-task-title"
+              aria-describedby="confirm-delete-task-description"
+              className="w-full max-w-md rounded-2xl border border-[#E8E8ED] bg-white p-6 shadow-2xl"
+            >
+              <h2
+                id="confirm-delete-task-title"
+                className="text-lg font-semibold text-[#20212B]"
+              >
+                Delete task?
+              </h2>
+
+              <p
+                id="confirm-delete-task-description"
+                className="mt-2 text-sm leading-6 text-[#77798A]"
+              >
+                Delete "{task.title}"? This action cannot be undone.
+              </p>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setConfirmDelete(false)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  type="button"
+                  onClick={() => void handleDelete()}
+                  disabled={deleting}
+                  className="bg-red-600 text-white hover:bg-red-700"
+                >
+                  {deleting ? (
+                    <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="mr-1.5 h-4 w-4" />
+                  )}
+                  {deleting ? "Deleting..." : "Delete task"}
+                </Button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </Modal>

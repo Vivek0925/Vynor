@@ -60,6 +60,7 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
   const [editingListName, setEditingListName] = useState("");
   const [savingList, setSavingList] = useState(false);
   const [openListMenuId, setOpenListMenuId] = useState<string | null>(null);
+  const [notification, setNotification] = useState("");
 
   const loadLists = useCallback(async () => {
     try {
@@ -84,18 +85,27 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
       void loadLists();
     };
 
+    const handleTaskDeleted = (event: { taskId: string }) => {
+      void loadLists();
+
+      if (selectedTask?.id === event.taskId) {
+        setSelectedTask(null);
+        setNotification("This task was deleted in another tab.");
+      }
+    };
+
     socket.on("task:created", handleTaskChange);
     socket.on("task:updated", handleTaskChange);
     socket.on("task:moved", handleTaskChange);
-    socket.on("task:deleted", handleTaskChange);
+    socket.on("task:deleted", handleTaskDeleted);
 
     return () => {
       socket.off("task:created", handleTaskChange);
       socket.off("task:updated", handleTaskChange);
       socket.off("task:moved", handleTaskChange);
-      socket.off("task:deleted", handleTaskChange);
+      socket.off("task:deleted", handleTaskDeleted);
     };
-  }, [loadLists]);
+  }, [loadLists, selectedTask?.id]);
 
   function handleDragStart(event: {
     active: {
@@ -115,150 +125,141 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
     setActiveTask(null);
   }
 
- async function handleDragEnd(event: DragEndEvent) {
-  const { active, over } = event;
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
 
-  setActiveTask(null);
+    setActiveTask(null);
 
-  if (!over || movingTaskId) return;
+    if (!over || movingTaskId) return;
 
-  const taskId = String(active.id);
-  const overId = String(over.id);
+    const taskId = String(active.id);
+    const overId = String(over.id);
 
-  const sourceList = lists.find((list) =>
-    list.tasks.some((task) => task.id === taskId),
-  );
+    const sourceList = lists.find((list) =>
+      list.tasks.some((task) => task.id === taskId),
+    );
 
-  if (!sourceList) return;
+    if (!sourceList) return;
 
-  const task = sourceList.tasks.find((item) => item.id === taskId);
+    const task = sourceList.tasks.find((item) => item.id === taskId);
 
-  if (!task) return;
+    if (!task) return;
 
-  let targetList = lists.find((list) =>
-    list.tasks.some((item) => item.id === overId),
-  );
+    let targetList = lists.find((list) =>
+      list.tasks.some((item) => item.id === overId),
+    );
 
-  if (!targetList) {
-    targetList = lists.find((list) => list.id === overId);
-  }
+    if (!targetList) {
+      targetList = lists.find((list) => list.id === overId);
+    }
 
-  if (!targetList) return;
+    if (!targetList) return;
 
-  const targetTasks = [...targetList.tasks]
-    .filter((item) => item.id !== taskId)
-    .sort((a, b) => a.position - b.position);
+    const targetTasks = [...targetList.tasks]
+      .filter((item) => item.id !== taskId)
+      .sort((a, b) => a.position - b.position);
 
-  let newPosition = targetTasks.length;
+    let newPosition = targetTasks.length;
 
-  const overTaskIndex = targetTasks.findIndex(
-    (item) => item.id === overId,
-  );
+    const overTaskIndex = targetTasks.findIndex((item) => item.id === overId);
 
-  if (overTaskIndex !== -1) {
-    newPosition = overTaskIndex;
-  }
+    if (overTaskIndex !== -1) {
+      newPosition = overTaskIndex;
+    }
 
-  if (
-    sourceList.id === targetList.id &&
-    task.position === newPosition
-  ) {
-    return;
-  }
+    if (sourceList.id === targetList.id && task.position === newPosition) {
+      return;
+    }
 
-  const previousLists = lists;
+    const previousLists = lists;
 
-  const sourceIsDone =
-    sourceList.name.trim().toUpperCase() === "DONE";
+    const sourceIsDone = sourceList.name.trim().toUpperCase() === "DONE";
 
-  const targetIsDone =
-    targetList.name.trim().toUpperCase() === "DONE";
+    const targetIsDone = targetList.name.trim().toUpperCase() === "DONE";
 
-  const isCompleted =
-    sourceIsDone !== targetIsDone
-      ? targetIsDone
-      : task.isCompleted;
+    const isCompleted =
+      sourceIsDone !== targetIsDone ? targetIsDone : task.isCompleted;
 
-  // Optimistic UI update.
-  setLists((current) =>
-    current.map((list) => {
-      if (list.id === sourceList.id && list.id === targetList.id) {
-        const reordered = list.tasks
-          .filter((item) => item.id !== taskId)
-          .sort((a, b) => a.position - b.position);
-
-        reordered.splice(newPosition, 0, {
-          ...task,
-          listId: list.id,
-          position: newPosition,
-          isCompleted,
-        });
-
-        return {
-          ...list,
-          tasks: reordered.map((item, index) => ({
-            ...item,
-            position: index,
-          })),
-        };
-      }
-
-      if (list.id === sourceList.id) {
-        return {
-          ...list,
-          tasks: list.tasks
+    // Optimistic UI update.
+    setLists((current) =>
+      current.map((list) => {
+        if (list.id === sourceList.id && list.id === targetList.id) {
+          const reordered = list.tasks
             .filter((item) => item.id !== taskId)
-            .sort((a, b) => a.position - b.position)
-            .map((item, index) => ({
+            .sort((a, b) => a.position - b.position);
+
+          reordered.splice(newPosition, 0, {
+            ...task,
+            listId: list.id,
+            position: newPosition,
+            isCompleted,
+          });
+
+          return {
+            ...list,
+            tasks: reordered.map((item, index) => ({
               ...item,
               position: index,
             })),
-        };
-      }
+          };
+        }
 
-      if (list.id === targetList.id) {
-        const updatedTasks = list.tasks
-          .filter((item) => item.id !== taskId)
-          .sort((a, b) => a.position - b.position);
+        if (list.id === sourceList.id) {
+          return {
+            ...list,
+            tasks: list.tasks
+              .filter((item) => item.id !== taskId)
+              .sort((a, b) => a.position - b.position)
+              .map((item, index) => ({
+                ...item,
+                position: index,
+              })),
+          };
+        }
 
-        updatedTasks.splice(newPosition, 0, {
-          ...task,
-          listId: targetList.id,
-          position: newPosition,
-          isCompleted,
-        });
+        if (list.id === targetList.id) {
+          const updatedTasks = list.tasks
+            .filter((item) => item.id !== taskId)
+            .sort((a, b) => a.position - b.position);
 
-        return {
-          ...list,
-          tasks: updatedTasks.map((item, index) => ({
-            ...item,
-            position: index,
-          })),
-        };
-      }
+          updatedTasks.splice(newPosition, 0, {
+            ...task,
+            listId: targetList.id,
+            position: newPosition,
+            isCompleted,
+          });
 
-      return list;
-    }),
-  );
+          return {
+            ...list,
+            tasks: updatedTasks.map((item, index) => ({
+              ...item,
+              position: index,
+            })),
+          };
+        }
 
-  setMovingTaskId(taskId);
+        return list;
+      }),
+    );
 
-  try {
-    await updateTask(workspaceSlug, taskId, {
-      listId: targetList.id,
-      position: newPosition,
-      isCompleted,
-    });
+    setMovingTaskId(taskId);
 
-    await loadLists();
-  } catch (error) {
-    console.error("Failed to move task:", error);
-    setLists(previousLists);
-    await loadLists();
-  } finally {
-    setMovingTaskId(null);
+    try {
+      await updateTask(workspaceSlug, taskId, {
+        listId: targetList.id,
+        position: newPosition,
+        isCompleted,
+      });
+
+      await loadLists();
+    } catch (error) {
+      console.error("Failed to move task:", error);
+      setLists(previousLists);
+      await loadLists();
+    } finally {
+      setMovingTaskId(null);
+    }
   }
-}
 
   function handleAddTask(listId: string) {
     setCreateTaskListId(listId);
@@ -297,50 +298,48 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
   }
 
   async function handleToggleComplete(task: Task) {
-  if (movingTaskId) return;
+    if (movingTaskId) return;
 
-  const sourceList = lists.find((list) =>
-    list.tasks.some((item) => item.id === task.id),
-  );
+    const sourceList = lists.find((list) =>
+      list.tasks.some((item) => item.id === task.id),
+    );
 
-  if (!sourceList) return;
+    if (!sourceList) return;
 
-  const isCompleted = !task.isCompleted;
-  const targetName = isCompleted ? "DONE" : "TODO";
+    const isCompleted = !task.isCompleted;
+    const targetName = isCompleted ? "DONE" : "TODO";
 
-  const targetList = lists.find(
-    (list) => list.name.trim().toUpperCase() === targetName,
-  );
+    const targetList = lists.find(
+      (list) => list.name.trim().toUpperCase() === targetName,
+    );
 
-  if (!targetList) {
-    window.alert(`Please create a "${targetName}" list first.`);
-    return;
+    if (!targetList) {
+      window.alert(`Please create a "${targetName}" list first.`);
+      return;
+    }
+
+    const previousLists = lists;
+    const targetPosition =
+      sourceList.id === targetList.id ? task.position : targetList.tasks.length;
+
+    setMovingTaskId(task.id);
+
+    try {
+      await updateTask(workspaceSlug, task.id, {
+        listId: targetList.id,
+        position: targetPosition,
+        isCompleted,
+      });
+
+      await loadLists();
+    } catch (error) {
+      console.error("Failed to toggle task completion:", error);
+      setLists(previousLists);
+      await loadLists();
+    } finally {
+      setMovingTaskId(null);
+    }
   }
-
-  const previousLists = lists;
-  const targetPosition =
-    sourceList.id === targetList.id
-      ? task.position
-      : targetList.tasks.length;
-
-  setMovingTaskId(task.id);
-
-  try {
-    await updateTask(workspaceSlug, task.id, {
-      listId: targetList.id,
-      position: targetPosition,
-      isCompleted,
-    });
-
-    await loadLists();
-  } catch (error) {
-    console.error("Failed to toggle task completion:", error);
-    setLists(previousLists);
-    await loadLists();
-  } finally {
-    setMovingTaskId(null);
-  }
-}
 
   async function handleRenameList(listId: string) {
     const name = editingListName.trim();
@@ -602,6 +601,22 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
           void loadLists();
         }}
       />
+
+      {notification && (
+        <div
+          role="status"
+          className="fixed bottom-6 right-6 z-[100] flex items-center gap-3 rounded-xl border border-emerald-200 bg-white px-5 py-3 text-sm text-emerald-800 shadow-xl"
+        >
+          <span>{notification}</span>
+          <button
+            type="button"
+            onClick={() => setNotification("")}
+            className="font-medium hover:underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
     </div>
   );
 }
