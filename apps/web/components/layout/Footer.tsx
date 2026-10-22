@@ -3,13 +3,15 @@
 import { ArrowUpRight } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 
+
 const FOOTER_LINKS = [
   { label: "Platform", href: "#show" },
   { label: "How it works", href: "#how" },
   { label: "Pricing", href: "#price" },
-  { label: "Privacy", href: "#top" },
-  { label: "Terms", href: "#top" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms of Service", href: "/terms" },
 ];
+
 
 export default function Footer() {
   const reducedMotion = useReducedMotion();

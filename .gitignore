@@ -89,3 +89,6 @@ apps/web/out/
 # Misc
 # ==========================================
 .vercel/
+
+# Local database backups
+/backups/
