@@ -100,8 +100,8 @@ export default function PrivacyPolicyPage() {
         </div>
       </section>
 
-      <div className="mx-auto grid max-w-7xl gap-12 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-20">
-        <aside className="h-fit rounded-2xl border border-[#302821]/10 bg-white/50 p-5 lg:sticky lg:top-8">
+      <div className="mx-auto grid max-w-7xl items-start gap-12 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-20">
+        <aside className="h-fit self-start rounded-2xl border border-[#302821]/10 bg-white/50 p-5 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#a45a43]">
             In this policy
           </p>
@@ -341,7 +341,7 @@ export default function PrivacyPolicyPage() {
             </div>
           </PolicySection>
 
-          <div className="flex flex-col gap-4 border-t border-[#302821]/10 pt-7 text-sm text-[#62564c] sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 border-t border-[#302821]/10 pt-4 text-sm text-[#62564c] sm:flex-row sm:items-center sm:justify-between">
             <span>© 2026 Vynor</span>
             <div className="flex gap-5">
               <Link

@@ -111,7 +111,7 @@ export default function AuthVisualPanel() {
             fill="#111111"
             style={{ fontFamily: "var(--font-geist-mono, monospace)", fontSize: 10, letterSpacing: "0.06em", fontWeight: 600 }}
           >
-            FORGE
+            VYNOR
           </text>
         </svg>
       </div>

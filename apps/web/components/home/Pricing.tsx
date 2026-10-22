@@ -16,7 +16,7 @@ const PLANS = [
   {
     name: "Team",
     description: "For small teams that ship together.",
-    amount: "$12",
+    amount: "$6",
     cadence: "per member, monthly",
     action: "Start your team",
     features: [
@@ -30,7 +30,7 @@ const PLANS = [
   {
     name: "Company",
     description: "For organizations with many teams.",
-    amount: "$29",
+    amount: "$12",
     cadence: "per member, monthly",
     action: "Talk to us",
     features: ["Everything in Team", "Multiple workspaces", "Priority support"],
