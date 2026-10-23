@@ -9,8 +9,8 @@ import { randomUUID } from 'crypto';
 import { extname } from 'path';
 
 import { s3 } from './s3.client';
-import { GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 export const MAX_UPLOAD_SIZE = 10 * 1024 * 1024;
 
@@ -123,19 +123,20 @@ export class StorageService {
   }
 
   async createDownloadUrl(
-  key: string,
-  fileName: string,
-  mimeType: string,
-): Promise<string> {
-  const safeFileName = fileName.replace(/["\\\r\n]/g, "_");
+    key: string,
+    fileName: string,
+    mimeType: string,
+    inline = false,
+  ): Promise<string> {
+    const safeFileName = fileName.replace(/["\\\r\n]/g, '_');
 
-  const command = new GetObjectCommand({
-    Bucket: process.env.S3_BUCKET!,
-    Key: key,
-    ResponseContentDisposition: `attachment; filename="${safeFileName}"`,
-    ResponseContentType: mimeType,
-  });
+    const command = new GetObjectCommand({
+      Bucket: process.env.S3_BUCKET!,
+      Key: key,
+      ResponseContentDisposition: `${inline ? 'inline' : 'attachment'}; filename="${safeFileName}"`,
+      ResponseContentType: mimeType,
+    });
 
-  return getSignedUrl(s3, command, { expiresIn: 300 });
-}
+    return getSignedUrl(s3, command, { expiresIn: 300 });
+  }
 }

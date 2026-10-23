@@ -8,6 +8,7 @@ import type { Message } from "@/types/chats";
 
 import MessageItem from "./MessageItem";
 import DateSeparator from "../DateSeparator";
+import { useParams } from "next/navigation";
 
 interface MessageListProps {
   messages: Message[];
@@ -31,6 +32,9 @@ export default function MessageList({
   const { user } = useAuth();
 
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const params = useParams<{ slug: string }>();
+  const workspaceSlug = params.slug;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({
@@ -58,6 +62,7 @@ export default function MessageList({
 
               <MessageItem
                 message={message}
+                workspaceSlug={workspaceSlug}
                 previousMessage={previous}
                 currentUserId={user?.id}
                 onReply={onReply}

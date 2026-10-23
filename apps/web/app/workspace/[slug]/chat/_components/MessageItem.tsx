@@ -2,9 +2,11 @@ import clsx from "clsx";
 import { ChevronDown, Pencil, Reply, Trash2, Download } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Message } from "@/types/chats";
+import { api } from "@/lib/api";
 
 interface MessageItemProps {
   message: Message;
+  workspaceSlug: string;
   previousMessage?: Message;
   currentUserId?: string;
   onReply: (message: Message) => void;
@@ -18,6 +20,7 @@ interface MessageItemProps {
 
 export default function MessageItem({
   message,
+  workspaceSlug,
   previousMessage,
   currentUserId,
   onReply,
@@ -138,6 +141,55 @@ export default function MessageItem({
 
     touchStartRef.current = null;
     setSwipeOffset(0);
+  }
+
+  async function handleAttachmentDownload(
+    attachment: Message["attachments"][number],
+  ) {
+    if (!attachment.id) {
+      alert("Unable to download this attachment.");
+      return;
+    }
+
+    try {
+      const result = await api<{ url: string }>(
+        `/workspaces/${encodeURIComponent(workspaceSlug)}/messages/${encodeURIComponent(message.id)}/attachments/${encodeURIComponent(attachment.id)}/download`,
+      );
+
+      const link = document.createElement("a");
+      link.href = result.url;
+      link.download = attachment.fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to download attachment.",
+      );
+    }
+  }
+
+  async function handleAttachmentOpen(
+    attachment: Message["attachments"][number],
+  ) {
+    if (!attachment.id) {
+      alert("Unable to open this attachment.");
+      return;
+    }
+
+    try {
+      const result = await api<{ url: string }>(
+        `/workspaces/${encodeURIComponent(workspaceSlug)}/messages/${encodeURIComponent(message.id)}/attachments/${encodeURIComponent(attachment.id)}/preview`,
+      );
+
+      window.open(result.url, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      alert(
+        error instanceof Error ? error.message : "Failed to open attachment.",
+      );
+    }
   }
 
   return (
@@ -368,11 +420,10 @@ export default function MessageItem({
                         key={attachment.id ?? index}
                         className="flex items-center gap-2 rounded-xl border bg-zinc-50 px-4 py-3 transition hover:bg-zinc-100"
                       >
-                        <a
-                          href={attachment.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex min-w-0 flex-1 items-center gap-3"
+                        <button
+                          type="button"
+                          onClick={() => void handleAttachmentOpen(attachment)}
+                          className="flex min-w-0 flex-1 items-center gap-3 text-left"
                         >
                           <span>📄</span>
                           <div className="min-w-0">
@@ -381,17 +432,19 @@ export default function MessageItem({
                             </p>
                             <p className="text-xs opacity-70">PDF Document</p>
                           </div>
-                        </a>
+                        </button>
 
-                        <a
-                          href={attachment.url}
-                          download={attachment.fileName}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            void handleAttachmentDownload(attachment)
+                          }
                           aria-label={`Download ${attachment.fileName}`}
                           title="Download file"
                           className="shrink-0 rounded-lg p-2 transition hover:bg-zinc-200"
                         >
                           <Download size={17} />
-                        </a>
+                        </button>
                       </div>
                     );
                   }
@@ -419,15 +472,17 @@ export default function MessageItem({
                         </div>
                       </a>
 
-                      <a
-                        href={attachment.url}
-                        download={attachment.fileName}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void handleAttachmentDownload(attachment)
+                        }
                         aria-label={`Download ${attachment.fileName}`}
                         title="Download file"
                         className="shrink-0 rounded-lg p-2 transition hover:bg-zinc-200"
                       >
                         <Download size={17} />
-                      </a>
+                      </button>
                     </div>
                   );
                 })}

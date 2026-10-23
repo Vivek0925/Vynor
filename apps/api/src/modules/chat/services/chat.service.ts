@@ -138,4 +138,35 @@ export class ChatService {
 
     return { url };
   }
+
+  async getAttachmentPreviewUrl(
+    userId: string,
+    workspaceSlug: string,
+    messageId: string,
+    attachmentId: string,
+  ) {
+    const workspace = await this.workspaceService.findAccessibleWorkspace(
+      userId,
+      workspaceSlug,
+    );
+
+    const attachment = await this.messageRepository.findAttachmentForDownload(
+      messageId,
+      workspace.id,
+      attachmentId,
+    );
+
+    if (!attachment) {
+      throw new NotFoundException('Attachment not found.');
+    }
+
+    const url = await this.storageService.createDownloadUrl(
+      attachment.key,
+      attachment.fileName,
+      attachment.mimeType,
+      true,
+    );
+
+    return { url };
+  }
 }

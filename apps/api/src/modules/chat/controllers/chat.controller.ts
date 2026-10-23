@@ -32,4 +32,19 @@ async downloadAttachment(
     attachmentId,
   );
 }
+
+@Get(':messageId/attachments/:attachmentId/preview')
+async previewAttachment(
+  @Param('slug') slug: string,
+  @Param('messageId') messageId: string,
+  @Param('attachmentId') attachmentId: string,
+  @CurrentUser() user: CurrentUserData,
+) {
+  return this.chatService.getAttachmentPreviewUrl(
+    user.id,
+    slug,
+    messageId,
+    attachmentId,
+  );
+}
 }
