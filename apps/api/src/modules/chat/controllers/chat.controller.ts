@@ -17,4 +17,19 @@ export class ChatController {
   ) {
     return this.chatService.getWorkspaceMessages(user.id, slug);
   }
+
+  @Get(':messageId/attachments/:attachmentId/download')
+async downloadAttachment(
+  @Param('slug') slug: string,
+  @Param('messageId') messageId: string,
+  @Param('attachmentId') attachmentId: string,
+  @CurrentUser() user: CurrentUserData,
+) {
+  return this.chatService.getAttachmentDownloadUrl(
+    user.id,
+    slug,
+    messageId,
+    attachmentId,
+  );
+}
 }

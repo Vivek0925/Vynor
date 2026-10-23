@@ -263,4 +263,37 @@ export class MessageRepository {
       },
     });
   }
+
+  async findAttachmentForDownload(
+  messageId: string,
+  workspaceId: string,
+  attachmentId: string,
+) {
+  const message = await this.prisma.message.findFirst({
+    where: {
+      id: messageId,
+      workspaceId,
+      attachments: {
+        some: {
+          id: attachmentId,
+        },
+      },
+    },
+    select: {
+      attachments: {
+        where: {
+          id: attachmentId,
+        },
+        select: {
+          id: true,
+          fileName: true,
+          key: true,
+          mimeType: true,
+        },
+      },
+    },
+  });
+
+  return message?.attachments[0] ?? null;
+}
 }

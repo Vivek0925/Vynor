@@ -5,12 +5,14 @@ import { MessageRepository } from '../repositories/message.repository';
 import { SendMessageDto } from '../dto/send-message.dto';
 import { EditMessageDto } from '../dto/edit-message.dto';
 import { ReactMessageDto } from '../dto/react-message.dto';
+import { StorageService } from '../../storage/storage.service';
 
 @Injectable()
 export class ChatService {
   constructor(
     private readonly workspaceService: WorkspaceService,
     private readonly messageRepository: MessageRepository,
+    private readonly storageService: StorageService,
   ) {}
 
   async createMessage(senderId: string, dto: SendMessageDto) {
@@ -105,5 +107,35 @@ export class ChatService {
       userId,
       dto.emoji,
     );
+  }
+
+  async getAttachmentDownloadUrl(
+    userId: string,
+    workspaceSlug: string,
+    messageId: string,
+    attachmentId: string,
+  ) {
+    const workspace = await this.workspaceService.findAccessibleWorkspace(
+      userId,
+      workspaceSlug,
+    );
+
+    const attachment = await this.messageRepository.findAttachmentForDownload(
+      messageId,
+      workspace.id,
+      attachmentId,
+    );
+
+    if (!attachment) {
+      throw new NotFoundException('Attachment not found.');
+    }
+
+    const url = await this.storageService.createDownloadUrl(
+      attachment.key,
+      attachment.fileName,
+      attachment.mimeType,
+    );
+
+    return { url };
   }
 }
