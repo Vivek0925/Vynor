@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { ChevronDown, Pencil, Reply, Trash2 } from "lucide-react";
+import { ChevronDown, Pencil, Reply, Trash2, Download } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Message } from "@/types/chats";
 
@@ -364,40 +364,71 @@ export default function MessageItem({
 
                   if (isPdf) {
                     return (
-                      <a
+                      <div
                         key={attachment.id ?? index}
-                        href={attachment.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-3 rounded-xl border bg-zinc-50 px-4 py-3 transition hover:bg-zinc-100"
+                        className="flex items-center gap-2 rounded-xl border bg-zinc-50 px-4 py-3 transition hover:bg-zinc-100"
                       >
-                        📄
-                        <div>
-                          <p className="font-medium">{attachment.fileName}</p>
+                        <a
+                          href={attachment.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex min-w-0 flex-1 items-center gap-3"
+                        >
+                          <span>📄</span>
+                          <div className="min-w-0">
+                            <p className="truncate font-medium">
+                              {attachment.fileName}
+                            </p>
+                            <p className="text-xs opacity-70">PDF Document</p>
+                          </div>
+                        </a>
 
-                          <p className="text-xs opacity-70">PDF Document</p>
-                        </div>
-                      </a>
+                        <a
+                          href={attachment.url}
+                          download={attachment.fileName}
+                          aria-label={`Download ${attachment.fileName}`}
+                          title="Download file"
+                          className="shrink-0 rounded-lg p-2 transition hover:bg-zinc-200"
+                        >
+                          <Download size={17} />
+                        </a>
+                      </div>
                     );
                   }
 
                   return (
-                    <a
+                    <div
                       key={attachment.id ?? index}
-                      href={attachment.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-3 rounded-xl border bg-zinc-50 px-4 py-3 transition hover:bg-zinc-100"
+                      className="flex items-center gap-2 rounded-xl border bg-zinc-50 px-4 py-3 transition hover:bg-zinc-100"
                     >
-                      📎
-                      <div>
-                        <p className="font-medium">{attachment.fileName}</p>
+                      <a
+                        href={attachment.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex min-w-0 flex-1 items-center gap-3"
+                      >
+                        <span>📎</span>
 
-                        <p className="text-xs opacity-70">
-                          {(attachment.size / 1024).toFixed(1)} KB
-                        </p>
-                      </div>
-                    </a>
+                        <div className="min-w-0">
+                          <p className="truncate font-medium">
+                            {attachment.fileName}
+                          </p>
+                          <p className="text-xs opacity-70">
+                            {(attachment.size / 1024).toFixed(1)} KB
+                          </p>
+                        </div>
+                      </a>
+
+                      <a
+                        href={attachment.url}
+                        download={attachment.fileName}
+                        aria-label={`Download ${attachment.fileName}`}
+                        title="Download file"
+                        className="shrink-0 rounded-lg p-2 transition hover:bg-zinc-200"
+                      >
+                        <Download size={17} />
+                      </a>
+                    </div>
                   );
                 })}
               </div>
