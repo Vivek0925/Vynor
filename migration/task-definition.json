@@ -1,0 +1,48 @@
+{
+  "family": "vynor-db-restore",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::106537046627:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::106537046627:role/vynor-migration-task-role",
+  "containerDefinitions": [
+    {
+      "name": "vynor-restore",
+      "image": "106537046627.dkr.ecr.ap-southeast-2.amazonaws.com/vynor-migration:latest",
+      "essential": true,
+      "environment": [
+        {
+          "name": "RDS_HOST",
+          "value": "vynor-postgres.cl0y4k6ewxw3.ap-southeast-2.rds.amazonaws.com"
+        },
+        {
+          "name": "RDS_USER",
+          "value": "vynoradmin"
+        },
+        {
+          "name": "RDS_DB",
+          "value": "vynor"
+        },
+        {
+          "name": "BACKUP_S3_URI",
+          "value": "s3://vynor-db-migration-106537046627/vynor-production.dump"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "RDS_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-2:106537046627:secret:vynor/rds-migration-b5KvBH:password::"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/vynor-migration",
+          "awslogs-region": "ap-southeast-2",
+          "awslogs-stream-prefix": "restore"
+        }
+      }
+    }
+  ]
+}

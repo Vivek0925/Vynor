@@ -1,0 +1,41 @@
+
+# Dependencies
+node_modules
+**/node_modules
+
+# Build output
+.next
+**/.next
+dist
+**/dist
+build
+**/build
+coverage
+**/coverage
+.turbo
+**/.turbo
+
+# Git
+.git
+**/.git
+
+# Environment files and secrets
+.env.local
+.env
+.env.*
+**/.env
+**/.env.* 
+!.env.example
+!**/.env.example
+.env.example
+
+# Local development data
+backups
+**/backups
+postgres_data
+minio_data
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*

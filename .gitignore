@@ -1,4 +1,4 @@
-    # ==========================================
+# ==========================================
 # Dependencies
 # ==========================================
 node_modules/
@@ -11,6 +11,8 @@ dist/
 build/
 .next/
 out/
+coverage/
+.nyc_output/
 
 # ==========================================
 # Logs
@@ -23,30 +25,50 @@ yarn-debug.log*
 yarn-error.log*
 
 # ==========================================
-# Environment Variables
+# Environment Variables and Secrets
 # ==========================================
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Allow sample env files
+.env.*
 !.env.example
+!.env.*.example
+
+# Local credentials and private keys
+.aws/
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+service-account*.json
 
 # ==========================================
-# Coverage
+# Database Backups and Dumps
 # ==========================================
-coverage/
-.nyc_output/
+/backups/
+*.dump
+*.dump.gz
+*.sql
+*.sql.gz
+*.bak
 
 # ==========================================
-# Cache
+# AWS / Production Artifacts
+# ==========================================
+# Never ignore migration/ as a whole:
+# its Dockerfile and scripts belong in Git.
+# Ignore only generated local artifacts.
+*.tfstate
+*.tfstate.*
+terraform.tfstate.d/
+
+# ==========================================
+# Cache and Tooling
 # ==========================================
 .cache/
 .turbo/
 .eslintcache
 .parcel-cache/
+.vercel/
 
 # ==========================================
 # TypeScript
@@ -59,7 +81,6 @@ coverage/
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
-
 .idea/
 
 # ==========================================
@@ -67,28 +88,28 @@ coverage/
 # ==========================================
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # ==========================================
 # Temporary Files
 # ==========================================
 *.tmp
 *.temp
+*.swp
+*.swo
 
 # ==========================================
-# NestJS
+# Monorepo App-Specific Outputs
 # ==========================================
 apps/api/dist/
-
-# ==========================================
-# Next.js
-# ==========================================
+apps/api/node_modules/
 apps/web/.next/
 apps/web/out/
+apps/web/node_modules/
 
 # ==========================================
-# Misc
+# Local Database / Container Data
 # ==========================================
-.vercel/
-
-# Local database backups
-/backups/
+docker-data/
+postgres-data/
+redis-data/
