@@ -183,14 +183,6 @@ export function useMeeting({
           return;
         }
 
-        console.log(
-          "[WebRTC] remote stream received:",
-          socketId,
-          remoteStream
-            .getTracks()
-            .map((track) => `${track.kind}:${track.enabled}`),
-        );
-
         setRemoteStreams((previous) => ({
           ...previous,
           [socketId]: remoteStream,
@@ -217,8 +209,6 @@ export function useMeeting({
        */
 
       peer.onconnectionstatechange = () => {
-        console.log(`[WebRTC] ${socketId}: ${peer.connectionState}`);
-
         if (
           peer.connectionState === "failed" ||
           peer.connectionState === "closed" ||
@@ -341,8 +331,6 @@ export function useMeeting({
       }
 
       const normalized = normalizeParticipants(data.participants);
-
-      console.log("[Meeting] authoritative participants:", normalized);
 
       setParticipants(normalized);
 
@@ -499,8 +487,6 @@ export function useMeeting({
       socketId: string;
       userId: string;
     }) => {
-      console.log("[Meeting] participant left:", data);
-
       cleanupPeer(data.socketId);
 
       setParticipants((previous) =>
@@ -640,8 +626,6 @@ export function useMeeting({
 
       setLocalSocketId(newSocketId);
 
-      console.log("[Socket] connected:", newSocketId);
-
       /*
        * If this is the first connection,
        * don't treat it as reconnect recovery.
@@ -718,8 +702,6 @@ export function useMeeting({
      */
 
     if (!joinedRef.current) {
-      console.log("[Meeting] joining:", meetingId);
-
       if (!socket.connected) {
         socket.connect();
       } else {
@@ -802,8 +784,6 @@ export function useMeeting({
     if (!meetingId || !joinedRef.current) {
       return;
     }
-
-    console.log("[Meeting] leaving:", meetingId);
 
     socket.emit("meeting:leave", {
       meetingId,

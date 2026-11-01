@@ -19,6 +19,7 @@ import {
 
 import { uploadFile } from "@/lib/storage";
 import type { Message } from "@/types/chats";
+import { useToast } from "@/components/ui/Toast";
 
 interface UploadedAttachment {
   fileName: string;
@@ -56,6 +57,7 @@ export default function MessageInput({
   const [attachmentMenuOpen, setAttachmentMenuOpen] = useState(false);
   const [fileAccept, setFileAccept] = useState<string | undefined>();
   const [captureCamera, setCaptureCamera] = useState(false);
+  const { showToast } = useToast();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const attachmentMenuRef = useRef<HTMLDivElement>(null);
@@ -89,13 +91,14 @@ export default function MessageInput({
       )) as UploadedAttachment;
 
       setAttachments((prev) => [...prev, uploaded]);
+      showToast({ message: "File uploaded.", tone: "success" });
     } catch (error) {
       console.error(error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Failed to upload file.",
-      );
+      showToast({
+        message:
+          error instanceof Error ? error.message : "Failed to upload file.",
+        tone: "error",
+      });
     } finally {
       setUploading(false);
 

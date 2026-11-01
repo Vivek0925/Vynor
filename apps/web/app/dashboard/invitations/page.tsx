@@ -6,6 +6,7 @@ import {
   acceptInvitation,
   getInvitations,
 } from "@/lib/invitations";
+import { useToast } from "@/components/ui/Toast";
 
 type Invitation = {
   id: string;
@@ -26,6 +27,8 @@ type Invitation = {
 export default function InvitationsPage() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [acceptingId, setAcceptingId] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   async function loadInvitations() {
     try {
@@ -39,15 +42,21 @@ export default function InvitationsPage() {
   }
 
   async function handleAccept(id: string) {
+    if (acceptingId) return;
+
     try {
+      setAcceptingId(id);
       await acceptInvitation(id);
 
       setInvitations((prev) =>
         prev.filter((inv) => inv.id !== id),
       );
+      showToast({ message: "Invitation accepted.", tone: "success" });
     } catch (err) {
       console.error(err);
-      alert("Failed to accept invitation.");
+      showToast({ message: "Failed to accept invitation.", tone: "error" });
+    } finally {
+      setAcceptingId(null);
     }
   }
 
@@ -95,10 +104,11 @@ export default function InvitationsPage() {
               </div>
 
               <button
+                disabled={acceptingId !== null}
                 onClick={() =>
                   handleAccept(invitation.id)
                 }
-                className="rounded-xl bg-emerald-600 px-5 py-2 font-medium text-white hover:bg-emerald-700"
+                className="rounded-xl bg-emerald-600 px-5 py-2 font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Accept
               </button>

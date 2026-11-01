@@ -15,6 +15,8 @@ import {
   updateWorkspace,
   type Workspace,
 } from "@/lib/workspace";
+import { ActionDialog, ConfirmDialog } from "@/components/ui/ActionDialog";
+import { useToast } from "@/components/ui/Toast";
 
 export interface WorkspaceCardData {
   id: string;
@@ -41,6 +43,10 @@ export default function WorkspaceCard({
   const cardRef = useRef<HTMLElement | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [renameValue, setRenameValue] = useState(workspace.name);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const { showToast } = useToast();
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -71,10 +77,15 @@ export default function WorkspaceCard({
 
   const handleRename = async () => {
     closeMenu();
+    setRenameValue(workspace.name);
+    setRenameOpen(true);
+  };
 
-    const nextName = window.prompt("Rename workspace", workspace.name)?.trim();
+  const submitRename = async () => {
+    const nextName = renameValue.trim();
 
     if (!nextName || nextName === workspace.name) {
+      setRenameOpen(false);
       return;
     }
 
@@ -82,6 +93,14 @@ export default function WorkspaceCard({
       setBusy(true);
       const updated = await updateWorkspace(workspace.id, { name: nextName });
       onUpdated?.(updated);
+      setRenameOpen(false);
+      showToast({ message: "Workspace renamed.", tone: "success" });
+    } catch (error) {
+      showToast({
+        message:
+          error instanceof Error ? error.message : "Unable to rename workspace.",
+        tone: "error",
+      });
     } finally {
       setBusy(false);
     }
@@ -89,29 +108,30 @@ export default function WorkspaceCard({
 
   const handleInvite = () => {
     closeMenu();
-    console.log(`Invite members to workspace ${workspace.id}`);
   };
 
   const handleSettings = () => {
     closeMenu();
-    console.log(`Open settings for workspace ${workspace.id}`);
   };
 
   const handleDelete = async () => {
     closeMenu();
+    setDeleteOpen(true);
+  };
 
-    const confirmed = window.confirm(
-      `Delete ${workspace.name}? This cannot be undone.`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
+  const confirmDelete = async () => {
     try {
       setBusy(true);
       await deleteWorkspace(workspace.id);
       onDeleted?.(workspace.id);
+      setDeleteOpen(false);
+      showToast({ message: "Workspace deleted.", tone: "success" });
+    } catch (error) {
+      showToast({
+        message:
+          error instanceof Error ? error.message : "Unable to delete workspace.",
+        tone: "error",
+      });
     } finally {
       setBusy(false);
     }
@@ -220,6 +240,36 @@ export default function WorkspaceCard({
       <div className="mt-6 border-t border-[#DEDFE8] pt-4 text-[12px] text-[#5B5D6E]">
         Updated {workspace.updatedAt}
       </div>
+      <ActionDialog
+        open={renameOpen}
+        title="Rename workspace"
+        onClose={() => !busy && setRenameOpen(false)}
+        submitLabel="Save"
+        loading={busy}
+        onSubmit={(event) => {
+          event.preventDefault();
+          void submitRename();
+        }}
+      >
+        <label className="block text-sm font-medium text-ink">
+          Workspace name
+          <input
+            autoFocus
+            value={renameValue}
+            onChange={(event) => setRenameValue(event.target.value)}
+            className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm text-ink outline-none transition focus:border-primary"
+          />
+        </label>
+      </ActionDialog>
+      <ConfirmDialog
+        open={deleteOpen}
+        title={`Delete ${workspace.name}?`}
+        description="This workspace and its data cannot be recovered."
+        onClose={() => !busy && setDeleteOpen(false)}
+        onConfirm={() => void confirmDelete()}
+        loading={busy}
+        destructive
+      />
     </article>
   );
 }

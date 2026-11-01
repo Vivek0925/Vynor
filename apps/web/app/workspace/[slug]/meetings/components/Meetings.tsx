@@ -7,6 +7,7 @@ import MeetingCard from "../components/MeetingCard";
 import { api } from "@/lib/api";
 import { useActiveMeeting } from "@/app/workspace/[slug]/_components/ActiveMeetingProvider";
 import { socket } from "@/lib/socket";
+import { ConfirmDialog } from "@/components/ui/ActionDialog";
 
 interface Meeting {
   id: string;
@@ -61,6 +62,7 @@ export default function Meetings({ slug }: MeetingsProps) {
   const [creating, setCreating] = useState(false);
 
   const [error, setError] = useState("");
+  const [cancelMeetingId, setCancelMeetingId] = useState<string | null>(null);
 
   async function loadMeetings() {
     try {
@@ -206,12 +208,13 @@ export default function Meetings({ slug }: MeetingsProps) {
   }
 
   async function handleCancel(meetingId: string) {
-    const confirmed = window.confirm(
-      "Are you sure you want to cancel this meeting?",
-    );
+    setCancelMeetingId(meetingId);
+  }
 
-    if (!confirmed) return;
+  async function confirmCancelMeeting() {
+    if (!cancelMeetingId) return;
 
+    const meetingId = cancelMeetingId;
     try {
       await api(`/meetings/${meetingId}/cancel`, {
         method: "POST",
@@ -223,6 +226,7 @@ export default function Meetings({ slug }: MeetingsProps) {
       });
 
       await loadMeetings();
+      setCancelMeetingId(null);
     } catch (error) {
       console.error("Failed to cancel meeting", error);
 
@@ -699,6 +703,15 @@ export default function Meetings({ slug }: MeetingsProps) {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={cancelMeetingId !== null}
+        title="Cancel meeting?"
+        description="This will cancel the meeting for everyone in the workspace."
+        onClose={() => setCancelMeetingId(null)}
+        onConfirm={() => void confirmCancelMeeting()}
+        confirmLabel="Cancel meeting"
+        destructive
+      />
     </div>
   );
 }

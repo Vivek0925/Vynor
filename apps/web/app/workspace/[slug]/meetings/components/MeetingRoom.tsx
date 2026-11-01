@@ -417,13 +417,6 @@ export default function MeetingRoom({
 
         setStream(mediaStream);
 
-        console.log("[Meeting] local media initialized", {
-          cameraEnabled,
-          micEnabled,
-          tracks: mediaStream
-            .getTracks()
-            .map((track) => `${track.kind}:${track.enabled}`),
-        });
       } catch (err) {
         console.error("[Meeting] media initialization failed:", err);
 

@@ -3,6 +3,8 @@ import { ChevronDown, Pencil, Reply, Trash2, Download } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Message } from "@/types/chats";
 import { api } from "@/lib/api";
+import { ActionDialog, ConfirmDialog } from "@/components/ui/ActionDialog";
+import { useToast } from "@/components/ui/Toast";
 
 interface MessageItemProps {
   message: Message;
@@ -39,6 +41,10 @@ export default function MessageItem({
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const [swipeOffset, setSwipeOffset] = useState(0);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editContent, setEditContent] = useState(message.content);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const { showToast } = useToast();
 
   const reactionOptions = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 
@@ -147,7 +153,7 @@ export default function MessageItem({
     attachment: Message["attachments"][number],
   ) {
     if (!attachment.id) {
-      alert("Unable to download this attachment.");
+      showToast({ message: "Unable to download this attachment.", tone: "error" });
       return;
     }
 
@@ -163,11 +169,13 @@ export default function MessageItem({
       link.click();
       link.remove();
     } catch (error) {
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Failed to download attachment.",
-      );
+      showToast({
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to download attachment.",
+        tone: "error",
+      });
     }
   }
 
@@ -175,7 +183,7 @@ export default function MessageItem({
     attachment: Message["attachments"][number],
   ) {
     if (!attachment.id) {
-      alert("Unable to open this attachment.");
+      showToast({ message: "Unable to open this attachment.", tone: "error" });
       return;
     }
 
@@ -186,13 +194,16 @@ export default function MessageItem({
 
       window.open(result.url, "_blank", "noopener,noreferrer");
     } catch (error) {
-      alert(
-        error instanceof Error ? error.message : "Failed to open attachment.",
-      );
+      showToast({
+        message:
+          error instanceof Error ? error.message : "Failed to open attachment.",
+        tone: "error",
+      });
     }
   }
 
   return (
+    <>
     <div
       className={clsx(
         "flex",
@@ -321,15 +332,8 @@ export default function MessageItem({
                       <button
                         type="button"
                         onClick={() => {
-                          const content = window.prompt(
-                            "Edit message",
-                            message.content,
-                          );
-
-                          if (content?.trim()) {
-                            onEdit({ ...message, content: content.trim() });
-                          }
-
+                          setEditContent(message.content);
+                          setEditOpen(true);
                           setActionsOpen(false);
                         }}
                         className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-xs text-zinc-700 transition hover:bg-zinc-100"
@@ -341,10 +345,7 @@ export default function MessageItem({
                       <button
                         type="button"
                         onClick={() => {
-                          if (window.confirm("Delete this message?")) {
-                            onDelete(message);
-                          }
-
+                          setDeleteOpen(true);
                           setActionsOpen(false);
                         }}
                         className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-xs text-red-600 transition hover:bg-red-50"
@@ -526,5 +527,43 @@ export default function MessageItem({
         )}
       </div>
     </div>
+    <ActionDialog
+      open={editOpen}
+      title="Edit message"
+      onClose={() => setEditOpen(false)}
+      submitLabel="Save"
+      onSubmit={(event) => {
+        event.preventDefault();
+        const content = editContent.trim();
+
+        if (!content) return;
+
+        onEdit({ ...message, content });
+        setEditOpen(false);
+      }}
+    >
+      <label className="block text-sm font-medium text-ink">
+        Message
+        <textarea
+          autoFocus
+          value={editContent}
+          onChange={(event) => setEditContent(event.target.value)}
+          rows={4}
+          className="mt-2 w-full resize-none rounded-xl border border-border bg-surface px-3 py-2 text-sm text-ink outline-none transition focus:border-primary"
+        />
+      </label>
+    </ActionDialog>
+    <ConfirmDialog
+      open={deleteOpen}
+      title="Delete message?"
+      description="This message will be permanently deleted."
+      onClose={() => setDeleteOpen(false)}
+      onConfirm={() => {
+        onDelete(message);
+        setDeleteOpen(false);
+        showToast({ message: "Message deleted.", tone: "success" });
+      }}
+    />
+    </>
   );
 }

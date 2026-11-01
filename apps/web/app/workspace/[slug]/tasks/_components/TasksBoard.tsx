@@ -29,6 +29,7 @@ import TaskListColumn from "./TaskListColumn";
 import CreateTaskModal from "./CreateTaskModal";
 import TaskDetailModal from "./TaskDetailModal";
 import { socket } from "@/lib/socket";
+import { useToast } from "@/components/ui/Toast";
 
 type TasksBoardProps = {
   workspaceSlug: string;
@@ -61,6 +62,7 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
   const [savingList, setSavingList] = useState(false);
   const [openListMenuId, setOpenListMenuId] = useState<string | null>(null);
   const [notification, setNotification] = useState("");
+  const { showToast } = useToast();
 
   const loadLists = useCallback(async () => {
     try {
@@ -314,7 +316,10 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
     );
 
     if (!targetList) {
-      window.alert(`Please create a "${targetName}" list first.`);
+      showToast({
+        message: `Please create a "${targetName}" list first.`,
+        tone: "warning",
+      });
       return;
     }
 
@@ -414,11 +419,13 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
     } catch (error) {
       console.error("Failed to delete task list:", error);
 
-      window.alert(
-        error instanceof Error
-          ? error.message
-          : "Failed to delete the list. Please try again.",
-      );
+      showToast({
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to delete the list. Please try again.",
+        tone: "error",
+      });
     }
   }
 

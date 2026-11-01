@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import Modal from "@/components/ui/Modal";
+import { ConfirmDialog } from "@/components/ui/ActionDialog";
 import Button from "@/components/ui/Button";
 import { getProject } from "@/lib/projects";
 import type {
@@ -93,6 +94,10 @@ export default function ProjectDetailModal({
   const [selectedListId, setSelectedListId] = useState("");
   const [loadingTaskOptions, setLoadingTaskOptions] = useState(false);
   const [linkingTasks, setLinkingTasks] = useState(false);
+  const [pendingDeleteTask, setPendingDeleteTask] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   const loadProject = useCallback(async () => {
     if (!projectId) return;
@@ -324,26 +329,29 @@ export default function ProjectDetailModal({
   async function handleDeleteTask(taskId: string, taskTitle: string) {
     if (!project) return;
 
-    const confirmed = window.confirm(
-      `Delete "${taskTitle}" permanently? This will also remove it from Workspace Tasks.`,
-    );
+    setPendingDeleteTask({ id: taskId, title: taskTitle });
+  }
 
-    if (!confirmed) return;
+  async function confirmDeleteTask() {
+    if (!project || !pendingDeleteTask) return;
 
     setTaskError(null);
-    setUpdatingTaskIds((ids) => [...ids, taskId]);
+    setUpdatingTaskIds((ids) => [...ids, pendingDeleteTask.id]);
 
     try {
-      await deleteTask(workspaceSlug, taskId);
+      await deleteTask(workspaceSlug, pendingDeleteTask.id);
 
       await Promise.all([loadProject(), loadTaskOptions()]);
       onProjectUpdated?.();
+      setPendingDeleteTask(null);
     } catch (err) {
       setTaskError(
         err instanceof Error ? err.message : "Unable to delete task.",
       );
     } finally {
-      setUpdatingTaskIds((ids) => ids.filter((id) => id !== taskId));
+      setUpdatingTaskIds((ids) =>
+        ids.filter((id) =>         id !== pendingDeleteTask?.id),
+      );
     }
   }
 
@@ -739,6 +747,23 @@ export default function ProjectDetailModal({
         projectId={projectId ?? undefined}
         onClose={() => setCreateTaskOpen(false)}
         onCreated={() => void handleTasksCreated()}
+      />
+      <ConfirmDialog
+        open={pendingDeleteTask !== null}
+        title="Delete task permanently?"
+        description={
+          pendingDeleteTask
+            ? `"${pendingDeleteTask.title}" will also be removed from Workspace Tasks.`
+            : undefined
+        }
+        onClose={() => setPendingDeleteTask(null)}
+        onConfirm={() => void confirmDeleteTask()}
+        destructive
+        loading={
+          pendingDeleteTask
+            ? updatingTaskIds.includes(pendingDeleteTask.id)
+            : false
+        }
       />
     </>
   );
