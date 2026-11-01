@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { ChevronDown, Pencil, Reply, Trash2, Download } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import type { Message } from "@/types/chats";
 import { api } from "@/lib/api";
 import { ActionDialog, ConfirmDialog } from "@/components/ui/ActionDialog";
@@ -20,7 +20,7 @@ interface MessageItemProps {
   onReact: (message: Message, emoji: string) => void;
 }
 
-export default function MessageItem({
+function MessageItem({
   message,
   workspaceSlug,
   previousMessage,
@@ -567,3 +567,5 @@ export default function MessageItem({
     </>
   );
 }
+
+export default memo(MessageItem);

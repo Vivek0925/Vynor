@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import MessageInput from "./MessageInput";
 import MessageList from "./MessageList";
@@ -24,6 +24,19 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
   } = useChat(slug);
 
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+
+  const handleEdit = useCallback(
+    (message: Message) => editMessage(message.id, message.content),
+    [editMessage],
+  );
+  const handleDelete = useCallback(
+    (message: Message) => deleteMessage(message.id),
+    [deleteMessage],
+  );
+  const handleReact = useCallback(
+    (message: Message, emoji: string) => reactToMessage(message.id, emoji),
+    [reactToMessage],
+  );
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-[#DEDFE8] bg-white shadow-[0_18px_50px_rgba(20,20,28,0.06)] sm:rounded-[32px]">
@@ -62,9 +75,9 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
           <MessageList
             messages={messages}
             onReply={setReplyingTo}
-            onEdit={(message) => editMessage(message.id, message.content)}
-            onDelete={(message) => deleteMessage(message.id)}
-            onReact={(message, emoji) => reactToMessage(message.id, emoji)}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onReact={handleReact}
           />
         )}
       </div>

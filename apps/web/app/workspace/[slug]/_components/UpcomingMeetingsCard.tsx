@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CalendarDays } from "lucide-react";
 
 import { api } from "@/lib/api";
@@ -22,8 +22,12 @@ export default function UpcomingMeetingsCard({
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
+  const requestIdRef = useRef(0);
+  const [loadedSlug, setLoadedSlug] = useState<string | null>(null);
 
   const loadMeetings = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+
     try {
       setFailed(false);
 
@@ -47,12 +51,20 @@ export default function UpcomingMeetingsCard({
         )
         .slice(0, 3);
 
-      setMeetings(upcoming);
+      if (requestId === requestIdRef.current) {
+        setMeetings(upcoming);
+        setLoadedSlug(workspaceSlug);
+      }
     } catch (error) {
-      console.error("Failed to load upcoming meetings", error);
-      setFailed(true);
+      if (requestId === requestIdRef.current) {
+        console.error("Failed to load upcoming meetings", error);
+        setFailed(true);
+        setLoadedSlug(workspaceSlug);
+      }
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [workspaceSlug]);
 
@@ -75,6 +87,8 @@ export default function UpcomingMeetingsCard({
       socket.off("meeting:cancelled", handleMeetingChange);
     };
   }, [workspaceSlug, loadMeetings]);
+
+  const visibleMeetings = loadedSlug === workspaceSlug ? meetings : [];
 
   function formatMeetingDate(value: string) {
     const date = new Date(value);
@@ -133,12 +147,12 @@ export default function UpcomingMeetingsCard({
           <p className="py-4 text-sm text-[#7A7D8C]">
             Could not load meetings. Please refresh the page.
           </p>
-        ) : meetings.length === 0 ? (
+        ) : visibleMeetings.length === 0 ? (
           <p className="py-4 text-sm text-[#7A7D8C]">
             No upcoming meetings scheduled.
           </p>
         ) : (
-          meetings.map((meeting) => {
+          visibleMeetings.map((meeting) => {
             const date = formatMeetingDate(meeting.scheduledAt!);
 
             return (

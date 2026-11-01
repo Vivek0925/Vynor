@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import {
   CalendarDays,
   CheckCircle2,
@@ -78,25 +78,39 @@ export default function MyTasksCard({ workspaceSlug }: MyTasksCardProps) {
   const [loading, setLoading] = useState(true);
 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const requestIdRef = useRef(0);
+  const [loadedSlug, setLoadedSlug] = useState<string | null>(null);
 
   const loadTasks = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+
     try {
       setLoading(true);
 
       const data = await getMyTasks(workspaceSlug);
 
-      setTasks(data);
+      if (requestId === requestIdRef.current) {
+        setTasks(data);
+        setLoadedSlug(workspaceSlug);
+      }
     } catch (error) {
-      console.error("Failed to load my tasks:", error);
-      setTasks([]);
+      if (requestId === requestIdRef.current) {
+        console.error("Failed to load my tasks:", error);
+        setTasks([]);
+        setLoadedSlug(workspaceSlug);
+      }
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [workspaceSlug]);
 
   useEffect(() => {
     void loadTasks();
   }, [loadTasks]);
+
+  const visibleTasks = loadedSlug === workspaceSlug ? tasks : [];
   return (
     <div className="rounded-[28px] border border-[#DEDFE8] bg-[#FAFAF8] p-6">
       <div className="flex items-center justify-between gap-4">
@@ -112,7 +126,7 @@ export default function MyTasksCard({ workspaceSlug }: MyTasksCardProps) {
 
         {!loading && (
           <div className="rounded-full bg-white px-3 py-1 text-[12px] font-medium text-[#5B5D6E]">
-            {tasks.length}
+            {visibleTasks.length}
           </div>
         )}
       </div>
@@ -122,7 +136,7 @@ export default function MyTasksCard({ workspaceSlug }: MyTasksCardProps) {
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-5 w-5 animate-spin text-[#6B6D78]" />
           </div>
-        ) : tasks.length === 0 ? (
+        ) : visibleTasks.length === 0 ? (
           <div className="rounded-[20px] border border-dashed border-[#D8D9E2] bg-white px-5 py-8 text-center">
             <div className="text-[14px] font-medium text-[#14141C]">
               No tasks assigned to you
@@ -134,7 +148,7 @@ export default function MyTasksCard({ workspaceSlug }: MyTasksCardProps) {
           </div>
         ) : (
           <div className="space-y-2">
-            {tasks.map((task) => (
+            {visibleTasks.map((task) => (
               <button
                 type="button"
                 key={task.id}

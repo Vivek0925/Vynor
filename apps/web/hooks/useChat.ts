@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { getWorkspaceMessages } from "@/lib/chat";
 import { socket } from "@/lib/socket";
@@ -18,22 +18,38 @@ interface Attachment {
 export function useChat(slug: string) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadedSlug, setLoadedSlug] = useState<string | null>(null);
 
   useEffect(() => {
+    let ignore = false;
+
     async function loadMessages() {
       try {
+        setLoading(true);
         const data = await getWorkspaceMessages(slug);
-        setMessages(data);
+        if (!ignore) {
+          setMessages(data);
+          setLoadedSlug(slug);
+        }
       } catch (error) {
-        console.error("Failed to load messages", error);
+        if (!ignore) {
+          console.error("Failed to load messages", error);
+          setLoadedSlug(slug);
+        }
       } finally {
-        setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
     }
 
     if (slug) {
-      loadMessages();
+      void loadMessages();
     }
+
+    return () => {
+      ignore = true;
+    };
   }, [slug]);
 
   useEffect(() => {
@@ -62,9 +78,9 @@ export function useChat(slug: string) {
       socket.off("chat:updated", handleUpdatedMessage);
       socket.off("chat:deleted", handleDeletedMessage);
     };
-  }, []);
+  }, [slug]);
 
-  const sendMessage = (
+  const sendMessage = useCallback((
     content: string,
     attachments: Attachment[] = [],
     replyToId?: string,
@@ -75,26 +91,26 @@ export function useChat(slug: string) {
       attachments,
       replyToId,
     });
-  };
+  }, [slug]);
 
-  const editMessage = (messageId: string, content: string) => {
+  const editMessage = useCallback((messageId: string, content: string) => {
     socket.emit("chat:edit", {
       messageId,
       content,
     });
-  };
+  }, []);
 
-  const deleteMessage = (messageId: string) => {
+  const deleteMessage = useCallback((messageId: string) => {
     socket.emit("chat:delete", { messageId });
-  };
+  }, []);
 
-  const reactToMessage = (messageId: string, emoji: string) => {
+  const reactToMessage = useCallback((messageId: string, emoji: string) => {
     socket.emit("chat:react", { messageId, emoji });
-  };
+  }, []);
 
   return {
-    messages,
-    loading,
+    messages: loadedSlug === slug ? messages : [],
+    loading: slug ? loading : false,
     sendMessage,
     editMessage,
     deleteMessage,
