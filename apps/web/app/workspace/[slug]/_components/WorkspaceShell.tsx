@@ -1,12 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { Search, Menu } from "lucide-react";
 import { getWorkspaceBySlug, type Workspace } from "@/lib/workspace";
 import WorkspaceSidebar from "@/components/workspace/WorkspaceSidebar";
-import InviteMemberModal from "@/components/modals/InviteMemberModal";
+
+const InviteMemberModal = dynamic(
+  () => import("@/components/modals/InviteMemberModal"),
+  { ssr: false },
+);
 
 type WorkspaceShellProps = {
   children: React.ReactNode;
