@@ -219,8 +219,16 @@ function MessageItem({
       >
         {!isMine && !shouldGroup && (
           <div className="mb-1 flex items-center gap-2 sm:mb-1.5 sm:gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#DDE3FF] text-sm font-semibold text-[#3659E6]">
-              {message.sender.name.charAt(0).toUpperCase()}
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#DDE3FF] text-sm font-semibold text-[#3659E6]">
+              {message.sender.avatar ? (
+                <img
+                  src={message.sender.avatar}
+                  alt={message.sender.name}
+                  className="h-full w-full rounded-full object-cover"
+                />
+              ) : (
+                message.sender.name.charAt(0).toUpperCase()
+              )}
             </div>
 
             <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
@@ -256,7 +264,7 @@ function MessageItem({
 
           <div
             className={clsx(
-              "relative touch-pan-y rounded-[14px] border px-3.5 py-2 transition-[transform,colors] sm:px-4 sm:py-2.5",
+              "relative touch-pan-y rounded-[15px] border px-2 py-1 transition-[transform,colors] sm:px-3 sm:py-1.5",
               isMine
                 ? "border-[#F6D6C9] bg-[#FCE9E1] text-[#252A27]"
                 : "border-[#E8E7E2] bg-[#F3F0E9] text-[#252A27]",
@@ -491,7 +499,7 @@ function MessageItem({
             )}
 
             {message.content && (
-              <p className="whitespace-pre-wrap text-[13px] leading-6 sm:text-[15px] sm:leading-7">
+              <p className="whitespace-pre-wrap text-[12px] leading-5 sm:text-[14px] sm:leading-6">
                 {message.content}
               </p>
             )}
