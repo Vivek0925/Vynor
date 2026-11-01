@@ -7,6 +7,7 @@ interface CreateMessageInput {
   senderId: string;
 
   replyToId?: string;
+  conversationId?: string;
 
   attachments?: {
     fileName: string;
@@ -24,7 +25,7 @@ export class MessageRepository {
   findById(messageId: string) {
     return this.prisma.message.findUnique({
       where: { id: messageId },
-      select: { id: true, workspaceId: true },
+      select: { id: true, workspaceId: true, conversationId: true },
     });
   }
 
@@ -33,11 +34,19 @@ export class MessageRepository {
     workspaceId,
     senderId,
     replyToId,
+    conversationId,
     attachments = [],
   }: CreateMessageInput) {
     return this.prisma.message.create({
       data: {
         content,
+        conversation: conversationId
+          ? {
+              connect: {
+                id: conversationId,
+              },
+            }
+          : undefined,
 
         workspace: {
           connect: {
@@ -97,10 +106,11 @@ export class MessageRepository {
     });
   }
 
-  findWorkspaceMessages(workspaceId: string) {
+  findWorkspaceMessages(workspaceId: string, conversationId?: string) {
     return this.prisma.message.findMany({
       where: {
         workspaceId,
+        ...(conversationId ? { conversationId } : {}),
       },
 
       include: {

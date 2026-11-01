@@ -358,6 +358,28 @@ export class RealtimeGateway
   // CHAT
   // =========================================================
 
+  @SubscribeMessage('conversation:join')
+  async handleConversationJoin(
+    @MessageBody() data: { conversationId: string },
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    const conversation = await this.chatService.getAccessibleConversation(
+      socket.data.currentUser.id,
+      data.conversationId,
+    );
+    if (conversation) {
+      await socket.join(`conversation:${conversation.id}`);
+    }
+  }
+
+  @SubscribeMessage('conversation:leave')
+  async handleConversationLeave(
+    @MessageBody() data: { conversationId: string },
+    @ConnectedSocket() socket: AuthenticatedSocket,
+  ) {
+    await socket.leave(`conversation:${data.conversationId}`);
+  }
+
   @SubscribeMessage('chat:send')
   async handleChatSend(
     @MessageBody()
@@ -372,7 +394,9 @@ export class RealtimeGateway
     );
 
     this.server
-      .to(`workspace:${message.workspaceId}`)
+      .to(message.conversationId
+        ? `conversation:${message.conversationId}`
+        : `workspace:${message.workspaceId}`)
       .emit('chat:new', message);
 
     return message;
@@ -389,7 +413,9 @@ export class RealtimeGateway
     );
 
     this.server
-      .to(`workspace:${message.workspaceId}`)
+      .to(message.conversationId
+        ? `conversation:${message.conversationId}`
+        : `workspace:${message.workspaceId}`)
       .emit('chat:updated', message);
 
     return message;
@@ -400,13 +426,19 @@ export class RealtimeGateway
     @MessageBody() data: { messageId: string },
     @ConnectedSocket() socket: AuthenticatedSocket,
   ) {
+    const existingMessage = await this.prisma.message.findUnique({
+      where: { id: data.messageId },
+      select: { workspaceId: true, conversationId: true },
+    });
     const message = await this.chatService.deleteMessage(
       socket.data.currentUser.id,
       data.messageId,
     );
 
     this.server
-      .to(`workspace:${message.workspaceId}`)
+      .to(existingMessage?.conversationId
+        ? `conversation:${existingMessage.conversationId}`
+        : `workspace:${message.workspaceId}`)
       .emit('chat:deleted', { messageId: message.id });
 
     return { messageId: message.id };
@@ -423,7 +455,9 @@ export class RealtimeGateway
     );
 
     this.server
-      .to(`workspace:${message.workspaceId}`)
+      .to(message.conversationId
+        ? `conversation:${message.conversationId}`
+        : `workspace:${message.workspaceId}`)
       .emit('chat:updated', message);
 
     return message;

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
@@ -14,9 +14,11 @@ export class ChatController {
   async getWorkspaceMessages(
     @Param('slug') slug: string,
     @CurrentUser() user: CurrentUserData,
+    @Query('conversationId') conversationId?: string,
   ) {
-    return this.chatService.getWorkspaceMessages(user.id, slug);
+    return this.chatService.getWorkspaceMessages(user.id, slug, conversationId);
   }
+
 
   @Get(':messageId/attachments/:attachmentId/download')
 async downloadAttachment(

@@ -15,26 +15,39 @@ interface Attachment {
   size: number;
 }
 
-export function useChat(slug: string) {
+export function useChat(slug: string, conversationId?: string) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadedSlug, setLoadedSlug] = useState<string | null>(null);
+  const [loadedConversationId, setLoadedConversationId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!conversationId) return;
+
+    socket.emit("conversation:join", { conversationId });
+
     let ignore = false;
 
     async function loadMessages() {
       try {
         setLoading(true);
-        const data = await getWorkspaceMessages(slug);
+        if (!conversationId) {
+          setMessages([]);
+          setLoadedSlug(slug);
+          setLoading(false);
+          return;
+        }
+        const data = await getWorkspaceMessages(slug, conversationId);
         if (!ignore) {
           setMessages(data);
           setLoadedSlug(slug);
+          setLoadedConversationId(conversationId ?? null);
         }
       } catch (error) {
         if (!ignore) {
           console.error("Failed to load messages", error);
           setLoadedSlug(slug);
+          setLoadedConversationId(conversationId ?? null);
         }
       } finally {
         if (!ignore) {
@@ -48,16 +61,19 @@ export function useChat(slug: string) {
     }
 
     return () => {
+      socket.emit("conversation:leave", { conversationId });
       ignore = true;
     };
-  }, [slug]);
+  }, [slug, conversationId]);
 
   useEffect(() => {
     function handleNewMessage(message: Message) {
+      if (message.conversationId !== conversationId) return;
       setMessages((prev) => [...prev, message]);
     }
 
     function handleUpdatedMessage(message: Message) {
+      if (message.conversationId !== conversationId) return;
       setMessages((prev) =>
         prev.map((item) => (item.id === message.id ? message : item)),
       );
@@ -78,7 +94,7 @@ export function useChat(slug: string) {
       socket.off("chat:updated", handleUpdatedMessage);
       socket.off("chat:deleted", handleDeletedMessage);
     };
-  }, [slug]);
+  }, [slug, conversationId]);
 
   const sendMessage = useCallback((
     content: string,
@@ -87,11 +103,12 @@ export function useChat(slug: string) {
   ) => {
     socket.emit("chat:send", {
       workspaceSlug: slug,
+      conversationId,
       content,
       attachments,
       replyToId,
     });
-  }, [slug]);
+  }, [slug, conversationId]);
 
   const editMessage = useCallback((messageId: string, content: string) => {
     socket.emit("chat:edit", {
@@ -109,8 +126,11 @@ export function useChat(slug: string) {
   }, []);
 
   return {
-    messages: loadedSlug === slug ? messages : [],
-    loading: slug ? loading : false,
+    messages:
+      loadedSlug === slug && loadedConversationId === conversationId
+        ? messages
+        : [],
+    loading: slug && conversationId ? loading : false,
     sendMessage,
     editMessage,
     deleteMessage,

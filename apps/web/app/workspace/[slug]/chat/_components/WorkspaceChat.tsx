@@ -1,11 +1,22 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import { Hash, MessageCircle, Plus, Users } from "lucide-react";
 
 import MessageInput from "./MessageInput";
 import MessageList from "./MessageList";
 
 import { useChat } from "@/hooks/useChat";
+import {
+  createChannel,
+  createDirectMessage,
+  getConversations,
+  markConversationRead,
+  type Conversation,
+} from "@/lib/conversations";
+import { getWorkspaceMembers, type WorkspaceMember } from "@/lib/workspace";
+import { useAuth } from "@/context/AuthContext";
 
 import type { Message } from "@/types/chats";
 
@@ -14,6 +25,106 @@ interface WorkspaceChatProps {
 }
 
 export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
+  const { user } = useAuth();
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [members, setMembers] = useState<WorkspaceMember[]>([]);
+  const [selectedId, setSelectedId] = useState<string | undefined>();
+  const [showChannelForm, setShowChannelForm] = useState(false);
+  const [channelName, setChannelName] = useState("");
+  const [showDmPicker, setShowDmPicker] = useState(false);
+  const [conversationError, setConversationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let ignore = false;
+    async function loadConversationData() {
+      try {
+        const [loadedConversations, loadedMembers] = await Promise.all([
+          getConversations(slug),
+          getWorkspaceMembers(slug),
+        ]);
+        if (ignore) return;
+        setConversations(loadedConversations);
+        setMembers(loadedMembers);
+        setSelectedId(
+          (current) =>
+            current &&
+            loadedConversations.some((conversation) => conversation.id === current)
+              ? current
+              : loadedConversations.find(
+                  (conversation) =>
+                    conversation.type === "CHANNEL" && conversation.slug === "general",
+                )?.id ?? loadedConversations[0]?.id,
+        );
+      } catch (error) {
+        if (!ignore) {
+          setConversationError(
+            error instanceof Error ? error.message : "Unable to load conversations.",
+          );
+        }
+      }
+    }
+    void loadConversationData();
+    return () => {
+      ignore = true;
+    };
+  }, [slug]);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    void markConversationRead(slug, selectedId).then(() => {
+      setConversations((current) =>
+        current.map((conversation) =>
+          conversation.id === selectedId
+            ? { ...conversation, unreadCount: 0 }
+            : conversation,
+        ),
+      );
+    });
+  }, [selectedId, slug]);
+
+  const selectedConversation = conversations.find(
+    (conversation) => conversation.id === selectedId,
+  );
+  const canManageChannels = useMemo(() => {
+    const membership = members.find((member) => member.userId === user?.id);
+    return membership?.role === "OWNER" || membership?.role === "ADMIN";
+  }, [members, user?.id]);
+
+  async function handleCreateChannel(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!channelName.trim()) return;
+    try {
+      const channel = await createChannel(slug, channelName.trim());
+      setConversations((current) => [...current, channel]);
+      setSelectedId(channel.id);
+      setChannelName("");
+      setShowChannelForm(false);
+      setConversationError(null);
+    } catch (error) {
+      setConversationError(
+        error instanceof Error ? error.message : "Unable to create channel.",
+      );
+    }
+  }
+
+  async function handleCreateDm(userId: string) {
+    try {
+      const dm = await createDirectMessage(slug, userId);
+      setConversations((current) =>
+        current.some((conversation) => conversation.id === dm.id)
+          ? current
+          : [...current, dm],
+      );
+      setSelectedId(dm.id);
+      setShowDmPicker(false);
+      setConversationError(null);
+    } catch (error) {
+      setConversationError(
+        error instanceof Error ? error.message : "Unable to start direct message.",
+      );
+    }
+  }
+
   const {
     messages,
     loading,
@@ -21,7 +132,7 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
     editMessage,
     deleteMessage,
     reactToMessage,
-  } = useChat(slug);
+  } = useChat(slug, selectedId);
 
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
 
@@ -39,35 +150,163 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
   );
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-[#DEDFE8] bg-white shadow-[0_18px_50px_rgba(20,20,28,0.06)] sm:rounded-[32px]">
-      {/* Header */}
-      <div className="border-b border-[#ECEEF3] px-4 py-2 sm:px-5">
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#059669]">
-          Chat
+    <div className="flex h-full min-h-0 overflow-hidden rounded-[24px] border border-[#E8E7E2] bg-white shadow-[0_10px_30px_rgba(20,20,28,0.04)] sm:rounded-[28px]">
+      <aside className="hidden w-[228px] shrink-0 flex-col border-r border-[#E8E7E2] bg-[#FCFBF9] p-3 sm:flex">
+        <div className="mb-3 px-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#707A73]">
+          Channels
         </div>
+        <div className="space-y-1">
+          {conversations
+            .filter((conversation) => conversation.type === "CHANNEL")
+            .map((conversation) => (
+              <button
+                key={conversation.id}
+                type="button"
+                onClick={() => setSelectedId(conversation.id)}
+                className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm ${
+                  selectedId === conversation.id
+                    ? "bg-[#FCE9E1] font-medium text-[#252A27]"
+                    : "text-[#707A73] hover:bg-[#F3F0E9]"
+                }`}
+              >
+                <Hash className="h-4 w-4 shrink-0" />
+                <span className="min-w-0 flex-1 truncate">{conversation.name}</span>
+                {!!conversation.unreadCount && (
+                  <span className="rounded-full bg-[#E5704F] px-1.5 py-0.5 text-[10px] text-white">
+                    {conversation.unreadCount}
+                  </span>
+                )}
+              </button>
+            ))}
+        </div>
+        {canManageChannels && (
+          <div className="mt-1">
+            {showChannelForm ? (
+              <form onSubmit={handleCreateChannel} className="flex gap-1">
+                <input
+                  autoFocus
+                  value={channelName}
+                  onChange={(event) => setChannelName(event.target.value)}
+                  placeholder="New channel"
+                  className="min-w-0 flex-1 rounded-md border border-[#E8E7E2] bg-white px-2 py-1.5 text-xs outline-none"
+                />
+                <button type="submit" className="rounded-md bg-[#E7F8EF] px-2 text-[#1E8E5A]">
+                  <Plus className="h-4 w-4" />
+                </button>
+              </form>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowChannelForm(true)}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs text-[#707A73] hover:bg-[#F3F0E9]"
+              >
+                <Plus className="h-4 w-4" />
+                Create channel
+              </button>
+            )}
+          </div>
+        )}
 
-        <h1 className="font-light tracking-[-0.035em] text-[20px] text-[#14141C] sm:text-[22px]">
-          Workspace Chat
-        </h1>
-      </div>
+        <div className="mb-2 mt-7 flex items-center justify-between px-2">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#707A73]">
+            Direct messages
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowDmPicker((current) => !current)}
+            className="rounded-md p-1 text-[#707A73] hover:bg-[#F3F0E9]"
+            aria-label="Start direct message"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+        </div>
+        {showDmPicker && (
+          <div className="mb-2 rounded-lg border border-[#E8E7E2] bg-white p-1">
+            {members
+              .filter((member) => member.userId !== user?.id)
+              .map((member) => (
+                <button
+                  key={member.userId}
+                  type="button"
+                  onClick={() => void handleCreateDm(member.userId)}
+                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-[#252A27] hover:bg-[#F3F0E9]"
+                >
+                  <Users className="h-3.5 w-3.5 text-[#707A73]" />
+                  <span className="truncate">{member.user.name}</span>
+                </button>
+              ))}
+          </div>
+        )}
+        <div className="space-y-1 overflow-y-auto">
+          {conversations
+            .filter((conversation) => conversation.type === "DM")
+            .map((conversation) => {
+              const other = conversation.participants.find(
+                (participant) => participant.userId !== user?.id,
+              );
+              return (
+                <button
+                  key={conversation.id}
+                  type="button"
+                  onClick={() => setSelectedId(conversation.id)}
+                  className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm ${
+                    selectedId === conversation.id
+                      ? "bg-[#FCE9E1] font-medium text-[#252A27]"
+                      : "text-[#707A73] hover:bg-[#F3F0E9]"
+                  }`}
+                >
+                  <MessageCircle className="h-4 w-4 shrink-0" />
+                  <span className="min-w-0 flex-1 truncate">{other?.user.name ?? "Direct message"}</span>
+                  {!!conversation.unreadCount && (
+                    <span className="rounded-full bg-[#E5704F] px-1.5 py-0.5 text-[10px] text-white">
+                      {conversation.unreadCount}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+        </div>
+      </aside>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-hidden">
-        {loading ? (
-          <div className="flex h-full items-center justify-center text-[#707487]">
+      <section className="flex min-w-0 flex-1 flex-col">
+      <header className="flex h-[68px] shrink-0 items-center gap-3 border-b border-[#E8E7E2] bg-white px-4 sm:px-7">
+        {selectedConversation?.type === "DM" ? (
+          <MessageCircle className="h-5 w-5 text-[#707A73]" />
+        ) : (
+          <Hash className="h-5 w-5 text-[#707A73]" />
+        )}
+        <div className="flex min-w-0 items-baseline gap-2.5">
+          <h1 className="text-[19px] font-semibold tracking-[-0.02em] text-[#252A27]">
+            {selectedConversation?.type === "DM"
+              ? selectedConversation.participants.find(
+                  (participant) => participant.userId !== user?.id,
+                )?.user.name ?? "Direct message"
+              : selectedConversation?.name ?? "general"}
+          </h1>
+          {selectedConversation?.type === "CHANNEL" && (
+            <span className="truncate text-sm text-[#707A73]">Everything team-wide</span>
+          )}
+        </div>
+      </header>
+
+      <div className="min-h-0 flex-1 overflow-hidden bg-white">
+        {conversationError ? (
+          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-red-600">
+            {conversationError}
+          </div>
+        ) : loading ? (
+          <div className="flex h-full items-center justify-center text-sm text-[#707487]">
             Loading messages...
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#F3F7F5] sm:mb-6 sm:h-20 sm:w-20">
-              💬
+          <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#F3F7F5] text-[#1E8E5A]">
+              <Hash className="h-6 w-6" />
             </div>
-
-            <h2 className="text-lg font-semibold text-[#20232D] sm:text-[22px]">
+            <h2 className="text-lg font-semibold text-[#20232D]">
               No conversations yet
             </h2>
-
-            <p className="mt-2 max-w-md px-4 text-center text-[13px] leading-6 text-[#707487] sm:mt-3 sm:px-0 sm:text-[15px] sm:leading-7">
+            <p className="mt-2 max-w-md text-sm leading-6 text-[#707487]">
               Start collaborating with everyone in this workspace.
             </p>
           </div>
@@ -92,6 +331,7 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
           setReplyingTo(null);
         }}
       />
+      </section>
     </div>
   );
 }

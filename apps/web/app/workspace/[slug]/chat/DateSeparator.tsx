@@ -23,10 +23,10 @@ export default function DateSeparator({ date }: DateSeparatorProps) {
   }
 
   return (
-    <div className="my-5 flex items-center gap-2.5 sm:my-8 sm:gap-4">
+    <div className="my-6 flex items-center gap-3 sm:my-8 sm:gap-4">
       <div className="h-px flex-1 bg-[#ECEEF3]" />
 
-      <span className="rounded-full bg-[#F5F6F8] px-3 py-1 text-[11px] font-medium text-[#707487] sm:px-4 sm:text-xs">
+      <span className="rounded-full bg-white px-3 py-1 text-[11px] font-medium text-[#707A73] sm:px-4 sm:text-xs">
         {label}
       </span>
 

@@ -19,7 +19,9 @@ export interface Workspace {
 
 export interface WorkspaceMember {
   userId: string;
+  role?: "OWNER" | "ADMIN" | "MEMBER";
   user: {
+    id?: string;
     name: string;
     avatar: string | null;
   };

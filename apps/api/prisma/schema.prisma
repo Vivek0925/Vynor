@@ -28,6 +28,8 @@ model User {
 
   // Chat
   messages        Message[]
+  conversationsCreated Conversation[] @relation("ConversationCreator")
+  conversationParticipants ConversationParticipant[]
   meetingMessages MeetingMessage[]
 
   meetingsCreated           Meeting[]                  @relation("MeetingCreator")
@@ -113,6 +115,7 @@ model Workspace {
 
   // Chat
   messages Message[]
+  conversations Conversation[]
 
   meetings   Meeting[]
   tasks      Task[]
@@ -177,6 +180,9 @@ model Message {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  conversationId String?
+  conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
   senderId String
   sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
@@ -196,7 +202,51 @@ model Message {
   @@index([workspaceId])
   @@index([senderId])
   @@index([workspaceId, createdAt])
+  @@index([conversationId, createdAt])
   @@map("messages")
+}
+
+model Conversation {
+  id String @id @default(cuid())
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  type ConversationType
+  name String?
+  slug String?
+  dmKey String?
+
+  createdById String
+  createdBy   User @relation("ConversationCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages Message[]
+  participants ConversationParticipant[]
+
+  @@unique([workspaceId, slug])
+  @@unique([workspaceId, dmKey])
+  @@index([workspaceId, type])
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  id String @id @default(cuid())
+
+  conversationId String
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime @default(now())
+  lastReadAt DateTime?
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+  @@map("conversation_participants")
 }
 
 model MessageAttachment {
@@ -463,6 +513,11 @@ enum WorkspaceRole {
   OWNER
   ADMIN
   MEMBER
+}
+
+enum ConversationType {
+  CHANNEL
+  DM
 }
 
 enum InvitationStatus {

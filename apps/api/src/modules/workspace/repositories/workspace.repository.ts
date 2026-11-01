@@ -87,10 +87,12 @@ async findMembers(workspaceId: string) {
       userId: true,
       user: {
         select: {
+          id: true,
           name: true,
           avatar: true,
         },
       },
+      role: true,
     },
   });
 }
@@ -138,4 +140,3 @@ async addMember(data: {
     });
   }
 }
-

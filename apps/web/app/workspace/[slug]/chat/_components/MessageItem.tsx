@@ -213,27 +213,27 @@ function MessageItem({
     >
       <div
         className={clsx(
-          "flex max-w-[86%] flex-col sm:max-w-[70%]",
+          "flex max-w-[92%] flex-col sm:max-w-[70%]",
           isMine ? "items-end" : "items-start",
         )}
       >
         {!isMine && !shouldGroup && (
-          <div className="mb-1.5 flex items-center gap-2 sm:mb-2 sm:gap-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-700 sm:h-9 sm:w-9 sm:text-sm">
+          <div className="mb-1 flex items-center gap-2 sm:mb-1.5 sm:gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#DDE3FF] text-sm font-semibold text-[#3659E6]">
               {message.sender.name.charAt(0).toUpperCase()}
             </div>
 
             <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
-              <h3 className="truncate text-[13px] font-medium text-[#20232D] sm:text-base">
+              <h3 className="truncate text-[15px] font-medium text-[#252A27]">
                 {message.sender.name}
               </h3>
 
-              <span className="shrink-0 text-[10px] text-zinc-400 sm:text-xs">
+              <span className="shrink-0 text-xs text-[#707A73]">
                 {time}
               </span>
 
               {message.edited && (
-                <span className="text-[10px] text-zinc-400 sm:text-xs">
+                <span className="text-[10px] text-[#707A73] sm:text-xs">
                   edited
                 </span>
               )}
@@ -256,14 +256,14 @@ function MessageItem({
 
           <div
             className={clsx(
-              "relative touch-pan-y rounded-2xl border px-3 py-1.5 transition-[transform,colors] sm:px-4",
+              "relative touch-pan-y rounded-[14px] border px-3.5 py-2 transition-[transform,colors] sm:px-4 sm:py-2.5",
               isMine
-                ? "border-[#BDE7CC] bg-[#EAFBF1] text-[#065F46]"
-                : "border border-zinc-200 bg-white text-zinc-700",
+                ? "border-[#F6D6C9] bg-[#FCE9E1] text-[#252A27]"
+                : "border-[#E8E7E2] bg-[#F3F0E9] text-[#252A27]",
               shouldGroup &&
                 (isMine
-                  ? "rounded-tr-2xl rounded-br-md"
-                  : "rounded-tl-2xl rounded-bl-md"),
+                  ? "rounded-tr-[14px] rounded-br-md"
+                  : "rounded-tl-[14px] rounded-bl-md"),
             )}
             style={{ transform: `translateX(${swipeOffset}px)` }}
             onContextMenu={(event) => {
@@ -419,7 +419,7 @@ function MessageItem({
                     return (
                       <div
                         key={attachment.id ?? index}
-                        className="flex items-center gap-2 rounded-xl border bg-zinc-50 px-4 py-3 transition hover:bg-zinc-100"
+                        className="flex items-center gap-2 rounded-xl border border-[#E8E7E2] bg-white/70 px-3 py-2.5 transition hover:bg-white"
                       >
                         <button
                           type="button"
@@ -453,7 +453,7 @@ function MessageItem({
                   return (
                     <div
                       key={attachment.id ?? index}
-                      className="flex items-center gap-2 rounded-xl border bg-zinc-50 px-4 py-3 transition hover:bg-zinc-100"
+                      className="flex items-center gap-2 rounded-xl border border-[#E8E7E2] bg-white/70 px-3 py-2.5 transition hover:bg-white"
                     >
                       <a
                         href={attachment.url}
@@ -520,7 +520,7 @@ function MessageItem({
         </div>
 
         {isMine && !shouldGroup && (
-          <div className="mt-1 text-[10px] text-zinc-400 sm:text-xs">
+          <div className="mt-1 text-[11px] text-[#707A73] sm:text-xs">
             You • {time}
             {message.edited && " • edited"}
           </div>

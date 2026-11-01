@@ -145,7 +145,7 @@ export default function MessageInput({
   }
 
   return (
-    <div className="border-t border-[#ECEEF3] bg-[#FAFAFB] px-3 py-2.5 sm:px-6 sm:py-4">
+    <div className="border-t border-[#E8E7E2] bg-[#FCFBF9] px-3 py-3 sm:px-6 sm:py-4">
       <div className="mx-auto max-w-5xl">
         <input
           ref={fileInputRef}
@@ -214,7 +214,7 @@ export default function MessageInput({
           </div>
         )}
 
-        <div className="flex items-end gap-1.5 rounded-2xl border border-[#DEDFE8] bg-white px-2 py-1.5 shadow-sm transition-all focus-within:border-[#BEEAD7] focus-within:shadow-md sm:gap-3 sm:rounded-3xl sm:px-4 sm:py-2">
+        <div className="flex items-end gap-1.5 rounded-[20px] border border-[#E8E7E2] bg-white px-2.5 py-2 shadow-[0_2px_10px_rgba(0,0,0,0.03)] transition-all focus-within:border-[#A8D5A2] focus-within:shadow-md sm:gap-3 sm:px-4 sm:py-2.5">
           <div ref={attachmentMenuRef} className="relative">
             <button
               type="button"
@@ -276,11 +276,15 @@ export default function MessageInput({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Message this workspace..."
+            placeholder="Message #general..."
             className="max-h-32 flex-1 resize-none bg-transparent text-[13px] leading-5 text-[#23262F] placeholder:text-[#9CA3AF] outline-none sm:max-h-40 sm:text-[15px] sm:leading-6"
           />
 
-          <button className="rounded-lg p-1.5 text-[#7C8093] transition hover:bg-[#F5F6F8] sm:rounded-xl sm:p-2">
+          <button
+            type="button"
+            aria-label="Add emoji"
+            className="rounded-lg p-1.5 text-[#7C8093] transition hover:bg-[#F5F6F8] sm:rounded-xl sm:p-2"
+          >
             <Smile size={16} />
           </button>
 
