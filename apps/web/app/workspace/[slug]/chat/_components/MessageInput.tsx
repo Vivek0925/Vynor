@@ -31,6 +31,7 @@ interface UploadedAttachment {
 
 interface MessageInputProps {
   workspaceSlug: string;
+  conversationLabel: string;
 
   replyingTo: Message | null;
 
@@ -45,6 +46,7 @@ interface MessageInputProps {
 
 export default function MessageInput({
   workspaceSlug,
+  conversationLabel,
   replyingTo,
   onCancelReply,
   onSend,
@@ -276,7 +278,7 @@ export default function MessageInput({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Message #general..."
+            placeholder={`Message ${conversationLabel}...`}
             className="max-h-32 flex-1 resize-none bg-transparent text-[13px] leading-5 text-[#23262F] placeholder:text-[#9CA3AF] outline-none sm:max-h-40 sm:text-[15px] sm:leading-6"
           />
 

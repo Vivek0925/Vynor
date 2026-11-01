@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { Hash, MessageCircle, Plus, Users } from "lucide-react";
+import { Hash, MessageCircle, Plus, Users, X } from "lucide-react";
 
 import MessageInput from "./MessageInput";
 import MessageList from "./MessageList";
@@ -17,6 +17,7 @@ import {
 } from "@/lib/conversations";
 import { getWorkspaceMembers, type WorkspaceMember } from "@/lib/workspace";
 import { useAuth } from "@/context/AuthContext";
+import { socket } from "@/lib/socket";
 
 import type { Message } from "@/types/chats";
 
@@ -33,6 +34,7 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
   const [channelName, setChannelName] = useState("");
   const [showDmPicker, setShowDmPicker] = useState(false);
   const [conversationError, setConversationError] = useState<string | null>(null);
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -85,6 +87,51 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
   const selectedConversation = conversations.find(
     (conversation) => conversation.id === selectedId,
   );
+  const selectedLabel =
+    selectedConversation?.type === "DM"
+      ? selectedConversation.participants.find(
+          (participant) => participant.userId !== user?.id,
+        )?.user.name ?? "direct message"
+      : `#${selectedConversation?.name ?? "general"}`;
+
+  useEffect(() => {
+    if (conversations.length === 0) return;
+
+    const conversationIds = conversations.map((conversation) => conversation.id);
+    const handleBackgroundMessage = (message: Message) => {
+      if (
+        !message.conversationId ||
+        message.conversationId === selectedId ||
+        message.sender.id === user?.id ||
+        !conversationIds.includes(message.conversationId)
+      ) {
+        return;
+      }
+
+      setConversations((current) =>
+        current.map((conversation) =>
+          conversation.id === message.conversationId
+            ? {
+                ...conversation,
+                unreadCount: (conversation.unreadCount ?? 0) + 1,
+              }
+            : conversation,
+        ),
+      );
+    };
+
+    conversationIds.forEach((conversationId) => {
+      socket.emit("conversation:join", { conversationId });
+    });
+    socket.on("chat:new", handleBackgroundMessage);
+
+    return () => {
+      socket.off("chat:new", handleBackgroundMessage);
+      conversationIds.forEach((conversationId) => {
+        socket.emit("conversation:leave", { conversationId });
+      });
+    };
+  }, [conversations, selectedId, user?.id]);
   const canManageChannels = useMemo(() => {
     const membership = members.find((member) => member.userId === user?.id);
     return membership?.role === "OWNER" || membership?.role === "ADMIN";
@@ -150,8 +197,33 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
   );
 
   return (
-    <div className="flex h-full min-h-0 overflow-hidden rounded-[24px] border border-[#E8E7E2] bg-white shadow-[0_10px_30px_rgba(20,20,28,0.04)] sm:rounded-[28px]">
-      <aside className="hidden w-[228px] shrink-0 flex-col border-r border-[#E8E7E2] bg-[#FCFBF9] p-3 sm:flex">
+    <div className="relative flex h-full min-h-0 overflow-hidden rounded-[24px] border border-[#E8E7E2] bg-white shadow-[0_10px_30px_rgba(20,20,28,0.04)] sm:rounded-[28px]">
+      {mobileChatOpen && (
+        <button
+          type="button"
+          aria-label="Close chat navigation"
+          onClick={() => setMobileChatOpen(false)}
+          className="absolute inset-0 z-20 bg-black/20 sm:hidden"
+        />
+      )}
+      <aside
+        className={`${
+          mobileChatOpen ? "absolute inset-y-0 left-0 z-30 flex w-[min(86vw,280px)]" : "hidden"
+        } shrink-0 flex-col border-r border-[#E8E7E2] bg-[#FCFBF9] p-3 sm:static sm:flex sm:w-[228px]`}
+      >
+        <div className="mb-3 flex items-center justify-between px-2">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#707A73]">
+            Chat
+          </span>
+          <button
+            type="button"
+            onClick={() => setMobileChatOpen(false)}
+            className="rounded-md p-1 text-[#707A73] hover:bg-[#F3F0E9] sm:hidden"
+            aria-label="Close chat navigation"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
         <div className="mb-3 px-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#707A73]">
           Channels
         </div>
@@ -162,7 +234,10 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
               <button
                 key={conversation.id}
                 type="button"
-                onClick={() => setSelectedId(conversation.id)}
+                onClick={() => {
+                  setSelectedId(conversation.id);
+                  setMobileChatOpen(false);
+                }}
                 className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm ${
                   selectedId === conversation.id
                     ? "bg-[#FCE9E1] font-medium text-[#252A27]"
@@ -248,7 +323,10 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
                 <button
                   key={conversation.id}
                   type="button"
-                  onClick={() => setSelectedId(conversation.id)}
+                  onClick={() => {
+                    setSelectedId(conversation.id);
+                    setMobileChatOpen(false);
+                  }}
                   className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm ${
                     selectedId === conversation.id
                       ? "bg-[#FCE9E1] font-medium text-[#252A27]"
@@ -256,7 +334,7 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
                   }`}
                 >
                   <MessageCircle className="h-4 w-4 shrink-0" />
-                  <span className="min-w-0 flex-1 truncate">{other?.user.name ?? "Direct message"}</span>
+                  <span className="min-w-0 flex-1 truncate text-[13px]">{other?.user.name ?? "Direct message"}</span>
                   {!!conversation.unreadCount && (
                     <span className="rounded-full bg-[#E5704F] px-1.5 py-0.5 text-[10px] text-white">
                       {conversation.unreadCount}
@@ -270,23 +348,34 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
 
       <section className="flex min-w-0 flex-1 flex-col">
       <header className="flex h-[68px] shrink-0 items-center gap-3 border-b border-[#E8E7E2] bg-white px-4 sm:px-7">
+        <button
+          type="button"
+          onClick={() => setMobileChatOpen(true)}
+          className="rounded-lg p-1.5 text-[#707A73] hover:bg-[#F3F0E9] sm:hidden"
+          aria-label="Open chat navigation"
+        >
+          <MessageCircle className="h-5 w-5" />
+        </button>
         {selectedConversation?.type === "DM" ? (
           <MessageCircle className="h-5 w-5 text-[#707A73]" />
         ) : (
           <Hash className="h-5 w-5 text-[#707A73]" />
         )}
-        <div className="flex min-w-0 items-baseline gap-2.5">
-          <h1 className="text-[19px] font-semibold tracking-[-0.02em] text-[#252A27]">
+        <button
+          type="button"
+          onClick={() => setMobileChatOpen(true)}
+          className="flex min-w-0 items-baseline gap-2.5 text-left sm:cursor-default"
+          aria-label="Open chat navigation"
+        >
+          <h1 className="max-w-[min(52vw,320px)] truncate text-[17px] font-semibold tracking-[-0.02em] text-[#252A27] sm:max-w-none sm:text-[19px]">
             {selectedConversation?.type === "DM"
-              ? selectedConversation.participants.find(
-                  (participant) => participant.userId !== user?.id,
-                )?.user.name ?? "Direct message"
+              ? selectedLabel
               : selectedConversation?.name ?? "general"}
           </h1>
           {selectedConversation?.type === "CHANNEL" && (
             <span className="truncate text-sm text-[#707A73]">Everything team-wide</span>
           )}
-        </div>
+        </button>
       </header>
 
       <div className="min-h-0 flex-1 overflow-hidden bg-white">
@@ -323,6 +412,7 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
 
       <MessageInput
         workspaceSlug={slug}
+        conversationLabel={selectedLabel}
         replyingTo={replyingTo}
         onCancelReply={() => setReplyingTo(null)}
         onSend={(content, attachments, replyToId) => {
