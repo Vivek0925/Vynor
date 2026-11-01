@@ -33,8 +33,12 @@ async function bootstrap() {
     const hasBearerToken =
       typeof req.headers.authorization === 'string' &&
       req.headers.authorization.startsWith('Bearer ');
-    const isLoginOrRegistration =
-      req.path === '/auth/login' || req.path === '/auth/register';
+    const isLoginOrRegistration = [
+      '/auth/login',
+      '/auth/register',
+      '/auth/register/verify',
+      '/auth/register/resend',
+    ].includes(req.path);
     const isCookieAuthenticatedMutation =
       Boolean(req.cookies?.access_token) && !hasBearerToken;
 

@@ -19,9 +19,23 @@ async function request<T>(
 }
 
 export function register(data: RegisterPayload) {
-  return request("/auth/register", {
+  return request<{ message: string; email: string }>("/auth/register", {
     method: "POST",
     body: JSON.stringify(data),
+  });
+}
+
+export function verifyRegistration(data: { email: string; otp: string }) {
+  return request<{ message: string }>("/auth/register/verify", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function resendRegistration(email: string) {
+  return request<{ message: string }>("/auth/register/resend", {
+    method: "POST",
+    body: JSON.stringify({ email }),
   });
 }
 

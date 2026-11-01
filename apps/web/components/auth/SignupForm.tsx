@@ -122,13 +122,13 @@ const handleGithubSignup = () => {
       setLoading(true);
       setError("");
 
-      await register({
+      const response = await register({
         name,
         email,
         password,
       });
 
-      router.push("/login");
+      router.push(`/signup/verify?email=${encodeURIComponent(response.email)}`);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -282,7 +282,7 @@ const handleGithubSignup = () => {
             </Link>{" "}
             and{" "}
             <Link
-              href="/privacy"
+              href="/privacy-policy"
               className="font-medium text-text hover:text-primary"
             >
               Privacy Policy

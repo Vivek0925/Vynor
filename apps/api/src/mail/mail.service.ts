@@ -7,6 +7,11 @@ interface InvitationEmail {
   role: string;
 }
 
+interface VerificationEmail {
+  recipient: string;
+  otp: string;
+}
+
 function escapeHtml(value: string) {
   return value.replace(
     /[&<>"']/g,
@@ -45,7 +50,7 @@ export class MailService {
 
     const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
     const from =
-      process.env.RESEND_FROM_EMAIL ?? 'Vynor <onboarding@resend.dev>';
+      process.env.RESEND_FROM_EMAIL ?? 'Vynor <no-reply@vynor.in>';
     const invitationUrl = `${frontendUrl}/dashboard`;
     const safeWorkspaceName = escapeHtml(workspaceName);
     const safeRole = escapeHtml(role.toLowerCase());
@@ -86,6 +91,51 @@ export class MailService {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(
         `Invitation created for ${recipient}, but email delivery failed: ${message}`,
+      );
+      return false;
+    }
+  }
+
+  async sendRegistrationVerificationOtp({
+    recipient,
+    otp,
+  }: VerificationEmail): Promise<boolean> {
+    if (!this.resend) {
+      this.logger.warn('Registration verification email delivery is not configured.');
+      return false;
+    }
+
+    const from =
+      process.env.RESEND_FROM_EMAIL ?? 'Vynor <no-reply@vynor.in>';
+
+    try {
+      const { error } = await this.resend.emails.send({
+        from,
+        to: recipient,
+        subject: 'Your Vynor verification code',
+        text: `Your Vynor verification code is ${otp}. It expires in 5 minutes.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 560px; color: #14141c;">
+            <h1 style="font-size: 24px; margin-bottom: 12px;">Verify your Vynor account</h1>
+            <p>Enter this code to finish creating your account:</p>
+            <p style="font-size: 32px; font-weight: 700; letter-spacing: 8px;">${otp}</p>
+            <p>This code expires in 5 minutes.</p>
+          </div>
+        `,
+      });
+
+      if (error) {
+        this.logger.error(
+          `Registration verification email delivery failed: ${error.message}`,
+        );
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Registration verification email delivery failed: ${message}`,
       );
       return false;
     }

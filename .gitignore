@@ -51,6 +51,9 @@ service-account*.json
 *.sql.gz
 *.bak
 
+# Prisma migrations are source-controlled SQL, not database backups.
+!apps/api/prisma/migrations/**/*.sql
+
 # ==========================================
 # AWS / Production Artifacts
 # ==========================================

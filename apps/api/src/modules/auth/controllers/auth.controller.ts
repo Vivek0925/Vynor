@@ -19,6 +19,8 @@ import type { Request } from 'express';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
+import { VerifyRegistrationDto } from '../dto/verify-registration.dto';
+import { ResendRegistrationDto } from '../dto/resend-registration.dto';
 import { AuthService } from '../services/auth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { CurrentUser } from '../decorators/current-user.decorator';
@@ -182,8 +184,21 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
+  }
+
+  @Post('register/verify')
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  verifyRegistration(@Body() dto: VerifyRegistrationDto) {
+    return this.authService.verifyRegistration(dto);
+  }
+
+  @Post('register/resend')
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  resendRegistration(@Body() dto: ResendRegistrationDto) {
+    return this.authService.resendRegistration(dto);
   }
 
   @Get('csrf-token')
