@@ -2,7 +2,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { RequireAuth } from "@/components/auth/AuthRedirect";
 import { useWorkspaces } from "@/app/hooks/useWorkspaces";
-import Container from "@/components/ui/Container";
 import { DashboardHeader, Hero, WorkspaceHistory } from "./components";
 
 // export const metadata = {
@@ -23,32 +22,25 @@ export default function Dashboard() {
   return (
     <RequireAuth>
       {loading || workspacesLoading ? (
-        <div>Loading...</div>
+        <div className="flex min-h-screen items-center justify-center bg-cream text-sm text-muted">
+          Loading...
+        </div>
       ) : (
-        <main className="relative min-h-screen bg-[#F8F8F6] text-[#14141C]">
-          {/* Decorative blobs */}
-          <div className="pointer-events-none absolute left-[-8rem] top-0 h-[24rem] w-[24rem] rounded-full bg-[#059669]/10 blur-[90px]" />
-          <div className="pointer-events-none absolute right-[-6rem] top-[10rem] h-[18rem] w-[18rem] rounded-full bg-[#065F46]/10 blur-[90px]" />
-
-          <Container>
+        <main className="min-h-screen overflow-hidden bg-surface text-ink">
+          <div className="rounded-b-[clamp(2rem,6vw,5rem)] bg-sage">
             <DashboardHeader onInvitationAccepted={addWorkspace} />
-          </Container>
-
-          <section className="relative flex min-h-[calc(100svh-4.5rem)] items-center justify-center overflow-hidden px-0 py-10 sm:py-20">
-            <Container>
+            <section className="relative flex min-h-[calc(100svh-4.5rem)] items-center justify-center overflow-hidden px-6 py-10 sm:py-16">
               <Hero user={user} onWorkspaceCreated={addWorkspace} />
-            </Container>
-          </section>
+            </section>
+          </div>
 
-          <section className="border-t border-[#DEDFE8]/40 bg-[#FAFAF8]/40 py-12 sm:py-20">
-            <Container>
+          <section className="px-6 py-14 sm:py-20">
               <WorkspaceHistory
                 user={user}
                 workspaces={workspaces}
                 onWorkspaceUpdated={() => void refresh()}
                 onWorkspaceDeleted={() => void refresh()}
               />
-            </Container>
           </section>
         </main>
       )}

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Bolt, Plus } from "lucide-react";
 import { CreateWorkspaceModal } from "@/components/workspace";
 import { api } from "@/lib/api";
 import type { Workspace } from "@/lib/workspace";
@@ -17,6 +19,7 @@ interface HeroProps {
 
 export default function Hero({ user, onWorkspaceCreated }: HeroProps) {
   const [open, setOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   const [meetingCode, setMeetingCode] = useState("");
   const [joining, setJoining] = useState(false);
@@ -101,50 +104,75 @@ export default function Hero({ user, onWorkspaceCreated }: HeroProps) {
     }
   }
 
+  const firstName = user?.name?.split(" ")[0] || "there";
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Good morning," : hour < 18 ? "Good afternoon," : "Good evening,";
+
   return (
     <div className="flex w-full flex-col items-center justify-center text-center">
-      <h1 className="max-w-[800px] text-[32px] font-light leading-[1.1] tracking-[-0.04em] text-[#14141C] sm:text-[48px] md:text-[64px] lg:text-[72px]">
-        Workspace, meetings, and collaboration in one place
-      </h1>
-      <p className="mx-auto mt-4 max-w-[580px] text-[14px] leading-[1.6] text-[#5B5D6E] sm:mt-6 sm:text-[18px]">
-        Welcome{user?.name ? `, ${user.name}` : ""}. Create a workspace for your
-        project, jump into a quick meeting, or join one using a code.
-      </p>
+      <motion.p
+        initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-3 text-sm text-muted"
+      >
+        {new Date().toLocaleDateString(undefined, {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+        })}
+      </motion.p>
+      <motion.h1
+        initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.08 }}
+        className="max-w-[800px] text-[38px] font-medium leading-[1.05] tracking-[-0.06em] text-ink sm:text-[54px] md:text-[64px]"
+      >
+        {greeting} <span className="font-light">{firstName}.</span>
+      </motion.h1>
+      <motion.p
+        initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.16 }}
+        className="mx-auto mt-4 max-w-[520px] text-[15px] leading-[1.5] text-muted"
+      >
+        Create a workspace for your project, jump into a quick meeting, or join
+        one using a code.
+      </motion.p>
 
-      <div className="mt-7 flex w-full max-w-[600px] flex-col items-stretch gap-3 sm:mt-12 sm:flex-row sm:items-center">
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.24 }}
+        className="mt-6 flex w-full max-w-[600px] flex-wrap justify-center gap-3"
+      >
         <button
           onClick={() => setOpen(true)}
-          className="flex min-h-12 flex-1 items-center justify-center rounded-full border border-[#86D9A8] bg-[#EAFBF1] px-6 py-3 text-[15px] font-medium text-[#065F46] transition-colors hover:bg-[#DFF7E8] sm:px-8 sm:text-[16px]"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-coral px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-coral-dark"
         >
-          <svg
-            className="mr-2 h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
+          <Plus className="h-4 w-4" />
           Create workspace
         </button>
         <button
           type="button"
           onClick={handleQuickMeeting}
-          className="flex min-h-12 flex-1 items-center justify-center rounded-full border border-[#DEDFE8] bg-transparent px-6 py-3 text-[15px] font-medium text-[#14141C] transition-colors hover:bg-[#FAFAF8] sm:px-8 sm:text-[16px]"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-ink/30 px-6 py-3 text-sm font-semibold text-ink transition hover:-translate-y-0.5 hover:bg-white"
         >
-          <svg className="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
+          <Bolt className="h-4 w-4" />
           Quick meeting
         </button>
-      </div>
+      </motion.div>
 
-      <div className="mt-6 w-full max-w-[500px] sm:mt-8">
-        <div className="flex flex-col gap-2 sm:flex-row">
+      <motion.form
+        initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.32 }}
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handleJoinMeeting();
+        }}
+        className="mt-3 flex w-full max-w-[520px] gap-2"
+      >
           <input
             type="text"
             value={meetingCode}
@@ -158,42 +186,43 @@ export default function Hero({ user, onWorkspaceCreated }: HeroProps) {
               }
             }}
             placeholder="Enter a code or meeting link"
-            className="min-w-0 flex-1 rounded-full border-2 border-[#DEDFE8] bg-white px-5 py-3 text-[14px] placeholder-[#5B5D6E] transition-all focus:border-[#059669] focus:outline-none sm:px-6"
+            className="h-11 min-w-0 flex-1 rounded-full border border-ink/20 bg-white px-5 text-sm text-ink placeholder:text-muted focus:border-ink focus:outline-none"
           />
           <button
             type="button"
             onClick={() => void handleJoinMeeting()}
             disabled={joining}
-            className="min-h-11 rounded-full bg-[#FAFAF8] px-6 py-3 text-[14px] font-medium text-[#5B5D6E] transition-all hover:bg-[#DEDFE8] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+            className="h-11 rounded-full bg-ink px-6 text-sm font-semibold text-text-warm transition hover:bg-forest disabled:cursor-not-allowed disabled:opacity-40"
           >
             {joining ? "Joining..." : "Join"}
           </button>
-        </div>
-      </div>
+      </motion.form>
 
       {joinError && (
         <p className="mt-2 px-4 text-left text-sm text-red-500">{joinError}</p>
       )}
 
-      <div className="mt-10 flex items-center justify-center sm:mt-16">
-        <div className="relative h-[180px] w-[180px] rounded-full bg-gradient-to-br from-[#059669]/20 to-[#065F46]/10 p-6 sm:h-[280px] sm:w-[280px] sm:p-8">
-          <svg
-            viewBox="0 0 200 200"
-            className="h-full w-full text-[#059669]/30"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            <circle cx="100" cy="100" r="80" />
-            <circle cx="100" cy="100" r="60" />
-            <circle cx="100" cy="100" r="40" />
-            <circle cx="65" cy="80" r="18" />
-            <circle cx="135" cy="80" r="18" />
-            <path d="M 70 120 Q 100 140 130 120" strokeLinecap="round" />
-            <circle cx="100" cy="50" r="8" fill="currentColor" />
-          </svg>
-        </div>
-      </div>
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0, scale: 0.92 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.4, duration: 0.6 }}
+        className="mt-9 flex h-[210px] w-[210px] items-center justify-center rounded-full bg-sage p-7 text-ink sm:h-[280px] sm:w-[280px] sm:p-9"
+        aria-hidden="true"
+      >
+        <svg viewBox="0 0 300 300" className="h-full w-full" fill="none">
+          <circle cx="150" cy="150" r="140" fill="var(--cream-panel)" stroke="var(--forest-light)" strokeWidth="1.5" />
+          <circle cx="150" cy="150" r="100" stroke="currentColor" strokeOpacity=".35" />
+          <circle cx="150" cy="150" r="76" stroke="currentColor" strokeOpacity=".35" />
+          <circle cx="118" cy="132" r="18" fill="white" stroke="currentColor" strokeWidth="1.4" />
+          <circle cx="182" cy="132" r="18" fill="white" stroke="currentColor" strokeWidth="1.4" />
+          <circle cx="118" cy="132" r="6" fill="currentColor" />
+          <circle cx="182" cy="132" r="6" fill="currentColor" />
+          <circle cx="98" cy="166" r="9" fill="var(--coral)" opacity=".55" />
+          <circle cx="202" cy="166" r="9" fill="var(--coral)" opacity=".55" />
+          <path d="M112 170 Q150 196 188 170" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          <circle cx="150" cy="50" r="7" fill="var(--coral)" />
+        </svg>
+      </motion.div>
 
       <CreateWorkspaceModal
         open={open}

@@ -9,6 +9,7 @@ import {
   Mail,
   MoreVertical,
   Settings,
+  Star,
 } from "lucide-react";
 import {
   deleteWorkspace,
@@ -149,21 +150,29 @@ export default function WorkspaceCard({
           handleOpen();
         }
       }}
-      className="group relative rounded-[24px] border border-[#DEDFE8] bg-white p-4 shadow-[var(--shadow-sm)] transition-transform duration-200 hover:-translate-y-0.5 sm:rounded-[28px] sm:p-5"
+      className="group relative rounded-[26px] border border-ink/15 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-ink/30 sm:p-6"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className={`h-2.5 w-2.5 rounded-full ${workspace.accent}`} />
-          <h3 className="mt-4 break-words text-[17px] font-medium tracking-[-0.02em] text-[#14141C]">
+          <h3 className="mt-4 break-words text-lg font-semibold tracking-[-0.03em] text-ink">
             {workspace.name}
           </h3>
-          <p className="mt-1 text-[13px] text-[#5B5D6E]">{workspace.members}</p>
+          <p className="mt-1 text-sm text-muted">{workspace.members}</p>
         </div>
         <div className="relative flex items-start gap-2">
           <span className="max-w-[110px] truncate rounded-full border border-[#DEDFE8] px-2.5 py-1 text-[11px] text-[#5B5D6E] sm:max-w-none sm:px-3 sm:text-[12px]">
             {workspace.status}
           </span>
 
+          <button
+            type="button"
+            aria-label={`Pin ${workspace.name}`}
+            onClick={(event) => event.stopPropagation()}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 text-muted transition hover:bg-cream hover:text-coral"
+          >
+            <Star className="h-4 w-4" />
+          </button>
           <button
             type="button"
             disabled={busy}
@@ -174,7 +183,7 @@ export default function WorkspaceCard({
               event.stopPropagation();
               setMenuOpen((current) => !current);
             }}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[#DEDFE8] text-[#5B5D6E] transition-colors hover:bg-[#FAFAF8] hover:text-[#14141C] disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 text-muted transition-colors hover:bg-cream hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
           >
             <MoreVertical className="h-4 w-4" />
           </button>
@@ -237,8 +246,9 @@ export default function WorkspaceCard({
         </div>
       </div>
 
-      <div className="mt-6 border-t border-[#DEDFE8] pt-4 text-[12px] text-[#5B5D6E]">
+      <div className="mt-6 flex items-center justify-between border-t border-ink/10 pt-4 text-xs text-muted">
         Updated {workspace.updatedAt}
+        <span className="font-medium text-ink opacity-0 transition group-hover:opacity-100">Open →</span>
       </div>
       <ActionDialog
         open={renameOpen}
