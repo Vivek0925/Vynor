@@ -4,7 +4,6 @@ import { WorkspaceRole } from '@prisma/client/wasm';
 
 @Injectable()
 export class WorkspaceRepository {
-  
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: {
@@ -25,6 +24,13 @@ export class WorkspaceRepository {
             role: 'OWNER',
           },
         },
+        taskLists: {
+          create: [
+            { name: 'Todo', position: 0, createdById: data.ownerId },
+            { name: 'In Progress', position: 1, createdById: data.ownerId },
+            { name: 'Done', position: 2, createdById: data.ownerId },
+          ],
+        },
       },
       include: {
         members: true,
@@ -44,85 +50,82 @@ export class WorkspaceRepository {
     });
   }
 
- async findUserWorkspaces(userId: string) {
-  return this.prisma.workspace.findMany({
-    where: {
-      members: {
-        some: {
-          userId,
+  async findUserWorkspaces(userId: string) {
+    return this.prisma.workspace.findMany({
+      where: {
+        members: {
+          some: {
+            userId,
+          },
         },
       },
-    },
-    include: {
-      members: {
-        where: {
-          userId,
-        },
-        select: {
-          role: true,
+      include: {
+        members: {
+          where: {
+            userId,
+          },
+          select: {
+            role: true,
+          },
         },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-}
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
 
-async findMember(workspaceId: string, userId: string) {
-  return this.prisma.workspaceMember.findUnique({
-    where: {
-      workspaceId_userId: {
+  async findMember(workspaceId: string, userId: string) {
+    return this.prisma.workspaceMember.findUnique({
+      where: {
+        workspaceId_userId: {
+          workspaceId,
+          userId,
+        },
+      },
+    });
+  }
+
+  async findMembers(workspaceId: string) {
+    return this.prisma.workspaceMember.findMany({
+      where: { workspaceId },
+      select: {
+        userId: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+        role: true,
+      },
+    });
+  }
+
+  async findMemberByEmail(workspaceId: string, email: string) {
+    return this.prisma.workspaceMember.findFirst({
+      where: {
         workspaceId,
-        userId,
-      },
-    },
-  });
-}
-
-async findMembers(workspaceId: string) {
-  return this.prisma.workspaceMember.findMany({
-    where: { workspaceId },
-    select: {
-      userId: true,
-      user: {
-        select: {
-          id: true,
-          name: true,
-          avatar: true,
+        user: {
+          email,
         },
       },
-      role: true,
-    },
-  });
-}
-
-async findMemberByEmail(
-  workspaceId: string,
-  email: string,
-) {
-  return this.prisma.workspaceMember.findFirst({
-    where: {
-      workspaceId,
-      user: {
-        email,
+      include: {
+        user: true,
       },
-    },
-    include: {
-      user: true,
-    },
-  });
-}
+    });
+  }
 
-async addMember(data: {
-  workspaceId: string;
-  userId: string;
-  role: WorkspaceRole;
-}) {
-  return this.prisma.workspaceMember.create({
-    data,
-  });
-}
+  async addMember(data: {
+    workspaceId: string;
+    userId: string;
+    role: WorkspaceRole;
+  }) {
+    return this.prisma.workspaceMember.create({
+      data,
+    });
+  }
 
   async update(id: string, data: { name: string; slug: string }) {
     return this.prisma.workspace.update({

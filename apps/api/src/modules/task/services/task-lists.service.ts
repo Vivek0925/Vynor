@@ -2,11 +2,10 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-} from "@nestjs/common";
+} from '@nestjs/common';
 
-import { WorkspaceService } from "../../workspace/services/workspace.service";
-import { TaskListsRepository } from "../repositories/task-lists.repository";
-
+import { WorkspaceService } from '../../workspace/services/workspace.service';
+import { TaskListsRepository } from '../repositories/task-lists.repository';
 
 @Injectable()
 export class TaskListsService {
@@ -16,40 +15,46 @@ export class TaskListsService {
   ) {}
 
   async findAll(userId: string, workspaceSlug: string) {
-    const workspace =
-      await this.workspaceService.findAccessibleWorkspace(
-        userId,
-        workspaceSlug,
+    const workspace = await this.workspaceService.findAccessibleWorkspace(
+      userId,
+      workspaceSlug,
+    );
+
+    const lists = await this.taskListsRepository.findByWorkspace(workspace.id);
+
+    if (lists.length === 0) {
+      await this.taskListsRepository.createDefaults(
+        workspace.id,
+        workspace.ownerId,
       );
 
-    return this.taskListsRepository.findByWorkspace(workspace.id);
+      return this.taskListsRepository.findByWorkspace(workspace.id);
+    }
+
+    return lists;
   }
 
-  async create(
-    userId: string,
-    workspaceSlug: string,
-    name: string,
-  ) {
-    const workspace =
-      await this.workspaceService.findAccessibleWorkspace(
-        userId,
-        workspaceSlug,
-      );
+  async create(userId: string, workspaceSlug: string, name: string) {
+    const workspace = await this.workspaceService.findAccessibleWorkspace(
+      userId,
+      workspaceSlug,
+    );
 
     const trimmedName = name.trim();
 
     if (!trimmedName) {
-      throw new BadRequestException("List name is required.");
+      throw new BadRequestException('List name is required.');
     }
 
     if (trimmedName.length > 100) {
       throw new BadRequestException(
-        "List name must be 100 characters or fewer.",
+        'List name must be 100 characters or fewer.',
       );
     }
 
-    const position =
-      await this.taskListsRepository.getNextPosition(workspace.id);
+    const position = await this.taskListsRepository.getNextPosition(
+      workspace.id,
+    );
 
     return this.taskListsRepository.create({
       workspaceId: workspace.id,
@@ -65,27 +70,26 @@ export class TaskListsService {
     listId: string,
     name: string,
   ) {
-    const workspace =
-      await this.workspaceService.findAccessibleWorkspace(
-        userId,
-        workspaceSlug,
-      );
+    const workspace = await this.workspaceService.findAccessibleWorkspace(
+      userId,
+      workspaceSlug,
+    );
 
     const list = await this.taskListsRepository.findById(listId);
 
     if (!list || list.workspaceId !== workspace.id) {
-      throw new NotFoundException("List not found.");
+      throw new NotFoundException('List not found.');
     }
 
     const trimmedName = name.trim();
 
     if (!trimmedName) {
-      throw new BadRequestException("List name is required.");
+      throw new BadRequestException('List name is required.');
     }
 
     if (trimmedName.length > 100) {
       throw new BadRequestException(
-        "List name must be 100 characters or fewer.",
+        'List name must be 100 characters or fewer.',
       );
     }
 
@@ -100,16 +104,15 @@ export class TaskListsService {
     listId: string,
     position: number,
   ) {
-    const workspace =
-      await this.workspaceService.findAccessibleWorkspace(
-        userId,
-        workspaceSlug,
-      );
+    const workspace = await this.workspaceService.findAccessibleWorkspace(
+      userId,
+      workspaceSlug,
+    );
 
     const list = await this.taskListsRepository.findById(listId);
 
     if (!list || list.workspaceId !== workspace.id) {
-      throw new NotFoundException("List not found.");
+      throw new NotFoundException('List not found.');
     }
 
     const targetPosition = Math.max(0, position);
@@ -149,40 +152,34 @@ export class TaskListsService {
     });
   }
 
-  async remove(
-  userId: string,
-  workspaceSlug: string,
-  listId: string,
-) {
-  const workspace =
-    await this.workspaceService.findAccessibleWorkspace(
+  async remove(userId: string, workspaceSlug: string, listId: string) {
+    const workspace = await this.workspaceService.findAccessibleWorkspace(
       userId,
       workspaceSlug,
     );
 
-  const list = await this.taskListsRepository.findById(listId);
+    const list = await this.taskListsRepository.findById(listId);
 
-  if (!list || list.workspaceId !== workspace.id) {
-    throw new NotFoundException("List not found.");
-  }
+    if (!list || list.workspaceId !== workspace.id) {
+      throw new NotFoundException('List not found.');
+    }
 
-  const taskCount =
-    await this.taskListsRepository.countTasks(list.id);
+    const taskCount = await this.taskListsRepository.countTasks(list.id);
 
-  if (taskCount > 0) {
-    throw new BadRequestException(
-      "This list contains tasks. Move or delete its tasks before deleting the list.",
+    if (taskCount > 0) {
+      throw new BadRequestException(
+        'This list contains tasks. Move or delete its tasks before deleting the list.',
+      );
+    }
+
+    await this.taskListsRepository.shiftPositionsAfterRemoval(
+      workspace.id,
+      list.position,
+      list.id,
     );
+
+    await this.taskListsRepository.delete(list.id);
+
+    return { id: list.id };
   }
-
-  await this.taskListsRepository.shiftPositionsAfterRemoval(
-    workspace.id,
-    list.position,
-    list.id,
-  );
-
-  await this.taskListsRepository.delete(list.id);
-
-  return { id: list.id };
-}
 }

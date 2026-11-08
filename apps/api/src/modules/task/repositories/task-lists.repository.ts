@@ -1,7 +1,7 @@
-import { Injectable } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 
-import { PrismaService } from "../../../database/prisma.service";
+import { PrismaService } from '../../../database/prisma.service';
 
 @Injectable()
 export class TaskListsRepository {
@@ -20,6 +20,16 @@ export class TaskListsRepository {
           },
         },
       },
+    });
+  }
+
+  async createDefaults(workspaceId: string, createdById: string) {
+    await this.prisma.taskList.createMany({
+      data: [
+        { workspaceId, name: 'Todo', position: 0, createdById },
+        { workspaceId, name: 'In Progress', position: 1, createdById },
+        { workspaceId, name: 'Done', position: 2, createdById },
+      ],
     });
   }
 
@@ -101,10 +111,10 @@ export class TaskListsRepository {
   }
 
   async countTasks(listId: string) {
-  return this.prisma.task.count({
-    where: { listId },
-  });
-}
+    return this.prisma.task.count({
+      where: { listId },
+    });
+  }
 
   async getNextPosition(workspaceId: string) {
     const lastList = await this.prisma.taskList.findFirst({
