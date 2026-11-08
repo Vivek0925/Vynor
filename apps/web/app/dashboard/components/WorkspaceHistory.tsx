@@ -21,13 +21,18 @@ export default function WorkspaceHistory({
   onWorkspaceDeleted,
 }: WorkspaceHistoryProps) {
   const [filter, setFilter] = useState<"all" | "own" | "shared">("all");
+  const [pinned, setPinned] = useState<string[]>([]);
   const reduceMotion = useReducedMotion();
-  const visibleWorkspaces = workspaces.filter((workspace) => {
-    if (filter === "all") return true;
-    return filter === "own"
-      ? workspace.status !== "Shared"
-      : workspace.status === "Shared";
-  });
+  const visibleWorkspaces = workspaces
+    .filter((workspace) => {
+      if (filter === "all") return true;
+      return filter === "own"
+        ? workspace.status !== "Shared"
+        : workspace.status === "Shared";
+    })
+    .sort(
+      (a, b) => Number(pinned.includes(b.id)) - Number(pinned.includes(a.id)),
+    );
 
   return (
     <div className="mx-auto max-w-[1440px]">
@@ -66,7 +71,7 @@ export default function WorkspaceHistory({
       {visibleWorkspaces.length === 0 ? (
         <EmptyWorkspaceState user={user} />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-[repeat(auto-fill,minmax(270px,340px))]">
           {visibleWorkspaces.map((workspace, index) => (
             <motion.div
               key={workspace.id}
@@ -76,6 +81,14 @@ export default function WorkspaceHistory({
             >
               <WorkspaceCard
                 workspace={workspace}
+                isPinned={pinned.includes(workspace.id)}
+                onPin={() => {
+                  setPinned((current) =>
+                    current.includes(workspace.id)
+                      ? current.filter((id) => id !== workspace.id)
+                      : [...current, workspace.id],
+                  );
+                }}
                 onUpdated={() => onWorkspaceUpdated?.()}
                 onDeleted={() => onWorkspaceDeleted?.()}
               />

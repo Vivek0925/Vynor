@@ -31,12 +31,16 @@ export interface WorkspaceCardData {
 
 interface WorkspaceCardProps {
   workspace: WorkspaceCardData;
+  isPinned?: boolean;
+  onPin?: () => void;
   onUpdated?: (workspace: Workspace) => void;
   onDeleted?: (workspaceId: string) => void;
 }
 
 export default function WorkspaceCard({
   workspace,
+  isPinned = false,
+  onPin,
   onUpdated,
   onDeleted,
 }: WorkspaceCardProps) {
@@ -109,6 +113,18 @@ export default function WorkspaceCard({
 
   const handleInvite = () => {
     closeMenu();
+    if (!navigator.clipboard) {
+      showToast({ message: "Unable to copy invite link.", tone: "error" });
+      return;
+    }
+    void navigator.clipboard
+      .writeText(`${window.location.origin}/workspace/${workspace.slug}`)
+      .then(() =>
+        showToast({ message: "Invite link copied.", tone: "success" }),
+      )
+      .catch(() =>
+        showToast({ message: "Unable to copy invite link.", tone: "error" }),
+      );
   };
 
   const handleSettings = () => {
@@ -168,8 +184,12 @@ export default function WorkspaceCard({
           <button
             type="button"
             aria-label={`Pin ${workspace.name}`}
-            onClick={(event) => event.stopPropagation()}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 text-muted transition hover:bg-cream hover:text-coral"
+            aria-pressed={isPinned}
+            onClick={(event) => {
+              event.stopPropagation();
+              onPin?.();
+            }}
+            className={`flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 transition hover:bg-cream hover:text-coral ${isPinned ? "text-coral [&_svg]:fill-coral" : "text-muted"}`}
           >
             <Star className="h-4 w-4" />
           </button>
@@ -220,7 +240,7 @@ export default function WorkspaceCard({
                 className="flex w-full items-center gap-2 rounded-[14px] px-3 py-2 text-left text-[13px] text-[#14141C] transition-colors hover:bg-[#FAFAF8]"
               >
                 <Mail className="h-4 w-4 text-[#5B5D6E]" />
-                Invite
+                Copy invite link
               </button>
               <button
                 type="button"

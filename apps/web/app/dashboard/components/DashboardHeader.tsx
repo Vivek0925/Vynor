@@ -135,7 +135,7 @@ export default function DashboardHeader({
   }
 
   return (
-    <header className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-3 border-b border-ink/15 px-6 py-4 sm:gap-4 sm:px-10 lg:px-16">
+    <header className="relative z-20 mx-auto flex w-full max-w-[1440px] items-center justify-between gap-3 border-b border-ink/15 px-6 py-4 sm:gap-4 sm:px-10 lg:px-16">
       <Link href="/" className="flex items-center gap-2">
         <span className="flex h-6 w-6 items-center justify-center rounded-[7px] bg-ink">
           <span className="text-xs font-semibold text-coral">V</span>
@@ -172,7 +172,7 @@ export default function DashboardHeader({
             <div
               role="dialog"
               aria-label="Notifications"
-              className="fixed right-3 top-20 z-20 w-[min(22rem,calc(100vw-1.5rem))] max-h-[calc(100svh-6rem)] overflow-hidden rounded-2xl border border-[#DEDFE8] bg-white shadow-[0_16px_45px_rgba(20,20,28,0.16)] sm:absolute sm:right-0 sm:top-12 sm:w-[360px]"
+              className="fixed right-3 top-20 z-50 w-[min(22rem,calc(100vw-1.5rem))] max-h-[calc(100svh-6rem)] overflow-hidden rounded-2xl border border-[#DEDFE8] bg-white shadow-[0_16px_45px_rgba(20,20,28,0.16)] sm:absolute sm:right-0 sm:top-12 sm:w-[360px]"
             >
               <div className="flex items-center justify-between border-b border-[#ECEEF3] px-4 py-3.5">
                 <div>
