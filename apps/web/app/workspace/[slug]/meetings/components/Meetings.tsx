@@ -288,18 +288,18 @@ export default function Meetings({ slug }: MeetingsProps) {
   );
 
   return (
-    <div className="relative isolate flex h-full min-h-0 flex-col overflow-y-auto scrollbar-none overflow-x-hidden rounded-[24px] border border-[#DEDFE8] bg-white sm:rounded-[32px]">
+    <div className="relative isolate flex h-full min-h-0 flex-col overflow-y-auto scrollbar-none overflow-x-hidden rounded-[22px] border border-[var(--workspace-line)] bg-[var(--workspace-surface)]">
       {/* Header */}
 
-      <div className="sticky top-0 z-30 shrink-0 rounded-xl border-b border-[#ECEEF3] bg-white px-3 py-3 shadow-[0_6px_16px_rgba(20,20,28,0.04)] sm:px-6 sm:py-4">
+      <div className="sticky top-0 z-30 shrink-0 border-b border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-4 py-4 sm:px-6">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <div className="min-w-0">
-              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#059669]">
+              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--workspace-ink)]">
                 Meetings
               </div>
 
-              <h1 className="font-light tracking-[-0.035em] text-[20px] text-[#14141C] sm:text-[22px]">
+              <h1 className="font-normal tracking-[-0.035em] text-[20px] text-[var(--workspace-ink)] sm:text-[22px]">
                 Meetings
               </h1>
             </div>
@@ -315,8 +315,8 @@ export default function Meetings({ slug }: MeetingsProps) {
               }}
               className={`inline-flex min-h-10 min-w-0 items-center justify-center gap-1.5 rounded-xl border px-2 text-center text-[11px] font-medium leading-tight transition sm:h-10 sm:gap-2 sm:px-3 sm:text-sm ${
                 calendarConnected
-                  ? "cursor-default border-green-200 bg-green-50 text-green-700"
-                  : "border-[#E2E5EB] bg-white text-[#343844] hover:bg-[#F5F6F8]"
+                  ? "cursor-default border-[var(--workspace-meeting-tint)] bg-[var(--workspace-meeting-tint)] text-[var(--workspace-ink)]"
+                  : "border-[var(--workspace-line)] bg-[var(--workspace-surface)] text-[var(--workspace-ink)] hover:bg-[var(--workspace-bg)]"
               }`}
             >
               <CalendarDays size={16} />
@@ -326,7 +326,7 @@ export default function Meetings({ slug }: MeetingsProps) {
             <button
               type="button"
               onClick={() => setShowCreate(true)}
-              className="flex min-h-10 shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-xl px-2 py-2.5 text-[11px] font-medium text-black transition hover:bg-green-50 sm:gap-2 sm:px-4 sm:text-sm"
+              className="flex min-h-10 shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-xl bg-[var(--workspace-coral)] px-2 py-2.5 text-[11px] font-medium text-white transition hover:opacity-90 sm:gap-2 sm:px-4 sm:text-sm"
             >
               <Plus size={17} />
               New Meeting
@@ -346,20 +346,20 @@ export default function Meetings({ slug }: MeetingsProps) {
           )}
 
           {loading ? (
-            <div className="flex min-h-[400px] items-center justify-center text-sm text-[#707487]">
+            <div className="flex min-h-[400px] items-center justify-center text-sm text-[var(--workspace-muted)]">
               Loading meetings...
             </div>
           ) : meetings.length === 0 ? (
-            <div className="flex min-h-[280px] flex-col items-center justify-center rounded-3xl border border-dashed border-[#DCDFE7] bg-white sm:min-h-[360px]">
-              <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[#F3F7F5]">
-                <Video size={30} className="text-[#1E8E5A]" />
+            <div className="flex min-h-[280px] flex-col items-center justify-center rounded-3xl border border-dashed border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)] sm:min-h-[360px]">
+              <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--workspace-meeting-tint)]">
+                <Video size={30} className="text-[var(--workspace-ink)]" />
               </div>
 
-              <h2 className="text-center text-xl font-semibold text-[#20232D] sm:text-left">
+              <h2 className="text-center text-xl font-medium text-[var(--workspace-ink)] sm:text-left">
                 No active or upcoming meetings
               </h2>
 
-              <p className="mt-2 max-w-md text-center text-sm leading-6 text-[#707487]">
+              <p className="mt-2 max-w-md text-center text-sm leading-6 text-[var(--workspace-muted)]">
                 Start an instant meeting or schedule one for later.
               </p>
 
@@ -379,9 +379,9 @@ export default function Meetings({ slug }: MeetingsProps) {
               {activeMeetings.length > 0 && (
                 <section>
                   <div className="mb-5 flex items-center gap-3">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#1E8E5A]" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-[var(--workspace-meeting-tint)]" />
 
-                    <h2 className="text-sm font-semibold uppercase tracking-wider text-[#85899A]">
+                    <h2 className="text-sm font-medium uppercase tracking-wider text-[var(--workspace-muted)]">
                       Live now
                     </h2>
                   </div>
@@ -405,9 +405,9 @@ export default function Meetings({ slug }: MeetingsProps) {
               {scheduledMeetings.length > 0 && (
                 <section>
                   <div className="mb-5 flex items-center gap-3">
-                    <CalendarDays size={16} className="text-[#85899A]" />
+                    <CalendarDays size={16} className="text-[var(--workspace-muted)]" />
 
-                    <h2 className="text-sm font-semibold uppercase tracking-wider text-[#85899A]">
+                    <h2 className="text-sm font-medium uppercase tracking-wider text-[var(--workspace-muted)]">
                       Upcoming
                     </h2>
                   </div>
@@ -437,11 +437,11 @@ export default function Meetings({ slug }: MeetingsProps) {
           <div className="my-auto max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl sm:p-6">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-[#20232D]">
+                <h2 className="text-xl font-medium text-[var(--workspace-ink)]">
                   New Meeting
                 </h2>
 
-                <p className="mt-1 text-sm text-[#707487]">
+                <p className="mt-1 text-sm text-[var(--workspace-muted)]">
                   Start now or schedule it for later.
                 </p>
               </div>
@@ -450,7 +450,7 @@ export default function Meetings({ slug }: MeetingsProps) {
                 type="button"
                 onClick={closeModal}
                 disabled={creating}
-                className="rounded-xl p-2 text-[#85899A] transition hover:bg-zinc-100 hover:text-[#20232D] disabled:opacity-50"
+                className="rounded-xl p-2 text-[var(--workspace-muted)] transition hover:bg-[var(--workspace-bg)] hover:text-[var(--workspace-ink)] disabled:opacity-50"
               >
                 <X size={18} />
               </button>
@@ -460,7 +460,7 @@ export default function Meetings({ slug }: MeetingsProps) {
               {/* Title */}
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-[#20232D]">
+                <label className="mb-2 block text-sm font-medium text-[var(--workspace-ink)]">
                   Meeting title
                 </label>
 
@@ -468,14 +468,14 @@ export default function Meetings({ slug }: MeetingsProps) {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Weekly Engineering Sync"
-                  className="w-full rounded-xl border border-[#DEDFE8] px-4 py-3 text-sm text-[#20232D] outline-none transition placeholder:text-[#A1A5B3] focus:border-[#BEEAD7] focus:ring-2 focus:ring-[#E7F8EF]"
+                  className="w-full rounded-xl border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-4 py-3 text-sm text-[var(--workspace-ink)] outline-none transition placeholder:text-[var(--workspace-muted)] focus:border-[var(--workspace-coral)] focus:ring-2 focus:ring-[var(--workspace-coral-tint)]"
                 />
               </div>
 
               {/* Description */}
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-[#20232D]">
+                <label className="mb-2 block text-sm font-medium text-[var(--workspace-ink)]">
                   Description
                   <span className="ml-1 font-normal text-[#A1A5B3]">
                     (optional)
@@ -487,14 +487,14 @@ export default function Meetings({ slug }: MeetingsProps) {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
                   placeholder="What is this meeting about?"
-                  className="w-full resize-none rounded-xl border border-[#DEDFE8] px-4 py-3 text-sm text-[#20232D] outline-none transition placeholder:text-[#A1A5B3] focus:border-[#BEEAD7] focus:ring-2 focus:ring-[#E7F8EF]"
+                  className="w-full resize-none rounded-xl border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-4 py-3 text-sm text-[var(--workspace-ink)] outline-none transition placeholder:text-[var(--workspace-muted)] focus:border-[var(--workspace-coral)] focus:ring-2 focus:ring-[var(--workspace-coral-tint)]"
                 />
               </div>
 
               {/* Meeting mode */}
 
               <div>
-                <label className="mb-3 block text-sm font-medium text-[#20232D]">
+                <label className="mb-3 block text-sm font-medium text-[var(--workspace-ink)]">
                   When?
                 </label>
 
@@ -504,25 +504,25 @@ export default function Meetings({ slug }: MeetingsProps) {
                     onClick={() => setMode("now")}
                     className={`rounded-2xl border px-4 py-4 text-left transition ${
                       mode === "now"
-                        ? "border-[#9ADDBB] bg-[#F0FBF5]"
-                        : "border-[#E1E3EA] bg-white hover:bg-[#FAFAFB]"
+                        ? "border-[var(--workspace-coral)] bg-[var(--workspace-coral-tint)]"
+                        : "border-[var(--workspace-line)] bg-[var(--workspace-surface)] hover:bg-[var(--workspace-bg)]"
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <span
                         className={`h-2.5 w-2.5 rounded-full ${
                           mode === "now"
-                            ? "bg-[#1E8E5A]"
-                            : "border border-[#B7BAC5]"
+                            ? "bg-[var(--workspace-coral)]"
+                            : "border border-[var(--workspace-muted)]"
                         }`}
                       />
 
-                      <span className="text-sm font-semibold text-[#20232D]">
+                      <span className="text-sm font-medium text-[var(--workspace-ink)]">
                         Start now
                       </span>
                     </div>
 
-                    <p className="mt-2 pl-4 text-xs leading-5 text-[#707487]">
+                    <p className="mt-2 pl-4 text-xs leading-5 text-[var(--workspace-muted)]">
                       Start the meeting immediately.
                     </p>
                   </button>
@@ -532,8 +532,8 @@ export default function Meetings({ slug }: MeetingsProps) {
                     onClick={() => setMode("scheduled")}
                     className={`rounded-2xl border px-4 py-4 text-left transition ${
                       mode === "scheduled"
-                        ? "border-[#9ADDBB] "
-                        : "border-[#E1E3EA] bg-white hover:bg-[#FAFAFB]"
+                        ? "border-[var(--workspace-coral)] bg-[var(--workspace-coral-tint)]"
+                        : "border-[var(--workspace-line)] bg-[var(--workspace-surface)] hover:bg-[var(--workspace-bg)]"
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -541,17 +541,17 @@ export default function Meetings({ slug }: MeetingsProps) {
                         size={15}
                         className={
                           mode === "scheduled"
-                            ? "text-[#1E8E5A]"
-                            : "text-[#85899A]"
+                            ? "text-[var(--workspace-coral)]"
+                            : "text-[var(--workspace-muted)]"
                         }
                       />
 
-                      <span className="text-sm font-semibold text-[#20232D]">
+                      <span className="text-sm font-medium text-[var(--workspace-ink)]">
                         Schedule
                       </span>
                     </div>
 
-                    <p className="mt-2 pl-6 text-xs leading-5 text-[#707487]">
+                    <p className="mt-2 pl-6 text-xs leading-5 text-[var(--workspace-muted)]">
                       Pick a date and time.
                     </p>
                   </button>
@@ -562,7 +562,7 @@ export default function Meetings({ slug }: MeetingsProps) {
 
               {mode === "scheduled" && (
                 <div>
-                  <label className="mb-2 flex items-center gap-2 text-sm font-medium text-[#20232D]">
+                  <label className="mb-2 flex items-center gap-2 text-sm font-medium text-[var(--workspace-ink)]">
                     <CalendarDays size={15} />
                     Date and time
                   </label>
@@ -572,7 +572,7 @@ export default function Meetings({ slug }: MeetingsProps) {
                     value={scheduledAt}
                     min={new Date().toISOString().slice(0, 16)}
                     onChange={(e) => setScheduledAt(e.target.value)}
-                    className="w-full rounded-xl border border-[#DEDFE8] px-4 py-3 text-sm text-[#20232D] outline-none transition focus:border-[#BEEAD7] focus:ring-2 focus:ring-[#E7F8EF]"
+                    className="w-full rounded-xl border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-4 py-3 text-sm text-[var(--workspace-ink)] outline-none transition focus:border-[var(--workspace-coral)] focus:ring-2 focus:ring-[var(--workspace-coral-tint)]"
                   />
                 </div>
               )}
@@ -591,7 +591,7 @@ export default function Meetings({ slug }: MeetingsProps) {
                 type="button"
                 onClick={closeModal}
                 disabled={creating}
-                className="rounded-xl px-4 py-2.5 text-sm font-medium text-[#707487] transition hover:bg-zinc-100 disabled:opacity-50"
+                className="rounded-xl px-4 py-2.5 text-sm font-medium text-[var(--workspace-muted)] transition hover:bg-[var(--workspace-bg)] disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -604,7 +604,7 @@ export default function Meetings({ slug }: MeetingsProps) {
                   !title.trim() ||
                   (mode === "scheduled" && !scheduledAt)
                 }
-                className="flex items-center gap-2 rounded-xl  px-5 py-2.5 text-sm font-medium text-black transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex items-center gap-2 rounded-xl bg-[var(--workspace-coral)] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <Video size={16} />
 
@@ -620,14 +620,14 @@ export default function Meetings({ slug }: MeetingsProps) {
       )}
       {editingMeeting && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-lg rounded-3xl bg-[var(--workspace-surface)] p-6 shadow-2xl">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-[#20232D]">
+                <h2 className="text-xl font-medium text-[var(--workspace-ink)]">
                   Edit Meeting
                 </h2>
 
-                <p className="mt-1 text-sm text-[#707487]">
+                <p className="mt-1 text-sm text-[var(--workspace-muted)]">
                   Update the meeting details.
                 </p>
               </div>
@@ -635,7 +635,7 @@ export default function Meetings({ slug }: MeetingsProps) {
               <button
                 type="button"
                 onClick={() => setEditingMeeting(null)}
-                className="rounded-xl p-2 text-[#85899A] transition hover:bg-zinc-100 hover:text-[#20232D]"
+                className="rounded-xl p-2 text-[var(--workspace-muted)] transition hover:bg-[var(--workspace-bg)] hover:text-[var(--workspace-ink)]"
               >
                 <X size={18} />
               </button>
@@ -643,19 +643,19 @@ export default function Meetings({ slug }: MeetingsProps) {
 
             <div className="mt-6 space-y-5">
               <div>
-                <label className="mb-2 block text-sm font-medium text-[#20232D]">
+                <label className="mb-2 block text-sm font-medium text-[var(--workspace-ink)]">
                   Meeting title
                 </label>
 
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full rounded-xl border border-[#DEDFE8] px-4 py-3 text-sm text-[#20232D] outline-none transition focus:border-[#BEEAD7] focus:ring-2 focus:ring-[#E7F8EF]"
+                  className="w-full rounded-xl border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-4 py-3 text-sm text-[var(--workspace-ink)] outline-none transition focus:border-[var(--workspace-coral)] focus:ring-2 focus:ring-[var(--workspace-coral-tint)]"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-[#20232D]">
+                <label className="mb-2 block text-sm font-medium text-[var(--workspace-ink)]">
                   Description
                 </label>
 
@@ -663,12 +663,12 @@ export default function Meetings({ slug }: MeetingsProps) {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
-                  className="w-full resize-none rounded-xl border border-[#DEDFE8] px-4 py-3 text-sm text-[#20232D] outline-none transition focus:border-[#BEEAD7] focus:ring-2 focus:ring-[#E7F8EF]"
+                  className="w-full resize-none rounded-xl border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-4 py-3 text-sm text-[var(--workspace-ink)] outline-none transition focus:border-[var(--workspace-coral)] focus:ring-2 focus:ring-[var(--workspace-coral-tint)]"
                 />
               </div>
 
               <div>
-                <label className="mb-2 flex items-center gap-2 text-sm font-medium text-[#20232D]">
+                <label className="mb-2 flex items-center gap-2 text-sm font-medium text-[var(--workspace-ink)]">
                   <CalendarDays size={15} />
                   Date and time
                 </label>
@@ -678,7 +678,7 @@ export default function Meetings({ slug }: MeetingsProps) {
                   value={scheduledAt}
                   min={new Date().toISOString().slice(0, 16)}
                   onChange={(e) => setScheduledAt(e.target.value)}
-                  className="w-full rounded-xl border border-[#DEDFE8] px-4 py-3 text-sm text-[#20232D] outline-none transition focus:border-[#BEEAD7] focus:ring-2 focus:ring-[#E7F8EF]"
+                  className="w-full rounded-xl border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-4 py-3 text-sm text-[var(--workspace-ink)] outline-none transition focus:border-[var(--workspace-coral)] focus:ring-2 focus:ring-[var(--workspace-coral-tint)]"
                 />
               </div>
             </div>
@@ -687,7 +687,7 @@ export default function Meetings({ slug }: MeetingsProps) {
               <button
                 type="button"
                 onClick={() => setEditingMeeting(null)}
-                className="rounded-xl px-4 py-2.5 text-sm font-medium text-[#707487] transition hover:bg-zinc-100"
+                className="rounded-xl px-4 py-2.5 text-sm font-medium text-[var(--workspace-muted)] transition hover:bg-[var(--workspace-bg)]"
               >
                 Cancel
               </button>
@@ -695,7 +695,7 @@ export default function Meetings({ slug }: MeetingsProps) {
               <button
                 type="button"
                 onClick={updateMeeting}
-                className="rounded-xl px-5 py-2.5 text-sm font-medium text-black transition hover:bg-green-100"
+                className="rounded-xl bg-[var(--workspace-coral)] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
               >
                 Save Changes
               </button>

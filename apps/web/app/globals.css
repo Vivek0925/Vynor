@@ -129,6 +129,7 @@ body {
   --workspace-coral: #e5704f;
   --workspace-coral-tint: #fbe9e1;
   --workspace-sage-tint: #d6e4cd;
+  --workspace-meeting-tint: #e8f2e3;
   font-family: var(--font-inter-tight), system-ui, sans-serif;
 }
 
@@ -142,6 +143,7 @@ body {
   --workspace-coral: #ec7d5d;
   --workspace-coral-tint: #3b2a23;
   --workspace-sage-tint: #24382b;
+  --workspace-meeting-tint: #304638;
 }
 
 .overview-theme button:focus-visible {

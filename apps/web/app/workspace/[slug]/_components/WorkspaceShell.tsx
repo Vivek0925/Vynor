@@ -195,11 +195,7 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
         </header>
 
         <main className="flex min-h-0 flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 md:px-6">
-          {loading ? (
-            <div className="flex min-h-[50vh] items-center justify-center rounded-[24px] border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-4 text-center text-[14px] text-[var(--workspace-muted)] shadow-[0_18px_50px_rgba(23,32,26,0.06)] sm:rounded-[32px]">
-              Loading workspace...
-            </div>
-          ) : !workspace ? (
+          {!loading && !workspace ? (
             <div className="flex min-h-[50vh] items-center justify-center rounded-[24px] border border-[var(--workspace-line)] bg-[var(--workspace-surface)] p-5 text-center shadow-[0_18px_50px_rgba(23,32,26,0.06)] sm:rounded-[32px] sm:p-8">
               <div className="min-w-0">
                 <div className="text-[11px] uppercase tracking-[0.22em] text-[var(--workspace-coral)]">
