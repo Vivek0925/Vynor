@@ -209,7 +209,7 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
       <aside
         className={`${
           mobileChatOpen ? "absolute inset-y-0 left-0 z-30 flex w-[min(86vw,280px)]" : "hidden"
-        } shrink-0 flex-col border-r border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)] p-3 shadow-[8px_0_24px_rgba(23,32,26,0.06)] sm:static sm:flex sm:w-[240px] sm:shadow-none`}
+        } shrink-0 flex-col border-r border-[var(--workspace-line)] bg-[var(--workspace-surface)] p-3 shadow-[8px_0_24px_rgba(23,32,26,0.06)] sm:static sm:flex sm:w-[240px] sm:shadow-none`}
       >
         <div className="mb-3 flex items-center justify-between px-2">
           <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--workspace-muted)]">
