@@ -194,16 +194,16 @@ export default function WorkspaceSidebar({
     <aside
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className={`fixed inset-y-0 left-0 z-50 flex w-[248px] shrink-0 flex-col border-r border-[#E8E8E8] bg-[#FCFCFB] px-3 py-4 transition-transform duration-200 md:static md:z-auto md:flex ${
+      className={`fixed inset-y-0 left-0 z-50 flex w-[260px] shrink-0 flex-col border-r border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-3 py-4 shadow-[8px_0_24px_rgba(23,32,26,0.06)] transition-transform duration-200 md:static md:z-auto md:flex md:shadow-none ${
         mobileOpen ? "translate-x-0" : "-translate-x-full"
       } md:translate-x-0`}
     >
       <div className="flex items-center justify-between px-2 pb-5">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
-          <span className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-[#0FA968] text-white">
-            <span className="h-3.5 w-3.5 rounded-[3px] border-2 border-white" />
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--workspace-ink)] text-[var(--workspace-coral)]">
+            <span className="h-3.5 w-3.5 rounded-[3px] border-2 border-current" />
           </span>
-          <span className="text-[14px] font-semibold tracking-[-0.02em] text-[#202124]">
+          <span className="text-xl font-semibold tracking-[-0.04em] text-[var(--workspace-ink)]">
             Vynor
           </span>
         </Link>
@@ -211,7 +211,7 @@ export default function WorkspaceSidebar({
         <button
           type="button"
           onClick={onMobileClose}
-          className="rounded-lg border border-[#E8E8E8] px-2 py-1 text-xs text-[#666] md:hidden"
+          className="rounded-lg border border-[var(--workspace-line)] px-2 py-1 text-xs text-[var(--workspace-muted)] md:hidden"
           aria-label="Close workspace navigation"
         >
           Close
@@ -220,18 +220,18 @@ export default function WorkspaceSidebar({
 
       <button
         type="button"
-        className="mx-1 mb-5 flex items-center gap-3 rounded-[14px] border border-[#EAEAE8] bg-white px-3 py-3 text-left shadow-[0_2px_8px_rgba(20,20,20,0.03)]"
+        className="mx-1 mb-5 flex items-center gap-3 rounded-[14px] border border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)] px-3 py-3 text-left"
         aria-label={`Switch workspace, current workspace ${title}`}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EAFBF1] text-[#15945E]">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--workspace-sage-tint)] text-[var(--workspace-muted)]">
           <BriefcaseBusiness className="h-3.5 w-3.5" />
         </span>
-        <span className="truncate text-[14px] font-medium text-[#303236]">
+        <span className="truncate text-[14px] font-medium text-[var(--workspace-ink)]">
           {title}
         </span>
       </button>
 
-      <div className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.1em] text-[#9A9DA0]">
+      <div className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--workspace-muted)]">
         Workspace
       </div>
 
@@ -243,7 +243,7 @@ export default function WorkspaceSidebar({
         </div>
 
         <div>
-          <div className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.1em] text-[#9A9DA0]">
+          <div className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--workspace-muted)]">
             Communication
           </div>
           <div className="space-y-1">
@@ -252,7 +252,7 @@ export default function WorkspaceSidebar({
         </div>
 
         <div>
-          <div className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.1em] text-[#9A9DA0]">
+          <div className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--workspace-muted)]">
             Resources
           </div>
           <div className="space-y-1">
@@ -266,12 +266,12 @@ export default function WorkspaceSidebar({
           type="button"
           aria-expanded={membersExpanded}
           onClick={() => setMembersExpanded((expanded) => !expanded)}
-          className="min-h-[87px] w-full rounded-[12px] border border-[#EAEAE8] bg-white p-3.5 text-left transition-colors hover:border-[#C9CDC6]"
+          className="min-h-[87px] w-full rounded-[14px] border border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)] p-3.5 text-left transition-colors hover:border-[var(--workspace-muted)]"
         >
           <div className="flex items-center justify-between">
-            <div className="text-[13px] font-medium text-[#303236]">Team</div>
+            <div className="text-[13px] font-medium text-[var(--workspace-ink)]">Team</div>
             <ChevronDown
-              className={`h-3.5 w-3.5 text-[#5B5D6E] transition-transform duration-200 ${
+              className={`h-3.5 w-3.5 text-[var(--workspace-muted)] transition-transform duration-200 ${
                 membersExpanded ? "rotate-180" : ""
               }`}
               aria-hidden="true"
@@ -283,14 +283,14 @@ export default function WorkspaceSidebar({
                 <MemberAvatar key={member.userId} member={member} />
               ))}
             </div>
-            <span className="text-[11px] text-[#85898C]">
+            <span className="text-[11px] text-[var(--workspace-muted)]">
               {membersLoading
                 ? "Loading..."
                 : membersError
                   ? "Unavailable"
                   : `${activeMemberCount} active · ${members.length} total`}
             </span>
-            <span className="text-[14px] text-[#596064]">›</span>
+            <span className="text-[14px] text-[var(--workspace-muted)]">›</span>
           </div>
 
           <div
@@ -301,9 +301,9 @@ export default function WorkspaceSidebar({
             }`}
           >
             <div className="min-h-0 overflow-hidden">
-              <div className="border-t border-[#EAEAE8] pt-2.5">
+              <div className="border-t border-[var(--workspace-line)] pt-2.5">
                 {membersError ? (
-                  <div className="text-[11px] text-[#B91C1C]">
+                  <div className="text-[11px] text-[var(--workspace-coral)]">
                     Try again after refreshing the workspace.
                   </div>
                 ) : (
@@ -326,19 +326,19 @@ export default function WorkspaceSidebar({
           type="button"
           aria-expanded={profileExpanded}
           onClick={() => setProfileExpanded((expanded) => !expanded)}
-          className="w-full border-t border-[#EAEAE8] px-2 pt-3 text-left"
+          className="w-full border-t border-[var(--workspace-line)] px-2 pt-3 text-left"
         >
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#D7E8E2] text-[11px] font-medium text-[#27634F]">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--workspace-sage-tint)] text-[11px] font-medium text-[var(--workspace-muted)]">
               {userInitials}
             </div>
-            <div className="min-w-0 flex-1 truncate text-[13px] font-medium text-[#303236]">
+            <div className="min-w-0 flex-1 truncate text-[13px] font-medium text-[var(--workspace-ink)]">
               {user?.name || "Your profile"}
             </div>
-            <MoreHorizontal className="h-4 w-4 shrink-0 text-[#596064]" />
+            <MoreHorizontal className="h-4 w-4 shrink-0 text-[var(--workspace-muted)]" />
           </div>
           {profileExpanded && (
-            <div className="mt-2 truncate pl-10 text-[11px] font-normal text-[#85898C]">
+            <div className="mt-2 truncate pl-10 text-[11px] font-normal text-[var(--workspace-muted)]">
               {user?.email || "Account"}
             </div>
           )}
@@ -367,8 +367,8 @@ export default function WorkspaceSidebar({
               onClick={onMobileClose}
               className={`flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-[14px] transition-colors ${
                 active
-                  ? "bg-[#E5F6EC] font-medium text-[#245C45]"
-                  : "text-[#303236] hover:bg-[#F2F5F1]"
+                  ? "bg-[var(--workspace-coral-tint)] font-medium text-[var(--workspace-coral)]"
+                  : "text-[var(--workspace-ink)] hover:bg-[var(--workspace-bg)]"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -387,7 +387,7 @@ function MemberAvatar({ member }: { member: WorkspaceMember }) {
     .toUpperCase();
 
   return (
-    <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-[#EAFBF1] text-[8px] font-medium text-[#065F46]">
+    <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--workspace-surface)] bg-[var(--workspace-sage-tint)] text-[8px] font-medium text-[var(--workspace-muted)]">
       {member.user.avatar ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={member.user.avatar} alt="" className="h-full w-full object-cover" />
@@ -406,12 +406,12 @@ function MemberRow({
   online: boolean;
 }) {
   return (
-    <div className="flex items-center gap-2 text-[11px] text-[#303236]">
+    <div className="flex items-center gap-2 text-[11px] text-[var(--workspace-ink)]">
       <div className="relative">
         <MemberAvatar member={member} />
         <span
-          className={`absolute bottom-0 right-0 h-1.5 w-1.5 rounded-full border border-white ${
-            online ? "bg-[#059669]" : "bg-[#A7A9B5]"
+          className={`absolute bottom-0 right-0 h-1.5 w-1.5 rounded-full border border-[var(--workspace-surface)] ${
+            online ? "bg-[var(--workspace-coral)]" : "bg-[var(--workspace-muted)]"
           }`}
         />
       </div>

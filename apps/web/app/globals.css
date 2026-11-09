@@ -119,6 +119,31 @@ body {
   color: var(--overview-ink);
 }
 
+.workspace-shell {
+  --workspace-bg: #f5f3ee;
+  --workspace-surface: #ffffff;
+  --workspace-surface-secondary: #faf8f3;
+  --workspace-ink: #17201a;
+  --workspace-muted: #5c675f;
+  --workspace-line: rgba(23, 32, 26, 0.11);
+  --workspace-coral: #e5704f;
+  --workspace-coral-tint: #fbe9e1;
+  --workspace-sage-tint: #d6e4cd;
+  font-family: var(--font-inter-tight), system-ui, sans-serif;
+}
+
+.workspace-shell[data-theme="dark"] {
+  --workspace-bg: #0f1713;
+  --workspace-surface: #1b2620;
+  --workspace-surface-secondary: #202c25;
+  --workspace-ink: #ece7da;
+  --workspace-muted: #9aa89f;
+  --workspace-line: rgba(255, 255, 255, 0.1);
+  --workspace-coral: #ec7d5d;
+  --workspace-coral-tint: #3b2a23;
+  --workspace-sage-tint: #24382b;
+}
+
 .overview-theme button:focus-visible {
   outline-color: var(--overview-ink);
 }

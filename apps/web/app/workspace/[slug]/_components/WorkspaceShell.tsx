@@ -126,7 +126,7 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
     <div
       onTouchStart={handleShellTouchStart}
       onTouchEnd={handleShellTouchEnd}
-      className="flex h-[100dvh] min-h-0 overflow-hidden bg-[#F8F8F6] text-[#14141C]"
+      className="workspace-shell flex h-[100dvh] min-h-0 overflow-hidden bg-[var(--workspace-bg)] text-[var(--workspace-ink)]"
     >
       <WorkspaceSidebar
         slug={slug}
@@ -140,38 +140,39 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
           type="button"
           aria-label="Close workspace navigation"
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-black/20 md:hidden"
+          className="fixed inset-0 z-40 bg-transparent md:hidden"
         />
       )}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="flex h-[68px] shrink-0 items-center justify-between gap-2 border-b border-[#DEDFE8]/80 bg-white/85 px-3 backdrop-blur-xl md:h-[76px] md:gap-4 md:px-6">
+        <header className="flex h-[68px] shrink-0 items-center justify-between gap-2 border-b border-[var(--workspace-line)] bg-[var(--workspace-bg)] px-3 md:h-[72px] md:gap-4 md:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#DEDFE8] bg-white text-[#14141C] md:hidden"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--workspace-line)] bg-[var(--workspace-surface)] text-[var(--workspace-ink)] md:hidden"
               aria-label="Open workspace navigation"
             >
               <Menu className="h-5 w-5" />
             </button>
 
             <div className="min-w-0 md:hidden">
-              <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-[#059669]">
+              <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--workspace-muted)]">
                 Workspace
               </div>
-              <div className="truncate text-[18px] font-medium tracking-[-0.02em] text-[#14141C]">
+              <div className="truncate text-[18px] font-medium tracking-[-0.02em] text-[var(--workspace-ink)]">
                 {title}
               </div>
             </div>
 
-            <div className="hidden min-w-[320px] items-center gap-2 rounded-full border border-[#DEDFE8] bg-[#FAFAF8] px-4 py-2 md:flex">
-              <Search className="h-4 w-4 text-[#5B5D6E]" />
+            <div className="hidden min-w-[320px] flex-1 items-center gap-2 rounded-full border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-4 py-2 md:flex md:max-w-[420px]">
+              <Search className="h-4 w-4 text-[var(--workspace-muted)]" />
               <input
                 aria-label="Search workspace"
                 placeholder="Search workspace"
-                className="w-full bg-transparent text-[13px] text-[#14141C] outline-none placeholder:text-[#5B5D6E]"
+                className="w-full bg-transparent text-[13px] text-[var(--workspace-ink)] outline-none placeholder:text-[var(--workspace-muted)]"
               />
+              <kbd className="rounded-md border border-[var(--workspace-line)] px-1.5 text-[11px] text-[var(--workspace-muted)]">/</kbd>
             </div>
           </div>
 
@@ -179,14 +180,14 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
             {/* button to redirect to dashboard */}
             <Link
               href="/dashboard"
-              className="rounded-full border border-[#DEDFE8] bg-white px-2 py-2 text-[11px] font-medium text-[#14141C] transition-colors hover:bg-[#FAFAF8] sm:px-2.5 sm:text-[12px] md:px-3 md:text-[13px]"
+              className="rounded-full border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-2 py-2 text-[11px] font-medium text-[var(--workspace-ink)] transition-colors hover:bg-[var(--workspace-surface-secondary)] sm:px-2.5 sm:text-[12px] md:px-3 md:text-[13px]"
             >
               Dashboard
             </Link>
 
             <button
               onClick={() => setInviteOpen(true)}
-              className="rounded-full border border-[#DEDFE8] bg-white px-2 py-2 text-[11px] font-medium text-[#14141C] transition-colors hover:bg-[#FAFAF8] sm:px-2.5 md:px-4"
+              className="rounded-full bg-[var(--workspace-coral)] px-2 py-2 text-[11px] font-medium text-white transition-colors hover:opacity-90 sm:px-2.5 md:px-4"
             >
               Invite
             </button>
@@ -195,25 +196,25 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
 
         <main className="flex min-h-0 flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 md:px-6">
           {loading ? (
-            <div className="flex min-h-[50vh] items-center justify-center rounded-[24px] border border-[#DEDFE8] bg-white px-4 text-center text-[14px] text-[#5B5D6E] shadow-[0_18px_50px_rgba(20,20,28,0.06)] sm:rounded-[32px]">
+            <div className="flex min-h-[50vh] items-center justify-center rounded-[24px] border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-4 text-center text-[14px] text-[var(--workspace-muted)] shadow-[0_18px_50px_rgba(23,32,26,0.06)] sm:rounded-[32px]">
               Loading workspace...
             </div>
           ) : !workspace ? (
-            <div className="flex min-h-[50vh] items-center justify-center rounded-[24px] border border-[#DEDFE8] bg-white p-5 text-center shadow-[0_18px_50px_rgba(20,20,28,0.06)] sm:rounded-[32px] sm:p-8">
+            <div className="flex min-h-[50vh] items-center justify-center rounded-[24px] border border-[var(--workspace-line)] bg-[var(--workspace-surface)] p-5 text-center shadow-[0_18px_50px_rgba(23,32,26,0.06)] sm:rounded-[32px] sm:p-8">
               <div className="min-w-0">
-                <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-[#B91C1C]">
+                <div className="text-[11px] uppercase tracking-[0.22em] text-[var(--workspace-coral)]">
                   Workspace not found
                 </div>
-                <h1 className="mt-2 text-[26px] font-light tracking-[-0.03em] text-[#14141C] sm:text-[30px]">
+                <h1 className="mt-2 text-[26px] font-normal tracking-[-0.03em] text-[var(--workspace-ink)] sm:text-[30px]">
                   We could not open this workspace.
                 </h1>
-                <p className="mt-3 max-w-xl text-[14px] leading-relaxed text-[#5B5D6E]">
+                <p className="mt-3 max-w-xl text-[14px] leading-relaxed text-[var(--workspace-muted)]">
                   The workspace may have been deleted or you may not have
                   access.
                 </p>
                 <Link
                   href="/dashboard"
-                  className="mt-6 inline-flex rounded-full border border-[#DEDFE8] px-5 py-2.5 text-[14px] font-medium text-[#14141C] transition-colors hover:bg-[#FAFAF8]"
+                  className="mt-6 inline-flex rounded-full border border-[var(--workspace-line)] px-5 py-2.5 text-[14px] font-medium text-[var(--workspace-ink)] transition-colors hover:bg-[var(--workspace-surface-secondary)]"
                 >
                   Back to dashboard
                 </Link>
