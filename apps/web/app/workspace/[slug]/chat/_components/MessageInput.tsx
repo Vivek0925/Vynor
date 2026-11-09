@@ -168,7 +168,7 @@ export default function MessageInput({
                   Replying to {replyingTo.sender.name}
                 </p>
 
-                <p className="mt-1 line-clamp-2 text-xs text-zinc-600 sm:text-sm">
+                <p className="mt-1 line-clamp-2 text-xs text-[var(--workspace-muted)] sm:text-sm">
                   {replyingTo.content || "Attachment"}
                 </p>
               </div>
@@ -176,7 +176,7 @@ export default function MessageInput({
 
             <button
               onClick={onCancelReply}
-              className="rounded-lg p-1 hover:bg-white"
+              className="rounded-lg p-1 hover:bg-[var(--workspace-surface)]"
             >
               <X size={16} />
             </button>
@@ -188,13 +188,13 @@ export default function MessageInput({
             {attachments.map((attachment, index) => (
               <div
                 key={index}
-                className="flex items-center gap-2 rounded-xl border border-[#E6E8EF] bg-white px-2.5 py-1.5 text-xs shadow-sm sm:px-3 sm:py-2 sm:text-sm"
+                className="flex items-center gap-2 rounded-xl border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-2.5 py-1.5 text-xs shadow-sm sm:px-3 sm:py-2 sm:text-sm"
               >
                 {attachment.mimeType.startsWith("image/") ? (
                   <img
                     src={attachment.url}
                     alt={attachment.fileName}
-                    className="h-10 w-10 rounded-lg border border-[#E6E8EF] object-cover"
+                    className="h-10 w-10 rounded-lg border border-[var(--workspace-line)] object-cover"
                   />
                 ) : (
                   <span className="text-sm">📎</span>
@@ -209,7 +209,7 @@ export default function MessageInput({
                   onClick={() => removeAttachment(index)}
                   aria-label={`Remove ${attachment.fileName}`}
                 >
-                  <X size={15} className="text-zinc-500 hover:text-red-500" />
+                  <X size={15} className="text-[var(--workspace-muted)] hover:text-[var(--workspace-coral)]" />
                 </button>
               </div>
             ))}
@@ -226,7 +226,7 @@ export default function MessageInput({
               }
               aria-label="Add attachment"
               aria-expanded={attachmentMenuOpen}
-              className="rounded-lg p-1.5 text-[#7C8093] transition hover:bg-[#F5F6F8] sm:rounded-xl sm:p-2"
+              className="rounded-lg p-1.5 text-[var(--workspace-muted)] transition hover:bg-[var(--workspace-surface-secondary)] sm:rounded-xl sm:p-2"
             >
               {uploading ? (
                 <Loader2 size={16} className="animate-spin" />
@@ -279,13 +279,13 @@ export default function MessageInput({
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={`Message ${conversationLabel}...`}
-            className="max-h-32 flex-1 resize-none bg-transparent text-[13px] leading-5 text-[#23262F] placeholder:text-[#9CA3AF] outline-none sm:max-h-40 sm:text-[15px] sm:leading-6"
+            className="max-h-32 flex-1 resize-none bg-transparent text-[13px] leading-5 text-[var(--workspace-ink)] placeholder:text-[var(--workspace-muted)] outline-none sm:max-h-40 sm:text-[15px] sm:leading-6"
           />
 
           <button
             type="button"
             aria-label="Add emoji"
-            className="rounded-lg p-1.5 text-[#7C8093] transition hover:bg-[#F5F6F8] sm:rounded-xl sm:p-2"
+            className="rounded-lg p-1.5 text-[var(--workspace-muted)] transition hover:bg-[var(--workspace-surface-secondary)] sm:rounded-xl sm:p-2"
           >
             <Smile size={16} />
           </button>

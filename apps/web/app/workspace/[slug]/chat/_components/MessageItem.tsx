@@ -253,8 +253,8 @@ function MessageItem({
           <button
             onClick={() => onReply(message)}
             className={clsx(
-              "absolute bottom-2 z-20 hidden h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white shadow-md transition-all sm:flex",
-              "opacity-100 group-hover:opacity-100 hover:bg-zinc-100 sm:opacity-0",
+              "absolute bottom-2 z-20 hidden h-8 w-8 items-center justify-center rounded-lg border border-[var(--workspace-line)] bg-[var(--workspace-surface)] text-[var(--workspace-ink)] shadow-md transition-all sm:flex",
+              "opacity-100 group-hover:opacity-100 hover:bg-[var(--workspace-surface-secondary)] sm:opacity-0",
               isMine ? "-left-10" : "-right-10",
             )}
             title="Reply"
@@ -299,7 +299,7 @@ function MessageItem({
               <button
                 type="button"
                 onClick={() => setActionsOpen((open) => !open)}
-                className={`absolute top-1 hidden h-6 w-6 items-center justify-center p-0 text-zinc-400 opacity-0 transition hover:text-zinc-700 group-hover:opacity-100 group-focus-within:opacity-100 sm:flex sm:h-7 sm:w-7
+                className={`absolute top-1 hidden h-6 w-6 items-center justify-center p-0 text-[var(--workspace-muted)] opacity-0 transition hover:text-[var(--workspace-ink)] group-hover:opacity-100 group-focus-within:opacity-100 sm:flex sm:h-7 sm:w-7
       ${isMine ? "-right-8" : "-left-8"}
     `}
                 aria-label="Message actions"
@@ -310,11 +310,11 @@ function MessageItem({
               {actionsOpen && (
                 <div
                   className={clsx(
-                    "absolute bottom-8 w-44 rounded-xl border border-zinc-200 bg-white p-1.5 text-left shadow-xl",
+                    "absolute bottom-8 w-44 rounded-xl border border-[var(--workspace-line)] bg-[var(--workspace-surface)] p-1.5 text-left text-[var(--workspace-ink)] shadow-xl",
                     isMine ? "right-0" : "left-0",
                   )}
                 >
-                  <p className="px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-zinc-400">
+                  <p className="px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-[var(--workspace-muted)]">
                     React
                   </p>
 
@@ -327,7 +327,7 @@ function MessageItem({
                           onReact(message, emoji);
                           setActionsOpen(false);
                         }}
-                        className="flex h-6 w-6 items-center justify-center rounded-lg text-xs transition hover:bg-zinc-100 sm:h-7 sm:w-7 sm:text-sm"
+                        className="flex h-6 w-6 items-center justify-center rounded-lg text-xs transition hover:bg-[var(--workspace-surface-secondary)] sm:h-7 sm:w-7 sm:text-sm"
                         aria-label={`React ${emoji}`}
                       >
                         {emoji}
@@ -344,7 +344,7 @@ function MessageItem({
                           setEditOpen(true);
                           setActionsOpen(false);
                         }}
-                        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-xs text-zinc-700 transition hover:bg-zinc-100"
+                        className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-xs text-[var(--workspace-ink)] transition hover:bg-[var(--workspace-surface-secondary)]"
                       >
                         <Pencil size={14} />
                         Edit message
@@ -373,7 +373,7 @@ function MessageItem({
                   "mb-3 rounded-lg border-l-4 px-3 py-1",
                   isMine
                     ? "border-white/40 bg-white/10"
-                    : "border-emerald-500 bg-zinc-100",
+                    : "border-[var(--workspace-coral)] bg-[var(--workspace-surface-secondary)]",
                 )}
               >
                 <p className="text-xs font-semibold">
@@ -403,7 +403,7 @@ function MessageItem({
                         key={attachment.id ?? index}
                         src={attachment.url}
                         alt={attachment.fileName}
-                        className="max-h-80 w-full rounded-xl border bg-zinc-50 object-contain"
+                        className="max-h-80 w-full rounded-xl border border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)] object-contain"
                       />
                     );
                   }
@@ -427,7 +427,7 @@ function MessageItem({
                     return (
                       <div
                         key={attachment.id ?? index}
-                        className="flex items-center gap-2 rounded-xl border border-[#E8E7E2] bg-white/70 px-3 py-2.5 transition hover:bg-white"
+                        className="flex items-center gap-2 rounded-xl border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-3 py-2.5 transition hover:bg-[var(--workspace-surface-secondary)]"
                       >
                         <button
                           type="button"
@@ -450,7 +450,7 @@ function MessageItem({
                           }
                           aria-label={`Download ${attachment.fileName}`}
                           title="Download file"
-                          className="shrink-0 rounded-lg p-2 transition hover:bg-zinc-200"
+                          className="shrink-0 rounded-lg p-2 transition hover:bg-[var(--workspace-surface-secondary)]"
                         >
                           <Download size={17} />
                         </button>
@@ -461,7 +461,7 @@ function MessageItem({
                   return (
                     <div
                       key={attachment.id ?? index}
-                      className="flex items-center gap-2 rounded-xl border border-[#E8E7E2] bg-white/70 px-3 py-2.5 transition hover:bg-white"
+                      className="flex items-center gap-2 rounded-xl border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-3 py-2.5 transition hover:bg-[var(--workspace-surface-secondary)]"
                     >
                       <a
                         href={attachment.url}
@@ -488,7 +488,7 @@ function MessageItem({
                         }
                         aria-label={`Download ${attachment.fileName}`}
                         title="Download file"
-                        className="shrink-0 rounded-lg p-2 transition hover:bg-zinc-200"
+                        className="shrink-0 rounded-lg p-2 transition hover:bg-[var(--workspace-surface-secondary)]"
                       >
                         <Download size={17} />
                       </button>
@@ -516,7 +516,7 @@ function MessageItem({
                     key={emoji}
                     type="button"
                     onClick={() => onReact(message, emoji)}
-                    className="rounded-full border border-zinc-200 bg-white px-1 py-0.5 text-[9px] shadow-sm transition hover:bg-zinc-50 sm:px-2 sm:text-[11px]"
+                    className="rounded-full border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-1 py-0.5 text-[9px] shadow-sm transition hover:bg-[var(--workspace-surface-secondary)] sm:px-2 sm:text-[11px]"
                   >
                     {emoji}
                     {users.length > 1 && ` ${users.length}`}
@@ -528,7 +528,7 @@ function MessageItem({
         </div>
 
         {isMine && !shouldGroup && (
-          <div className="mt-1 text-[11px] text-[#707A73] sm:text-xs">
+          <div className="mt-1 text-[11px] text-[var(--workspace-muted)] sm:text-xs">
             You • {time}
             {message.edited && " • edited"}
           </div>

@@ -24,13 +24,12 @@ export default function DateSeparator({ date }: DateSeparatorProps) {
 
   return (
     <div className="my-6 flex items-center gap-3 sm:my-8 sm:gap-4">
-      <div className="h-px flex-1 bg-[#ECEEF3]" />
-
-      <span className="rounded-full bg-white px-3 py-1 text-[11px] font-medium text-[#707A73] sm:px-4 sm:text-xs">
+      <div className="h-px flex-1 bg-[var(--workspace-line)]" />
+      <span className="rounded-full bg-[var(--workspace-surface-secondary)] px-3 py-1 text-[11px] font-medium text-[var(--workspace-muted)] sm:px-4 sm:text-xs">
         {label}
       </span>
 
-      <div className="h-px flex-1 bg-[#ECEEF3]" />
+      <div className="h-px flex-1 bg-[var(--workspace-line)]" />
     </div>
   );
 }

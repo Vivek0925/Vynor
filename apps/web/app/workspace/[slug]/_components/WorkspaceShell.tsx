@@ -27,6 +27,12 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
   const [loading, setLoading] = useState(true);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">(() =>
+    typeof window !== "undefined" &&
+    window.localStorage.getItem("vynor-workspace-theme") === "dark"
+      ? "dark"
+      : "light",
+  );
 
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
@@ -88,6 +94,10 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
   }
 
   useEffect(() => {
+    window.localStorage.setItem("vynor-workspace-theme", theme);
+  }, [theme]);
+
+  useEffect(() => {
     if (!slug) {
       return;
     }
@@ -126,13 +136,19 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
     <div
       onTouchStart={handleShellTouchStart}
       onTouchEnd={handleShellTouchEnd}
+      data-theme={theme}
       className="workspace-shell flex h-[100dvh] min-h-0 overflow-hidden bg-[var(--workspace-bg)] text-[var(--workspace-ink)]"
     >
       <WorkspaceSidebar
+        key={slug}
         slug={slug}
         title={title}
         mobileOpen={sidebarOpen}
         onMobileClose={() => setSidebarOpen(false)}
+        theme={theme}
+        onThemeToggle={() =>
+          setTheme((current) => (current === "light" ? "dark" : "light"))
+        }
       />
 
       {sidebarOpen && (

@@ -388,7 +388,7 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
         </button>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-hidden bg-white">
+      <div className="min-h-0 flex-1 overflow-hidden bg-[var(--workspace-bg)]">
         {conversationError ? (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm text-red-600">
             {conversationError}

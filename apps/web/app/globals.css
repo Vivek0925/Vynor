@@ -134,16 +134,28 @@ body {
 }
 
 .workspace-shell[data-theme="dark"] {
-  --workspace-bg: #0f1713;
-  --workspace-surface: #1b2620;
-  --workspace-surface-secondary: #202c25;
-  --workspace-ink: #ece7da;
-  --workspace-muted: #9aa89f;
+  --workspace-bg: #0b1b2b;
+  --workspace-surface: #132a40;
+  --workspace-surface-secondary: #18344d;
+  --workspace-ink: #f4efe3;
+  --workspace-muted: #b8c5cc;
   --workspace-line: rgba(255, 255, 255, 0.1);
-  --workspace-coral: #ec7d5d;
-  --workspace-coral-tint: #3b2a23;
-  --workspace-sage-tint: #24382b;
-  --workspace-meeting-tint: #304638;
+  --workspace-coral: #ed795b;
+  --workspace-coral-tint: #593126;
+  --workspace-sage-tint: #23445a;
+  --workspace-meeting-tint: #24506a;
+}
+
+.workspace-shell[data-theme="dark"] .overview-theme {
+  --overview-bg: #0b1b2b;
+  --overview-surface: #132a40;
+  --overview-surface-secondary: #18344d;
+  --overview-ink: #f4efe3;
+  --overview-muted: #b8c5cc;
+  --overview-border: rgba(255, 255, 255, 0.1);
+  --overview-coral-tint: #3b2a23;
+  --overview-coral: #ed795b;
+  --overview-sage-tint: #23445a;
 }
 
 .overview-theme button:focus-visible {

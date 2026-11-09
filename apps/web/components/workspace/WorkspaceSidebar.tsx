@@ -12,6 +12,8 @@ import {
   LayoutList,
   MessageCircle,
   MoreHorizontal,
+  Moon,
+  Sun,
   Video,
   Workflow,
 } from "lucide-react";
@@ -43,6 +45,8 @@ type WorkspaceSidebarProps = {
   title: string;
   mobileOpen: boolean;
   onMobileClose: () => void;
+  theme: "light" | "dark";
+  onThemeToggle: () => void;
 };
 
 export default function WorkspaceSidebar({
@@ -50,6 +54,8 @@ export default function WorkspaceSidebar({
   title,
   mobileOpen,
   onMobileClose,
+  theme,
+  onThemeToggle,
 }: WorkspaceSidebarProps) {
   const pathname = usePathname();
   const { user } = useAuth();
@@ -67,12 +73,6 @@ export default function WorkspaceSidebar({
   const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
-    setMembersExpanded(false);
-    setMembers([]);
-    setOnlineUserIds(new Set());
-    setMembersLoading(true);
-    setMembersError(false);
-
     let ignore = false;
 
     async function loadMembers() {
@@ -95,8 +95,6 @@ export default function WorkspaceSidebar({
 
     if (slug) {
       void loadMembers();
-    } else {
-      setMembersLoading(false);
     }
 
     return () => {
@@ -322,12 +320,7 @@ export default function WorkspaceSidebar({
           </div>
         </button>
 
-        <button
-          type="button"
-          aria-expanded={profileExpanded}
-          onClick={() => setProfileExpanded((expanded) => !expanded)}
-          className="w-full border-t border-[var(--workspace-line)] px-2 pt-3 text-left"
-        >
+        <div className="border-t border-[var(--workspace-line)] px-2 pt-3">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--workspace-sage-tint)] text-[11px] font-medium text-[var(--workspace-muted)]">
               {userInitials}
@@ -335,14 +328,35 @@ export default function WorkspaceSidebar({
             <div className="min-w-0 flex-1 truncate text-[13px] font-medium text-[var(--workspace-ink)]">
               {user?.name || "Your profile"}
             </div>
-            <MoreHorizontal className="h-4 w-4 shrink-0 text-[var(--workspace-muted)]" />
+            <span className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onThemeToggle();
+                }}
+                className="rounded-lg p-1.5 text-[var(--workspace-muted)] transition-colors hover:bg-[var(--workspace-bg)]"
+                aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
+              >
+                {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              </button>
+              <button
+                type="button"
+                aria-expanded={profileExpanded}
+                onClick={() => setProfileExpanded((expanded) => !expanded)}
+                className="rounded-lg p-1 text-[var(--workspace-muted)] hover:bg-[var(--workspace-bg)]"
+                aria-label="Toggle profile details"
+              >
+                <MoreHorizontal className="h-4 w-4 shrink-0" />
+              </button>
+            </span>
           </div>
           {profileExpanded && (
             <div className="mt-2 truncate pl-10 text-[11px] font-normal text-[var(--workspace-muted)]">
               {user?.email || "Account"}
             </div>
           )}
-        </button>
+        </div>
       </div>
     </aside>
   );
