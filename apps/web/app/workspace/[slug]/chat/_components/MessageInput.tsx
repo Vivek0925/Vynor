@@ -147,7 +147,7 @@ export default function MessageInput({
   }
 
   return (
-    <div className="border-t border-[#E8E7E2] bg-[#FCFBF9] px-3 py-3 sm:px-6 sm:py-4">
+    <div className="border-t border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)] px-3 py-3 sm:px-5 sm:py-4">
       <div className="mx-auto max-w-5xl">
         <input
           ref={fileInputRef}
@@ -216,7 +216,7 @@ export default function MessageInput({
           </div>
         )}
 
-        <div className="flex items-end gap-1.5 rounded-[20px] border border-[#E8E7E2] bg-white px-2.5 py-2 shadow-[0_2px_10px_rgba(0,0,0,0.03)] transition-all focus-within:border-[#A8D5A2] focus-within:shadow-md sm:gap-3 sm:px-4 sm:py-2.5">
+        <div className="flex items-end gap-1.5 rounded-[14px] border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-2.5 py-2 shadow-[0_2px_10px_rgba(23,32,26,0.03)] transition-all focus-within:border-[var(--workspace-ink)] focus-within:shadow-md sm:gap-3 sm:px-3.5 sm:py-2">
           <div ref={attachmentMenuRef} className="relative">
             <button
               type="button"
@@ -295,7 +295,7 @@ export default function MessageInput({
             disabled={
               uploading || (!message.trim() && attachments.length === 0)
             }
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#E7F8EF] text-[#1E8E5A] transition hover:bg-[#D8F3E5] disabled:opacity-50 sm:h-10 sm:w-10 sm:rounded-2xl"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--workspace-coral)] text-white transition hover:opacity-90 disabled:opacity-50 sm:h-9 sm:w-9"
           >
             <SendHorizontal size={16} />
           </button>

@@ -197,34 +197,34 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
   );
 
   return (
-    <div className="relative flex h-full min-h-0 overflow-hidden rounded-[24px] border border-[#E8E7E2] bg-white shadow-[0_10px_30px_rgba(20,20,28,0.04)] sm:rounded-[28px]">
+    <div className="relative flex h-full min-h-0 overflow-hidden rounded-[22px] border border-[var(--workspace-line)] bg-[var(--workspace-surface)] shadow-[0_10px_30px_rgba(23,32,26,0.04)] sm:rounded-[22px]">
       {mobileChatOpen && (
         <button
           type="button"
           aria-label="Close chat navigation"
           onClick={() => setMobileChatOpen(false)}
-          className="absolute inset-0 z-20 bg-black/20 sm:hidden"
+          className="absolute inset-0 z-20 bg-transparent sm:hidden"
         />
       )}
       <aside
         className={`${
           mobileChatOpen ? "absolute inset-y-0 left-0 z-30 flex w-[min(86vw,280px)]" : "hidden"
-        } shrink-0 flex-col border-r border-[#E8E7E2] bg-[#FCFBF9] p-3 sm:static sm:flex sm:w-[228px]`}
+        } shrink-0 flex-col border-r border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)] p-3 shadow-[8px_0_24px_rgba(23,32,26,0.06)] sm:static sm:flex sm:w-[240px] sm:shadow-none`}
       >
         <div className="mb-3 flex items-center justify-between px-2">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#707A73]">
+          <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--workspace-muted)]">
             Chat
           </span>
           <button
             type="button"
             onClick={() => setMobileChatOpen(false)}
-            className="rounded-md p-1 text-[#707A73] hover:bg-[#F3F0E9] sm:hidden"
+            className="rounded-md p-1 text-[var(--workspace-muted)] hover:bg-[var(--workspace-bg)] sm:hidden"
             aria-label="Close chat navigation"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="mb-3 px-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#707A73]">
+        <div className="mb-3 px-2 text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--workspace-muted)]">
           Channels
         </div>
         <div className="space-y-1">
@@ -240,14 +240,14 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
                 }}
                 className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm ${
                   selectedId === conversation.id
-                    ? "bg-[#FCE9E1] font-medium text-[#252A27]"
-                    : "text-[#707A73] hover:bg-[#F3F0E9]"
+                    ? "bg-[var(--workspace-coral-tint)] font-medium text-[var(--workspace-coral)]"
+                    : "text-[var(--workspace-ink)] hover:bg-[var(--workspace-bg)]"
                 }`}
               >
                 <Hash className="h-4 w-4 shrink-0" />
                 <span className="min-w-0 flex-1 truncate">{conversation.name}</span>
                 {!!conversation.unreadCount && (
-                  <span className="rounded-full bg-[#E5704F] px-1.5 py-0.5 text-[10px] text-white">
+                  <span className="rounded-full bg-[var(--workspace-coral)] px-1.5 py-0.5 text-[10px] text-white">
                     {conversation.unreadCount}
                   </span>
                 )}
@@ -263,9 +263,9 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
                   value={channelName}
                   onChange={(event) => setChannelName(event.target.value)}
                   placeholder="New channel"
-                  className="min-w-0 flex-1 rounded-md border border-[#E8E7E2] bg-white px-2 py-1.5 text-xs outline-none"
+                  className="min-w-0 flex-1 rounded-md border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-2 py-1.5 text-xs outline-none"
                 />
-                <button type="submit" className="rounded-md bg-[#E7F8EF] px-2 text-[#1E8E5A]">
+                <button type="submit" className="rounded-md bg-[var(--workspace-coral-tint)] px-2 text-[var(--workspace-coral)]">
                   <Plus className="h-4 w-4" />
                 </button>
               </form>
@@ -273,7 +273,7 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
               <button
                 type="button"
                 onClick={() => setShowChannelForm(true)}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs text-[#707A73] hover:bg-[#F3F0E9]"
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs text-[var(--workspace-muted)] hover:bg-[var(--workspace-bg)]"
               >
                 <Plus className="h-4 w-4" />
                 Create channel
@@ -283,20 +283,20 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
         )}
 
         <div className="mb-2 mt-7 flex items-center justify-between px-2">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#707A73]">
+          <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--workspace-muted)]">
             Direct messages
           </span>
           <button
             type="button"
             onClick={() => setShowDmPicker((current) => !current)}
-            className="rounded-md p-1 text-[#707A73] hover:bg-[#F3F0E9]"
+            className="rounded-md p-1 text-[var(--workspace-muted)] hover:bg-[var(--workspace-bg)]"
             aria-label="Start direct message"
           >
             <Plus className="h-4 w-4" />
           </button>
         </div>
         {showDmPicker && (
-          <div className="mb-2 rounded-lg border border-[#E8E7E2] bg-white p-1">
+          <div className="mb-2 rounded-lg border border-[var(--workspace-line)] bg-[var(--workspace-surface)] p-1">
             {members
               .filter((member) => member.userId !== user?.id)
               .map((member) => (
@@ -304,9 +304,9 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
                   key={member.userId}
                   type="button"
                   onClick={() => void handleCreateDm(member.userId)}
-                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-[#252A27] hover:bg-[#F3F0E9]"
+                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs text-[var(--workspace-ink)] hover:bg-[var(--workspace-bg)]"
                 >
-                  <Users className="h-3.5 w-3.5 text-[#707A73]" />
+                  <Users className="h-3.5 w-3.5 text-[var(--workspace-muted)]" />
                   <span className="truncate">{member.user.name}</span>
                 </button>
               ))}
@@ -329,14 +329,24 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
                   }}
                   className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm ${
                     selectedId === conversation.id
-                      ? "bg-[#FCE9E1] font-medium text-[#252A27]"
-                      : "text-[#707A73] hover:bg-[#F3F0E9]"
+                      ? "bg-[var(--workspace-coral-tint)] font-medium text-[var(--workspace-coral)]"
+                      : "text-[var(--workspace-ink)] hover:bg-[var(--workspace-bg)]"
                   }`}
                 >
-                  <MessageCircle className="h-4 w-4 shrink-0" />
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--workspace-sage-tint)] text-[10px] font-medium text-[var(--workspace-ink)]">
+                    {other?.user.avatar ? (
+                      <img
+                        src={other.user.avatar}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      (other?.user.name ?? "D").charAt(0).toUpperCase()
+                    )}
+                  </span>
                   <span className="min-w-0 flex-1 truncate text-[13px]">{other?.user.name ?? "Direct message"}</span>
                   {!!conversation.unreadCount && (
-                    <span className="rounded-full bg-[#E5704F] px-1.5 py-0.5 text-[10px] text-white">
+                    <span className="rounded-full bg-[var(--workspace-coral)] px-1.5 py-0.5 text-[10px] text-white">
                       {conversation.unreadCount}
                     </span>
                   )}
@@ -347,19 +357,19 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
       </aside>
 
       <section className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-[68px] shrink-0 items-center gap-3 border-b border-[#E8E7E2] bg-white px-4 sm:px-7">
+      <header className="flex h-[58px] shrink-0 items-center gap-3 border-b border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-4 sm:px-5">
         <button
           type="button"
           onClick={() => setMobileChatOpen(true)}
-          className="rounded-lg p-1.5 text-[#707A73] hover:bg-[#F3F0E9] sm:hidden"
+          className="rounded-lg p-1.5 text-[var(--workspace-muted)] hover:bg-[var(--workspace-bg)] sm:hidden"
           aria-label="Open chat navigation"
         >
           <MessageCircle className="h-5 w-5" />
         </button>
         {selectedConversation?.type === "DM" ? (
-          <MessageCircle className="h-5 w-5 text-[#707A73]" />
+          <MessageCircle className="h-5 w-5 text-[var(--workspace-muted)]" />
         ) : (
-          <Hash className="h-5 w-5 text-[#707A73]" />
+          <Hash className="h-5 w-5 text-[var(--workspace-muted)]" />
         )}
         <button
           type="button"
@@ -367,13 +377,13 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
           className="flex min-w-0 items-baseline gap-2.5 text-left sm:cursor-default"
           aria-label="Open chat navigation"
         >
-          <h1 className="max-w-[min(52vw,320px)] truncate text-[17px] font-semibold tracking-[-0.02em] text-[#252A27] sm:max-w-none sm:text-[19px]">
+          <h1 className="max-w-[min(52vw,320px)] truncate text-[17px] font-medium tracking-[-0.02em] text-[var(--workspace-ink)] sm:max-w-none sm:text-[18px]">
             {selectedConversation?.type === "DM"
               ? selectedLabel
               : selectedConversation?.name ?? "general"}
           </h1>
           {selectedConversation?.type === "CHANNEL" && (
-            <span className="truncate text-sm text-[#707A73]">Everything team-wide</span>
+            <span className="truncate text-sm text-[var(--workspace-muted)]">Everything team-wide</span>
           )}
         </button>
       </header>
@@ -384,18 +394,18 @@ export default function WorkspaceChat({ slug }: WorkspaceChatProps) {
             {conversationError}
           </div>
         ) : loading ? (
-          <div className="flex h-full items-center justify-center text-sm text-[#707487]">
+          <div className="flex h-full items-center justify-center text-sm text-[var(--workspace-muted)]">
             Loading messages...
           </div>
         ) : messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#F3F7F5] text-[#1E8E5A]">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--workspace-coral-tint)] text-[var(--workspace-coral)]">
               <Hash className="h-6 w-6" />
             </div>
-            <h2 className="text-lg font-semibold text-[#20232D]">
+            <h2 className="text-lg font-medium text-[var(--workspace-ink)]">
               No conversations yet
             </h2>
-            <p className="mt-2 max-w-md text-sm leading-6 text-[#707487]">
+            <p className="mt-2 max-w-md text-sm leading-6 text-[var(--workspace-muted)]">
               Start collaborating with everyone in this workspace.
             </p>
           </div>

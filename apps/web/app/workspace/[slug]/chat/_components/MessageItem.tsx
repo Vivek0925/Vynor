@@ -219,7 +219,7 @@ function MessageItem({
       >
         {!isMine && !shouldGroup && (
           <div className="mb-1 flex items-center gap-2 sm:mb-1.5 sm:gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#DDE3FF] text-sm font-semibold text-[#3659E6]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--workspace-sage-tint)] text-sm font-medium text-[var(--workspace-muted)]">
               {message.sender.avatar ? (
                 <img
                   src={message.sender.avatar}
@@ -232,16 +232,16 @@ function MessageItem({
             </div>
 
             <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
-              <h3 className="truncate text-[15px] font-medium text-[#252A27]">
+              <h3 className="truncate text-[15px] font-medium text-[var(--workspace-ink)]">
                 {message.sender.name}
               </h3>
 
-              <span className="shrink-0 text-xs text-[#707A73]">
+              <span className="shrink-0 text-xs text-[var(--workspace-muted)]">
                 {time}
               </span>
 
               {message.edited && (
-                <span className="text-[10px] text-[#707A73] sm:text-xs">
+                <span className="text-[10px] text-[var(--workspace-muted)] sm:text-xs">
                   edited
                 </span>
               )}
@@ -266,8 +266,8 @@ function MessageItem({
             className={clsx(
               "relative touch-pan-y rounded-[15px] border px-2 py-1 transition-[transform,colors] sm:px-3 sm:py-1.5",
               isMine
-                ? "border-[#F6D6C9] bg-[#FCE9E1] text-[#252A27]"
-                : "border-[#E8E7E2] bg-[#F3F0E9] text-[#252A27]",
+                ? "border-[var(--workspace-coral-tint)] bg-[var(--workspace-coral-tint)] text-[var(--workspace-ink)]"
+                : "border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)] text-[var(--workspace-ink)]",
               shouldGroup &&
                 (isMine
                   ? "rounded-tr-[14px] rounded-br-md"
@@ -310,7 +310,7 @@ function MessageItem({
               {actionsOpen && (
                 <div
                   className={clsx(
-                    "absolute top-8 w-44 rounded-xl border border-zinc-200 bg-white p-1.5 text-left shadow-xl",
+                    "absolute bottom-8 w-44 rounded-xl border border-zinc-200 bg-white p-1.5 text-left shadow-xl",
                     isMine ? "right-0" : "left-0",
                   )}
                 >
