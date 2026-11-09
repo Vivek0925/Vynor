@@ -105,6 +105,24 @@ body {
   overflow-x: hidden;
 }
 
+.overview-theme {
+  --overview-bg: #f5f3ee;
+  --overview-surface: #ffffff;
+  --overview-surface-secondary: #faf8f3;
+  --overview-ink: #17201a;
+  --overview-muted: #5c675f;
+  --overview-border: rgba(23, 32, 26, 0.11);
+  --overview-coral-tint: #fbe9e1;
+  --overview-coral: #e5704f;
+  --overview-sage-tint: #eaf5e8;
+  font-family: var(--font-inter-tight), system-ui, sans-serif;
+  color: var(--overview-ink);
+}
+
+.overview-theme button:focus-visible {
+  outline-color: var(--overview-ink);
+}
+
 .navbar-ink {
   color: var(--ink);
 }

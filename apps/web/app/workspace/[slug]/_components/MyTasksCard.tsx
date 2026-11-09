@@ -32,13 +32,13 @@ function getPriorityLabel(priority: Task["priority"]) {
 function getPriorityClass(priority: Task["priority"]) {
   switch (priority) {
     case "URGENT":
-      return "bg-red-100 text-red-700";
+      return "bg-[var(--overview-coral-tint)] text-[var(--overview-coral)]";
     case "HIGH":
-      return "bg-orange-100 text-orange-700";
+      return "bg-[var(--overview-coral-tint)] text-[var(--overview-coral)]";
     case "MEDIUM":
-      return "bg-yellow-100 text-yellow-700";
+      return "bg-[var(--overview-surface-secondary)] text-[var(--overview-muted)]";
     case "LOW":
-      return "bg-green-100 text-green-700";
+      return "bg-[var(--overview-sage-tint)] text-[var(--overview-muted)]";
   }
 }
 
@@ -59,7 +59,7 @@ function StatusIcon({ listName }: { listName: string }) {
     normalized === "completed" ||
     normalized === "complete"
   ) {
-    return <CheckCircle2 className="h-4 w-4 text-emerald-600" />;
+    return <CheckCircle2 className="h-4 w-4 text-[var(--overview-muted)]" />;
   }
 
   if (
@@ -67,10 +67,10 @@ function StatusIcon({ listName }: { listName: string }) {
     normalized === "in-progress" ||
     normalized === "doing"
   ) {
-    return <Clock3 className="h-4 w-4 text-blue-600" />;
+    return <Clock3 className="h-4 w-4 text-[var(--overview-muted)]" />;
   }
 
-  return <Circle className="h-4 w-4 text-[#8A8C98]" />;
+  return <Circle className="h-4 w-4 text-[var(--overview-muted)]" />;
 }
 
 export default function MyTasksCard({ workspaceSlug }: MyTasksCardProps) {
@@ -112,20 +112,20 @@ export default function MyTasksCard({ workspaceSlug }: MyTasksCardProps) {
 
   const visibleTasks = loadedSlug === workspaceSlug ? tasks : [];
   return (
-    <div className="rounded-[28px] border border-[#DEDFE8] bg-[#FAFAF8] p-6">
+    <div className="rounded-[28px] border border-[var(--overview-border)] bg-[var(--overview-surface-secondary)] p-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <div className="text-[13px] font-medium uppercase tracking-[0.18em] text-[#5B5D6E]">
+          <div className="text-[13px] font-medium uppercase tracking-[0.18em] text-[var(--overview-muted)]">
             My Tasks
           </div>
 
-          <div className="mt-1 text-[13px] text-[#8A8C98]">
+          <div className="mt-1 text-[13px] text-[var(--overview-muted)]">
             Tasks assigned to you
           </div>
         </div>
 
         {!loading && (
-          <div className="rounded-full bg-white px-3 py-1 text-[12px] font-medium text-[#5B5D6E]">
+          <div className="rounded-full bg-[var(--overview-surface)] px-3 py-1 text-[12px] font-medium text-[var(--overview-muted)]">
             {visibleTasks.length}
           </div>
         )}
@@ -134,15 +134,15 @@ export default function MyTasksCard({ workspaceSlug }: MyTasksCardProps) {
       <div className="mt-5">
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-5 w-5 animate-spin text-[#6B6D78]" />
+            <Loader2 className="h-5 w-5 animate-spin text-[var(--overview-muted)]" />
           </div>
         ) : visibleTasks.length === 0 ? (
-          <div className="rounded-[20px] border border-dashed border-[#D8D9E2] bg-white px-5 py-8 text-center">
-            <div className="text-[14px] font-medium text-[#14141C]">
+          <div className="rounded-[20px] border border-dashed border-[var(--overview-border)] bg-[var(--overview-surface)] px-5 py-8 text-center">
+            <div className="text-[14px] font-medium text-[var(--overview-ink)]">
               No tasks assigned to you
             </div>
 
-            <div className="mt-1 text-[13px] text-[#8A8C98]">
+            <div className="mt-1 text-[13px] text-[var(--overview-muted)]">
               You’re all caught up.
             </div>
           </div>
@@ -153,16 +153,16 @@ export default function MyTasksCard({ workspaceSlug }: MyTasksCardProps) {
                 type="button"
                 key={task.id}
                 onClick={() => setSelectedTask(task)}
-                className="flex w-full items-center gap-3 rounded-[18px] border border-white bg-white px-4 py-3 text-left shadow-[0_8px_20px_rgba(20,20,28,0.04)] transition hover:-translate-y-[1px] hover:shadow-[0_10px_24px_rgba(20,20,28,0.07)]"
+                className="flex w-full items-center gap-3 rounded-[18px] border border-[var(--overview-surface)] bg-[var(--overview-surface)] px-4 py-3 text-left shadow-[0_8px_20px_rgba(23,32,26,0.04)] transition hover:-translate-y-[1px] hover:shadow-[0_10px_24px_rgba(23,32,26,0.07)]"
               >
                 <StatusIcon listName={task.list?.name ?? ""} />
 
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-[14px] font-medium text-[#14141C]">
+                  <div className="truncate text-[14px] font-medium text-[var(--overview-ink)]">
                     {task.title}
                   </div>
 
-                  <div className="mt-1 flex items-center gap-2 text-[12px] text-[#8A8C98]">
+                  <div className="mt-1 flex items-center gap-2 text-[12px] text-[var(--overview-muted)]">
                     <span className="capitalize">
                       {task.list?.name ?? "Unknown list"}
                     </span>

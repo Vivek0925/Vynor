@@ -18,14 +18,14 @@ function QuickStat({
   detail: string;
 }) {
   return (
-    <div className="rounded-[24px] border border-[#DEDFE8] bg-[#FAFAF8] p-5 shadow-[0_10px_30px_rgba(20,20,28,0.04)]">
-      <div className="text-[12px] font-medium uppercase tracking-[0.18em] text-[#5B5D6E]">
+    <div className="rounded-[24px] border border-[var(--overview-border)] bg-[var(--overview-surface-secondary)] p-5 shadow-[0_10px_30px_rgba(23,32,26,0.04)]">
+      <div className="text-[12px] font-medium uppercase tracking-[0.18em] text-[var(--overview-muted)]">
         {label}
       </div>
-      <div className="mt-3 text-[30px] font-light tracking-[-0.04em] text-[#14141C]">
+      <div className="mt-3 text-[30px] font-normal tracking-[-0.04em] text-[var(--overview-ink)]">
         {value}
       </div>
-      <div className="mt-1 text-[13px] text-[#5B5D6E]">{detail}</div>
+      <div className="mt-1 text-[13px] text-[var(--overview-muted)]">{detail}</div>
     </div>
   );
 }
@@ -43,51 +43,53 @@ export default async function WorkspacePage({
       title="Workspace overview"
       description="A clean home for project work, task tracking, docs, meetings, chat, and files."
     >
-      {/* Dashboard cards */}
-      <div className="grid gap-4 my-4 xl:grid-cols-2">
-        {/* My Tasks */}
-        <MyTasksCard workspaceSlug={slug} />
+      <div className="overview-theme">
+        {/* Dashboard cards */}
+        <div className="my-4 grid gap-4 xl:grid-cols-2">
+          {/* My Tasks */}
+          <MyTasksCard workspaceSlug={slug} />
 
-        {/* Recent Activity */}
-        <div className="rounded-[28px] border border-[#DEDFE8] bg-[#FAFAF8] p-6">
-          <div className="text-[13px] font-medium uppercase tracking-[0.18em] text-[#5B5D6E]">
-            Recent activity
-          </div>
-        </div>
-
-        {/* Upcoming Meetings */}
-        <UpcomingMeetingsCard workspaceSlug={slug} />
-      </div>
-
-      {/* Recent Documents */}
-      <div className="rounded-[28px] border border-[#DEDFE8] bg-[#FAFAF8] my-4 p-6">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <div className="text-[13px] font-medium uppercase tracking-[0.18em] text-[#5B5D6E]">
-              Recent documents
+          {/* Recent Activity */}
+          <div className="rounded-[28px] border border-[var(--overview-border)] bg-[var(--overview-surface-secondary)] p-6">
+            <div className="text-[13px] font-medium uppercase tracking-[0.18em] text-[var(--overview-muted)]">
+              Recent activity
             </div>
           </div>
 
-          <button className="rounded-full border border-[#DEDFE8] px-4 py-2 text-[13px] font-medium text-[#14141C] transition-colors hover:bg-white">
-            View all documents
-          </button>
+          {/* Upcoming Meetings */}
+          <UpcomingMeetingsCard workspaceSlug={slug} />
         </div>
 
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
-          {documents.map((doc) => (
-            <div
-              key={doc.label}
-              className="rounded-[20px] border border-white bg-white p-4 shadow-[0_8px_20px_rgba(20,20,28,0.04)]"
-            >
-              <div className="text-[14px] font-medium text-[#14141C]">
-                {doc.label}
-              </div>
-
-              <div className="mt-1 text-[13px] text-[#5B5D6E]">
-                {doc.meta}
+        {/* Recent Documents */}
+        <div className="my-4 rounded-[28px] border border-[var(--overview-border)] bg-[var(--overview-surface-secondary)] p-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <div className="text-[13px] font-medium uppercase tracking-[0.18em] text-[var(--overview-muted)]">
+                Recent documents
               </div>
             </div>
-          ))}
+
+            <button className="rounded-full border border-[var(--overview-border)] px-4 py-2 text-[13px] font-medium text-[var(--overview-ink)] transition-colors hover:bg-[var(--overview-surface)]">
+              View all documents
+            </button>
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            {documents.map((doc) => (
+              <div
+                key={doc.label}
+                className="rounded-[20px] border border-[var(--overview-surface)] bg-[var(--overview-surface)] p-4 shadow-[0_8px_20px_rgba(23,32,26,0.04)]"
+              >
+                <div className="text-[14px] font-medium text-[var(--overview-ink)]">
+                  {doc.label}
+                </div>
+
+                <div className="mt-1 text-[13px] text-[var(--overview-muted)]">
+                  {doc.meta}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </WorkspaceSectionPage>
