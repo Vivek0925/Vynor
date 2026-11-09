@@ -140,8 +140,8 @@ body {
   --workspace-ink: #f4efe3;
   --workspace-muted: #b8c5cc;
   --workspace-line: rgba(255, 255, 255, 0.1);
-  --workspace-coral: #ed795b;
-  --workspace-coral-tint: #593126;
+  --workspace-coral: #f6a083;
+  --workspace-coral-tint: #804936;
   --workspace-sage-tint: #23445a;
   --workspace-meeting-tint: #24506a;
 }
@@ -154,8 +154,57 @@ body {
   --overview-muted: #b8c5cc;
   --overview-border: rgba(255, 255, 255, 0.1);
   --overview-coral-tint: #3b2a23;
-  --overview-coral: #ed795b;
+  --overview-coral: #f29a7d;
   --overview-sage-tint: #23445a;
+}
+
+.workspace-shell[data-theme="dark"] [data-tasks-board="true"] {
+  background: #10263b;
+  box-shadow: none;
+}
+
+.workspace-shell[data-theme="dark"] [data-tasks-board="true"] .task-list-column {
+  background: #18344d;
+  box-shadow: none;
+}
+
+.workspace-shell[data-theme="dark"] [data-tasks-board="true"] .task-card {
+  background: #132a40;
+  box-shadow: none;
+}
+
+.workspace-shell[data-theme="dark"] .workspace-modal {
+  color: var(--workspace-ink);
+  background: var(--workspace-surface);
+}
+
+.workspace-shell[data-theme="dark"] .workspace-modal input,
+.workspace-shell[data-theme="dark"] .workspace-modal textarea,
+.workspace-shell[data-theme="dark"] .workspace-modal select {
+  border-color: var(--workspace-line);
+  background: var(--workspace-surface-secondary);
+  color: var(--workspace-ink);
+}
+
+.workspace-shell[data-theme="dark"] .workspace-modal option {
+  background: var(--workspace-surface);
+  color: var(--workspace-ink);
+}
+
+.workspace-shell[data-theme="dark"] .workspace-modal [class*="bg-white"] {
+  background-color: var(--workspace-surface);
+}
+
+.workspace-shell[data-theme="dark"] .workspace-modal [class*="bg-[#"] {
+  background-color: var(--workspace-surface-secondary);
+}
+
+.workspace-shell[data-theme="dark"] .workspace-modal [class*="border-[#"] {
+  border-color: var(--workspace-line);
+}
+
+.workspace-shell[data-theme="dark"] .workspace-modal [class*="text-[#"] {
+  color: var(--workspace-ink);
 }
 
 .overview-theme button:focus-visible {

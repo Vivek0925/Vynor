@@ -52,13 +52,11 @@ export default function TaskCard({
         }
       }}
       className={[
-        "group rounded-[12px] border border-[var(--workspace-line)]",
+        "task-card group rounded-[12px] border border-[var(--workspace-line)]",
         "bg-[var(--workspace-surface)] p-3",
         "shadow-[0_1px_2px_rgba(23,32,26,0.04)]",
         "cursor-grab active:cursor-grabbing",
-        "transition-[border-color,box-shadow]",
-        "hover:border-[var(--workspace-muted)]",
-        "hover:shadow-[0_3px_8px_rgba(23,32,26,0.08)]",
+        "transition-shadow",
         isDragging ? "opacity-30" : "",
       ].join(" ")}
     >

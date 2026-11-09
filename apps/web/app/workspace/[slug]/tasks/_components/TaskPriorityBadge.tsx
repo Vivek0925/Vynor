@@ -13,19 +13,19 @@ const priorityConfig: Record<
 > = {
   LOW: {
     label: "Low",
-    className: "bg-[var(--workspace-surface-secondary)] text-[var(--workspace-muted)]",
+    className: "border border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)] text-[var(--workspace-muted)]",
   },
   MEDIUM: {
     label: "Medium",
-    className: "bg-[var(--butter)] text-[var(--workspace-muted)]",
+    className: "border border-[var(--workspace-line)] bg-[var(--workspace-sage-tint)] text-[var(--workspace-ink)]",
   },
   HIGH: {
     label: "High",
-    className: "bg-[var(--workspace-coral-tint)] text-[var(--workspace-coral)]",
+    className: "border border-[var(--workspace-coral)]/40 bg-[var(--workspace-coral-tint)] text-[var(--workspace-coral)]",
   },
   URGENT: {
     label: "Urgent",
-    className: "bg-[var(--workspace-coral-tint)] text-[var(--workspace-coral)]",
+    className: "border border-[var(--workspace-coral)] bg-[var(--workspace-coral)] text-[var(--workspace-bg)]",
   },
 };
 

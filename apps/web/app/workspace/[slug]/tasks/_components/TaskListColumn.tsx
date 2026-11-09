@@ -102,12 +102,12 @@ export default function TaskListColumn({
         },
       }}
       className={[
-        "relative flex h-fit max-h-full w-[310px] shrink-0 flex-col overflow-hidden",
+        "task-list-column relative flex h-fit max-h-full w-[310px] shrink-0 flex-col overflow-hidden",
         "rounded-2xl border border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)]",
-        "shadow-[0_3px_10px_rgba(23,32,26,0.04)] transition-all duration-200",
+        "shadow-[0_3px_10px_rgba(23,32,26,0.04)]",
         isOver
           ? "border-[var(--workspace-coral)] bg-[var(--workspace-coral-tint)] ring-2 ring-[var(--workspace-coral)]/20"
-          : "hover:border-[var(--workspace-muted)]",
+          : "",
       ].join(" ")}
     >
       <header className="relative flex h-12 shrink-0 items-center justify-between px-3">
@@ -204,7 +204,7 @@ export default function TaskListColumn({
               role="menuitem"
               disabled={!canMoveRight}
               onClick={() => runAction(() => onMoveListRight(list))}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-[var(--workspace-bg)] disabled:cursor-not-allowed disabled:opacity-40"
             >
               <ArrowRight size={15} />
               Move right
@@ -294,7 +294,7 @@ export default function TaskListColumn({
             id="delete-list-title"
             className="text-base font-semibold text-[#26382C]"
           >
-            Delete "{list.name}"?
+            Delete &quot;{list.name}&quot;?
           </h3>
 
           <p

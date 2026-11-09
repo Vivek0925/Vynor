@@ -49,7 +49,7 @@ export default function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? "modal-title" : undefined}
-        className={`
+        className={`workspace-modal
   relative z-10 flex h-[100dvh] w-full min-w-0 flex-col
   overflow-hidden bg-white shadow-2xl
   sm:rounded-2xl
@@ -61,10 +61,10 @@ export default function Modal({
 `}
       >
         {title && (
-          <header className="flex h-[60px] shrink-0 items-center justify-between border-b border-slate-200 px-4 sm:px-6">
+          <header className="flex h-[60px] shrink-0 items-center justify-between border-b border-[var(--workspace-line)] px-4 sm:px-6">
             <h2
               id="modal-title"
-              className="text-base font-semibold text-slate-900 sm:text-lg"
+              className="text-base font-semibold text-[var(--workspace-ink)] sm:text-lg"
             >
               {title}
             </h2>
@@ -73,7 +73,7 @@ export default function Modal({
               type="button"
               onClick={onClose}
               aria-label="Close dialog"
-              className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+              className="rounded-full p-2 text-[var(--workspace-muted)] transition hover:bg-[var(--workspace-surface-secondary)] hover:text-[var(--workspace-ink)]"
             >
               <svg
                 viewBox="0 0 24 24"

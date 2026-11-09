@@ -35,10 +35,10 @@ export const statusStyles: Record<ProjectStatus, string> = {
 };
 
 export const priorityStyles: Record<ProjectPriority, string> = {
-  LOW: "text-[var(--workspace-muted)]",
-  MEDIUM: "text-[var(--workspace-muted)]",
-  HIGH: "text-[var(--workspace-coral)]",
-  URGENT: "text-[var(--workspace-coral)]",
+  LOW: "border border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)] text-[var(--workspace-muted)]",
+  MEDIUM: "border border-[var(--workspace-line)] bg-[var(--workspace-sage-tint)] text-[var(--workspace-ink)]",
+  HIGH: "border border-[var(--workspace-coral)]/40 bg-[var(--workspace-coral-tint)] text-[var(--workspace-coral)]",
+  URGENT: "border border-[var(--workspace-coral)] bg-[var(--workspace-coral)] text-[var(--workspace-bg)]",
 };
 
 export function formatDate(value: string | null | undefined) {
