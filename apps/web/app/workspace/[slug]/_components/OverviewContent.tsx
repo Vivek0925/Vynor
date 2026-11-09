@@ -141,7 +141,7 @@ export default function OverviewContent({ workspaceSlug }: OverviewContentProps)
           {activities.length === 0 ? (
             <p className="mt-4 text-[13px] text-[var(--overview-muted)]">No recent activity to show.</p>
           ) : (
-            <div className="mt-4 space-y-4">
+            <div className="scrollbar-none mt-4 max-h-80 space-y-4 overflow-y-auto pr-2">
               {activities.map((activity) => {
                 const Icon =
                   activity.kind === "project"
