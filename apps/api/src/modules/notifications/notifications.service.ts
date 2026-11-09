@@ -13,7 +13,15 @@ export class NotificationsService {
 
   findForUser(userId: string) {
     return this.prisma.notification.findMany({
-      where: { userId },
+      where: {
+        userId,
+        OR: [
+          { meetingId: null, projectId: null, taskId: null },
+          { meeting: { status: 'SCHEDULED' } },
+          { project: { isNot: null } },
+          { task: { is: { isCompleted: false } } },
+        ],
+      },
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
@@ -60,6 +68,78 @@ export class NotificationsService {
       where: { meetingId, userId: { in: members.map(({ userId }) => userId) } },
       orderBy: { createdAt: 'desc' },
       take: members.length,
+    });
+
+    for (const notification of createdNotifications) {
+      this.realtime.emitToUser(notification.userId, notification);
+    }
+  }
+
+  async createProjectCreated(
+    projectId: string,
+    workspaceId: string,
+    creatorId: string,
+    projectName: string,
+  ) {
+    const members = await this.prisma.workspaceMember.findMany({
+      where: { workspaceId, userId: { not: creatorId } },
+      select: { userId: true },
+    });
+
+    await this.createForUsers(
+      members.map(({ userId }) => userId),
+      {
+        type: NotificationType.PROJECT_CREATED,
+        title: 'New project created',
+        message: `${projectName} was added to the workspace.`,
+        projectId,
+      },
+    );
+  }
+
+  async createTaskAssigned(
+    taskId: string,
+    assigneeId: string,
+    taskTitle: string,
+    assignerId: string,
+  ) {
+    if (assigneeId === assignerId) return;
+
+    await this.createForUsers([assigneeId], {
+      type: NotificationType.TASK_ASSIGNED,
+      title: 'Task assigned to you',
+      message: `You were assigned "${taskTitle}".`,
+      taskId,
+    });
+  }
+
+  private async createForUsers(
+    userIds: string[],
+    data: {
+      type: NotificationType;
+      title: string;
+      message: string;
+      meetingId?: string;
+      projectId?: string;
+      taskId?: string;
+    },
+  ) {
+    if (userIds.length === 0) return;
+
+    const notifications = await this.prisma.notification.createMany({
+      data: userIds.map((userId) => ({ userId, ...data })),
+    });
+
+    const createdNotifications = await this.prisma.notification.findMany({
+      where: {
+        userId: { in: userIds },
+        type: data.type,
+        ...(data.meetingId ? { meetingId: data.meetingId } : {}),
+        ...(data.projectId ? { projectId: data.projectId } : {}),
+        ...(data.taskId ? { taskId: data.taskId } : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      take: notifications.count,
     });
 
     for (const notification of createdNotifications) {

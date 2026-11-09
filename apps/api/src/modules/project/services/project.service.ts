@@ -9,6 +9,7 @@ import { WorkspaceService } from '../../workspace/services/workspace.service';
 import { CreateProjectDto } from '../dto/create-project.dto';
 import { UpdateProjectDto } from '../dto/update-project.dto';
 import { ProjectRealtimeService } from '../../realtime/services/project-realtime.service';
+import { NotificationsService } from '../../notifications/notifications.service';
 
 @Injectable()
 export class ProjectService {
@@ -16,6 +17,7 @@ export class ProjectService {
     private readonly projectRepository: ProjectRepository,
     private readonly workspaceService: WorkspaceService,
     private readonly projectRealtimeService: ProjectRealtimeService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(userId: string, workspaceSlug: string, dto: CreateProjectDto) {
@@ -39,6 +41,12 @@ export class ProjectService {
     });
 
     this.projectRealtimeService.emitProjectCreated(workspace.id, project.id);
+    await this.notificationsService.createProjectCreated(
+      project.id,
+      workspace.id,
+      userId,
+      project.name,
+    );
 
     return project;
   }
@@ -151,22 +159,22 @@ export class ProjectService {
     return updatedProject;
   }
 
- async delete(userId: string, workspaceSlug: string, projectId: string) {
-  const project = await this.getAccessibleProject(
-    userId,
-    workspaceSlug,
-    projectId,
-  );
+  async delete(userId: string, workspaceSlug: string, projectId: string) {
+    const project = await this.getAccessibleProject(
+      userId,
+      workspaceSlug,
+      projectId,
+    );
 
-  const deletedProject = await this.projectRepository.delete(projectId);
+    const deletedProject = await this.projectRepository.delete(projectId);
 
-  this.projectRealtimeService.emitProjectDeleted(
-    project.workspaceId,
-    projectId,
-  );
+    this.projectRealtimeService.emitProjectDeleted(
+      project.workspaceId,
+      projectId,
+    );
 
-  return deletedProject;
-}
+    return deletedProject;
+  }
 
   private async getAccessibleProject(
     userId: string,

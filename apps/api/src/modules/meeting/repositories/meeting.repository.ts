@@ -159,6 +159,20 @@ export class MeetingRepository {
     });
   }
 
+  findRecentByWorkspace(workspaceId: string) {
+    return this.prisma.meeting.findMany({
+      where: { workspaceId },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 8,
+    });
+  }
+
   start(id: string) {
     return this.prisma.meeting.update({
       where: {

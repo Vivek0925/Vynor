@@ -215,6 +215,15 @@ export class MeetingService {
     return this.meetingRepository.findByWorkspace(workspace.id);
   }
 
+  async findRecentWorkspaceMeetings(userId: string, workspaceSlug: string) {
+    const workspace = await this.workspaceService.findAccessibleWorkspace(
+      userId,
+      workspaceSlug,
+    );
+
+    return this.meetingRepository.findRecentByWorkspace(workspace.id);
+  }
+
   async start(id: string, userId: string) {
     const meeting = await this.findById(id);
 

@@ -66,6 +66,14 @@ export class MeetingController {
     return this.meetingService.findWorkspaceMeetings(req.user.id, slug);
   }
 
+  @Get('workspace/:slug/activity')
+  async getWorkspaceMeetingActivity(
+    @Param('slug') slug: string,
+    @Request() req: any,
+  ) {
+    return this.meetingService.findRecentWorkspaceMeetings(req.user.id, slug);
+  }
+
   @Post(':id/start')
   async startMeeting(@Param('id') id: string, @Request() req: any) {
     return this.meetingService.start(id, req.user.id);
