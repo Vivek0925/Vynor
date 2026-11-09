@@ -12,6 +12,7 @@ type TaskCardProps = {
   onClick?: (task: Task) => void;
   onToggleComplete?: (task: Task) => void;
   isCompleted?: boolean;
+  isOverlay?: boolean;
 };
 
 export default function TaskCard({
@@ -19,6 +20,7 @@ export default function TaskCard({
   onClick,
   onToggleComplete,
   isCompleted = false,
+  isOverlay = false,
 }: TaskCardProps) {
   const {
     attributes,
@@ -29,11 +31,12 @@ export default function TaskCard({
     isDragging,
   } = useSortable({
     id: task.id,
+    disabled: isOverlay,
   });
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: isDragging ? "none" : transition,
     touchAction: "none" as const,
   };
 
@@ -49,13 +52,13 @@ export default function TaskCard({
         }
       }}
       className={[
-        "group rounded-[10px] border border-[#E1E1DC]",
-        "bg-white p-3",
-        "shadow-[0_1px_2px_rgba(0,0,0,0.05)]",
+        "group rounded-[12px] border border-[var(--workspace-line)]",
+        "bg-[var(--workspace-surface)] p-3",
+        "shadow-[0_1px_2px_rgba(23,32,26,0.04)]",
         "cursor-grab active:cursor-grabbing",
-        "transition",
-        "hover:border-[#D2D2CC]",
-        "hover:shadow-[0_3px_8px_rgba(0,0,0,0.08)]",
+        "transition-[border-color,box-shadow]",
+        "hover:border-[var(--workspace-muted)]",
+        "hover:shadow-[0_3px_8px_rgba(23,32,26,0.08)]",
         isDragging ? "opacity-30" : "",
       ].join(" ")}
     >
@@ -79,13 +82,13 @@ export default function TaskCard({
             "focus-visible:outline-none focus-visible:ring-2",
             "focus-visible:ring-emerald-500",
             isCompleted
-              ? "border-[#16A34A] bg-[#16A34A] text-white opacity-100"
-              : "border-[#A3A3A3] bg-transparent text-transparent",
+              ? "border-[var(--workspace-coral)] bg-[var(--workspace-coral)] text-white opacity-100"
+              : "border-[var(--workspace-muted)] bg-transparent text-transparent",
             isCompleted
               ? "translate-x-0"
               : "pointer-events-none -translate-x-2 opacity-0 group-hover:pointer-events-auto group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-x-0 group-focus-within:opacity-100",
             !isCompleted
-              ? "hover:border-[#16A34A] hover:bg-[#16A34A] hover:text-white"
+              ? "hover:border-[var(--workspace-coral)] hover:bg-[var(--workspace-coral)] hover:text-white"
               : "",
           ].join(" ")}
         >
@@ -104,10 +107,10 @@ export default function TaskCard({
           <h3
             className={[
               "min-w-0 text-[13px] font-medium leading-[1.4]",
-              "transition-transform duration-200 ease-out",
+              "transition-transform duration-150 ease-out",
               isCompleted
-                ? "translate-x-7 text-[#858585] line-through"
-                : "text-[#292929] group-hover:translate-x-7 group-focus-within:translate-x-7",
+                ? "translate-x-7 text-[var(--workspace-muted)] line-through"
+                : "text-[var(--workspace-ink)] group-hover:translate-x-7 group-focus-within:translate-x-7",
             ].join(" ")}
           >
             {task.title}
@@ -117,7 +120,7 @@ export default function TaskCard({
             <TaskPriorityBadge priority={task.priority} />
 
             {task.assignee ? (
-              <span className="inline-flex min-w-0 items-center gap-1.5 text-[10px] text-[#737373]">
+              <span className="inline-flex min-w-0 items-center gap-1.5 text-[10px] text-[var(--workspace-muted)]">
                 {task.assignee.avatar ? (
                   <img
                     src={task.assignee.avatar}
@@ -126,7 +129,7 @@ export default function TaskCard({
                     className="h-4 w-4 shrink-0 rounded-full object-cover"
                   />
                 ) : (
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#E9E5EF] text-[8px] font-medium text-[#5B476F]">
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--workspace-sage-tint)] text-[8px] font-medium text-[var(--workspace-muted)]">
                     {task.assignee.name.charAt(0).toUpperCase()}
                   </span>
                 )}
@@ -136,14 +139,14 @@ export default function TaskCard({
                 </span>
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 text-[10px] text-[#737373]">
+            <span className="inline-flex items-center gap-1 text-[10px] text-[var(--workspace-muted)]">
                 <span className="text-[12px]">+</span>
                 Assign
               </span>
             )}
 
             {task.dueDate && (
-              <span className="inline-flex items-center gap-1 text-[10px] text-[#737373]">
+              <span className="inline-flex items-center gap-1 text-[10px] text-[var(--workspace-muted)]">
                 <CalendarDays size={11} />
                 {new Date(task.dueDate).toLocaleDateString()}
               </span>

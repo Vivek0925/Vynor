@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  closestCorners,
+  closestCenter,
   DndContext,
   DragEndEvent,
   DragOverlay,
@@ -10,7 +10,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { ArrowDown, ArrowUp, MoreHorizontal, Pencil, Plus } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   createTaskList,
@@ -49,6 +49,7 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
 
   const [loading, setLoading] = useState(true);
   const [movingTaskId, setMovingTaskId] = useState<string | null>(null);
+  const movingTaskIdRef = useRef<string | null>(null);
 
   const [newListName, setNewListName] = useState("");
   const [creatingList, setCreatingList] = useState(false);
@@ -87,6 +88,12 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
       void loadLists();
     };
 
+    const handleTaskMoved = () => {
+      if (!movingTaskIdRef.current) {
+        void loadLists();
+      }
+    };
+
     const handleTaskDeleted = (event: { taskId: string }) => {
       void loadLists();
 
@@ -98,13 +105,13 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
 
     socket.on("task:created", handleTaskChange);
     socket.on("task:updated", handleTaskChange);
-    socket.on("task:moved", handleTaskChange);
+    socket.on("task:moved", handleTaskMoved);
     socket.on("task:deleted", handleTaskDeleted);
 
     return () => {
       socket.off("task:created", handleTaskChange);
       socket.off("task:updated", handleTaskChange);
-      socket.off("task:moved", handleTaskChange);
+      socket.off("task:moved", handleTaskMoved);
       socket.off("task:deleted", handleTaskDeleted);
     };
   }, [loadLists, selectedTask?.id]);
@@ -244,6 +251,7 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
       }),
     );
 
+    movingTaskIdRef.current = taskId;
     setMovingTaskId(taskId);
 
     try {
@@ -253,12 +261,12 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
         isCompleted,
       });
 
-      await loadLists();
     } catch (error) {
       console.error("Failed to move task:", error);
       setLists(previousLists);
       await loadLists();
     } finally {
+      movingTaskIdRef.current = null;
       setMovingTaskId(null);
     }
   }
@@ -432,18 +440,18 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
   return (
     <div
       data-tasks-board="true"
-      className="flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border border-[#DCE5DA] bg-[#E8EFE6] shadow-[0_12px_36px_rgba(35,55,38,0.07)] sm:rounded-[28px]"
+      className="flex h-full min-h-0 flex-col overflow-hidden rounded-[22px] border border-[var(--workspace-line)] bg-[var(--workspace-surface)] shadow-[0_12px_36px_rgba(23,32,26,0.06)] sm:rounded-[22px]"
     >
       {/* Board top bar */}
 
-      <header className="flex min-h-[60px] shrink-0 items-center justify-between gap-4 border-b border-[#E1E8DE] bg-[#FAFCF9] px-4 py-2 text-[#202A22] sm:px-5">
+      <header className="flex min-h-[60px] shrink-0 items-center justify-between gap-4 border-b border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-4 py-2 text-[var(--workspace-ink)] sm:px-5">
         <div className="flex min-w-0 items-center gap-3">
           <div className="min-w-0">
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#059669]">
+            <div className="text-[10px] uppercase tracking-[0.22em] text-[var(--workspace-muted)]">
               Tasks
             </div>
 
-            <h1 className="truncate font-light tracking-[-0.035em] text-[20px] text-[#14141C] sm:text-[22px]">
+            <h1 className="truncate text-[20px] font-normal tracking-[-0.035em] text-[var(--workspace-ink)] sm:text-[22px]">
               Task board
             </h1>
           </div>
@@ -459,7 +467,7 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
             }
           }}
           disabled={lists.length === 0}
-          className="inline-flex h-9 shrink-0 items-center gap-2 rounded-[9px] bg-[#168653] px-3 text-[12px] font-medium text-white transition hover:bg-[#116B43] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full bg-[var(--workspace-ink)] px-4 text-[12px] font-medium text-[var(--workspace-surface)] transition hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Plus size={15} />
           Add task
@@ -468,16 +476,16 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
       {/* Board */}
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCorners}
+        collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragCancel={handleDragCancel}
         onDragEnd={handleDragEnd}
       >
         <div className="min-h-0 flex-1 overflow-hidden">
-          <div className="h-full overflow-x-auto overflow-y-hidden p-3 sm:p-4">
+          <div className="h-full overflow-x-auto overflow-y-hidden scrollbar-none p-3 sm:p-4">
             <div className="flex h-full min-w-max items-start gap-3">
               {loading ? (
-                <div className="px-2 py-3 text-sm text-[#536657]">
+                <div className="px-2 py-3 text-sm text-[var(--workspace-muted)]">
                   Loading task board...
                 </div>
               ) : (
@@ -517,7 +525,7 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
                   {/* Add another list */}
                   <div className="w-[310px] shrink-0">
                     {isAddingList ? (
-                      <div className="rounded-2xl border border-[#DCE5DA] bg-[#F5F8F3] p-3 shadow-sm">
+                      <div className="rounded-2xl border border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)] p-3 shadow-sm">
                         <input
                           autoFocus
                           value={newListName}
@@ -537,7 +545,7 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
                           }}
                           placeholder="List name"
                           maxLength={100}
-                          className="h-10 w-full rounded-[9px] border border-white/15 bg-white px-3 text-[13px] text-[#14141C] outline-none placeholder:text-[#8A8C98] focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/20"
+                          className="h-10 w-full rounded-[9px] border border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-3 text-[13px] text-[var(--workspace-ink)] outline-none placeholder:text-[var(--workspace-muted)] focus:border-[var(--workspace-ink)] focus:ring-2 focus:ring-[var(--workspace-ink)]/20"
                         />
 
                         <div className="mt-2 flex items-center gap-2">
@@ -545,7 +553,7 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
                             type="button"
                             onClick={() => void handleCreateList()}
                             disabled={!newListName.trim() || creatingList}
-                            className="h-9 rounded-[9px] bg-[#168653] px-3 text-[12px] font-medium text-white transition hover:bg-[#116B43] disabled:cursor-not-allowed disabled:opacity-50"
+                            className="h-9 rounded-full bg-[var(--workspace-coral)] px-3 text-[12px] font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {creatingList ? "Adding..." : "Add list"}
                           </button>
@@ -557,7 +565,7 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
                               setIsAddingList(false);
                             }}
                             disabled={creatingList}
-                            className="h-9 rounded-[9px] px-3 text-[12px] font-medium text-[#536657] transition hover:bg-[#E8EFE6] hover:text-[#26382C]"
+                            className="h-9 rounded-full px-3 text-[12px] font-medium text-[var(--workspace-muted)] transition hover:bg-[var(--workspace-bg)] hover:text-[var(--workspace-ink)]"
                           >
                             Cancel
                           </button>
@@ -567,7 +575,7 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
                       <button
                         type="button"
                         onClick={() => setIsAddingList(true)}
-                        className="flex h-[37px] w-[210px] items-center justify-center gap-2 rounded-[14px] border border-dashed border-[#B9CBB7] bg-[#F5F8F3]/80 text-[13px] font-medium text-[#536657] transition hover:border-[#168653] hover:bg-[#F5F8F3] hover:text-[#116B43]"
+                        className="flex h-[37px] w-[210px] items-center justify-center gap-2 rounded-[14px] border border-dashed border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)] text-[13px] font-medium text-[var(--workspace-muted)] transition hover:border-[var(--workspace-coral)] hover:bg-[var(--workspace-surface)] hover:text-[var(--workspace-coral)]"
                       >
                         <Plus size={16} />
                         Add another list
@@ -580,12 +588,19 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
           </div>
         </div>
 
-        <DragOverlay>
+        <DragOverlay
+          dropAnimation={{
+            duration: 180,
+            easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+          }}
+          adjustScale={false}
+        >
           {activeTask ? (
             <div className="w-[310px]">
               <TaskCard
                 task={activeTask}
                 isCompleted={activeTask.isCompleted}
+                isOverlay
               />
             </div>
           ) : null}
