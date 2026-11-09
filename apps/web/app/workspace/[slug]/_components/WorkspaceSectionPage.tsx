@@ -19,7 +19,7 @@ export default function WorkspaceSectionPage({
     <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[#DEDFE8] bg-white shadow-[0_12px_32px_rgba(20,20,28,0.05)] sm:rounded-[24px] lg:rounded-[32px] fullscreen:!h-screen fullscreen:!w-screen fullscreen:!max-w-none fullscreen:!rounded-none fullscreen:!border-0">
       <header className="z-20 flex shrink-0 items-center justify-between gap-3 border-b border-[#ECEEF3] bg-white px-4 py-3 sm:px-5 md:px-6 lg:px-7">
         <div className="min-w-0">
-          <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#059669] sm:text-[10px] sm:tracking-[0.22em]">
+          <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--workspace-ink)] sm:text-[10px] sm:tracking-[0.22em]">
             {eyebrow}
           </div>
 
