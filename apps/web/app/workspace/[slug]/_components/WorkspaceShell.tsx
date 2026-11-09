@@ -145,7 +145,7 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="flex h-[68px] shrink-0 items-center justify-between gap-2 border-b border-[var(--workspace-line)] bg-[var(--workspace-bg)] px-3 md:h-[72px] md:gap-4 md:px-6">
+        <header className="flex h-[68px] shrink-0 items-center justify-between gap-2 bg-[var(--workspace-bg)] px-3 md:h-[72px] md:gap-4 md:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
@@ -187,7 +187,7 @@ export default function WorkspaceShell({ children }: WorkspaceShellProps) {
 
             <button
               onClick={() => setInviteOpen(true)}
-              className="rounded-full bg-[var(--workspace-coral)] px-2 py-2 text-[11px] font-medium text-white transition-colors hover:opacity-90 sm:px-2.5 md:px-4"
+              className="rounded-full bg-[var(--workspace-coral)] px-2 py-2 text-[11px] font-medium text-white transition-colors hover:opacity-90 sm:px-2 sm:text-[12px] md:px-4 md:text-[13px]"
             >
               Invite
             </button>

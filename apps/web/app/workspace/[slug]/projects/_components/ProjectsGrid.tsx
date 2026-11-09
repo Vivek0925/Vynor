@@ -25,16 +25,16 @@ export default function ProjectsGrid({
 }: Props) {
   if (projects.length === 0) {
     return (
-      <div className="flex min-h-[270px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#DCDCE6] bg-white px-2 py-7 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E7F5EF] text-[#168653]">
+      <div className="flex min-h-[270px] flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)] px-2 py-7 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--workspace-coral-tint)] text-[var(--workspace-coral)]">
           {hasProjects ? <Search size={22} /> : <FolderKanban size={22} />}
         </div>
 
-        <h3 className="mt-4 text-base font-semibold text-[#252638]">
+        <h3 className="mt-4 text-base font-medium text-[var(--workspace-ink)]">
           {hasProjects ? "No matching projects" : "No projects yet"}
         </h3>
 
-        <p className="mt-2 max-w-sm text-sm leading-6 text-[#77798A]">
+        <p className="mt-2 max-w-sm text-sm leading-6 text-[var(--workspace-muted)]">
           {hasProjects
             ? "Try a different search term or status filter."
             : "Create a project to start organizing your team's work in this workspace."}
@@ -44,7 +44,7 @@ export default function ProjectsGrid({
           <button
             type="button"
             onClick={onClearFilters}
-            className="mt-5 rounded-xl border border-[#E5E5EB] px-4 py-2 text-sm font-medium text-[#454655] transition hover:bg-[#F7F7FA]"
+            className="mt-5 rounded-xl border border-[var(--workspace-line)] px-4 py-2 text-sm font-medium text-[var(--workspace-ink)] transition hover:bg-[var(--workspace-surface)]"
           >
             Clear filters
           </button>
@@ -52,7 +52,7 @@ export default function ProjectsGrid({
           <button
             type="button"
             onClick={onCreateProject}
-            className="mt-5 rounded-xl bg-[#168653] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#116B43]"
+            className="mt-5 rounded-xl bg-[var(--workspace-coral)] px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
           >
             Create your first project
           </button>
@@ -62,7 +62,7 @@ export default function ProjectsGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
+    <div className="overflow-hidden rounded-[16px] border border-[var(--workspace-line)] bg-[var(--workspace-surface)]">
       {projects.map((project) => (
         <ProjectCard
           key={project.id}

@@ -13,7 +13,6 @@ export default async function WhiteboardPage({
     <WorkspaceSectionPage
       eyebrow="Whiteboard"
       title="Whiteboard"
-      description="Sketch ideas, map flows, and plan visually inside the workspace route."
       contentClassName="overflow-hidden flex flex-col"
       headerActions={<WhiteboardPageClient />}
     >

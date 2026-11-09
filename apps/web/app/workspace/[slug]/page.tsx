@@ -41,7 +41,6 @@ export default async function WorkspacePage({
     <WorkspaceSectionPage
       eyebrow="Overview"
       title="Workspace overview"
-      description="A clean home for project work, task tracking, docs, meetings, chat, and files."
     >
       <div className="overview-theme">
         {/* Dashboard cards */}

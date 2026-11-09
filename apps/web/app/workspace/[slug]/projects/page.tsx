@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { AlertCircle, LoaderCircle, RefreshCw } from "lucide-react";
 
 import WorkspaceSectionPage from "../_components/WorkspaceSectionPage";
@@ -19,10 +19,10 @@ import {
 import type { Project, CreateProjectPayload } from "@/lib/projects";
 import ProjectDetailModal from "./_components/ProjectDetailModal";
 import { socket } from "@/lib/socket";
+import { Plus } from "lucide-react";
 
 export default function ProjectsPage() {
   const params = useParams<{ slug: string }>();
-  const router = useRouter();
   const slug = params.slug;
 
   const [projects, setProjects] = useState<Project[]>([]);
@@ -166,7 +166,16 @@ export default function ProjectsPage() {
     <WorkspaceSectionPage
       eyebrow="Project management"
       title="Projects"
-      description="Plan client work, track delivery, and keep every project moving."
+      headerActions={
+        <button
+          type="button"
+          onClick={openCreateModal}
+          className="inline-flex items-center gap-2 rounded-full bg-[var(--workspace-ink)] px-4 py-2 text-sm font-medium text-[var(--workspace-surface)] transition-opacity hover:opacity-85"
+        >
+          <Plus size={16} />
+          New project
+        </button>
+      }
     >
       <div className="space-y-6">
         {error && (
@@ -280,7 +289,7 @@ export default function ProjectsPage() {
               id="delete-project-description"
               className="mt-2 text-sm leading-6 text-[#77798A]"
             >
-              Delete "{projectToDelete.name}"? This action cannot be undone.
+              Delete &quot;{projectToDelete.name}&quot;? This action cannot be undone.
             </p>
 
             <div className="mt-6 flex justify-end gap-3">

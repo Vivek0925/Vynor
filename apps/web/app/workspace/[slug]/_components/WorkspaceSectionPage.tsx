@@ -3,7 +3,6 @@ import type React from "react";
 type WorkspaceSectionPageProps = {
   eyebrow: string;
   title: string;
-  description: string;
   children?: React.ReactNode;
   contentClassName?: string;
   headerActions?: React.ReactNode;
@@ -12,7 +11,6 @@ type WorkspaceSectionPageProps = {
 export default function WorkspaceSectionPage({
   eyebrow,
   title,
-  description,
   children,
   contentClassName,
   headerActions,
@@ -25,9 +23,11 @@ export default function WorkspaceSectionPage({
             {eyebrow}
           </div>
 
-          <h1 className="mt-0.5 truncate text-lg font-light tracking-[-0.035em] text-[#14141C] sm:text-xl md:text-[22px]">
-            {title}
-          </h1>
+          <div className="flex min-w-0 items-center gap-3">
+            <h1 className="mt-0.5 truncate text-lg font-normal tracking-[-0.035em] text-[#14141C] sm:text-xl md:text-[22px]">
+              {title}
+            </h1>
+          </div>
         </div>
 
         {headerActions && (

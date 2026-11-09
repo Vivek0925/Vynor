@@ -78,21 +78,21 @@ export default function ProjectsStats({ projects }: ProjectsStatsProps) {
         return (
           <div
             key={stat.label}
-            className="rounded-2xl my-3 border border-[#DEDFE8] bg-[#FAFAF8] p-3.5 sm:rounded-[22px] sm:p-5"
+            className="my-3 rounded-2xl border border-[var(--workspace-line)] bg-[var(--workspace-surface-secondary)] p-3.5 sm:rounded-[22px] sm:p-5"
           >
             <div className="flex  items-center justify-between gap-2">
-              <span className="text-[11px] text-[#5B5D6E] sm:text-[13px]">
+              <span className="text-[11px] text-[var(--workspace-muted)] sm:text-[13px]">
                 {stat.label}
               </span>
 
-              <Icon className="h-4 w-4 shrink-0 text-[#087F5B]" />
+              <Icon className="h-4 w-4 shrink-0 text-[var(--workspace-coral)]" />
             </div>
 
-            <div className="mt-3 text-2xl font-medium tracking-[-0.04em] text-[#14141C] sm:text-3xl">
+            <div className="mt-3 text-2xl font-medium tracking-[-0.04em] text-[var(--workspace-ink)] sm:text-3xl">
               {stat.value}
             </div>
 
-            <div className="mt-1 text-[10px] text-[#777887] sm:text-[11px]">
+            <div className="mt-1 text-[10px] text-[var(--workspace-muted)] sm:text-[11px]">
               {stat.note}
             </div>
           </div>

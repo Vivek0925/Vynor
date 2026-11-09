@@ -26,19 +26,19 @@ export const statusLabels: Record<ProjectStatus, string> = {
 };
 
 export const statusStyles: Record<ProjectStatus, string> = {
-  PLANNING: "bg-[#F2F2F5] text-[#5B5D6E]",
-  IN_PROGRESS: "bg-[#E7F5EF] text-[#087F5B]",
-  IN_REVIEW: "bg-[#FFF3D6] text-[#986500]",
-  READY_FOR_DELIVERY: "bg-[#E8EDFF] text-[#4358A8]",
-  COMPLETED: "bg-[#DDF5E7] text-[#176B43]",
-  ARCHIVED: "bg-[#ECECF0] text-[#777887]",
+  PLANNING: "bg-[var(--workspace-surface-secondary)] text-[var(--workspace-muted)]",
+  IN_PROGRESS: "bg-[var(--workspace-sage-tint)] text-[var(--workspace-muted)]",
+  IN_REVIEW: "bg-[var(--butter)] text-[var(--workspace-muted)]",
+  READY_FOR_DELIVERY: "bg-[var(--blue-light)] text-[var(--workspace-muted)]",
+  COMPLETED: "bg-[var(--workspace-sage-tint)] text-[var(--workspace-muted)]",
+  ARCHIVED: "bg-[var(--workspace-surface-secondary)] text-[var(--workspace-muted)]",
 };
 
 export const priorityStyles: Record<ProjectPriority, string> = {
-  LOW: "text-[#777887]",
-  MEDIUM: "text-[#5B5D6E]",
-  HIGH: "text-[#B7791F]",
-  URGENT: "text-[#C24141]",
+  LOW: "text-[var(--workspace-muted)]",
+  MEDIUM: "text-[var(--workspace-muted)]",
+  HIGH: "text-[var(--workspace-coral)]",
+  URGENT: "text-[var(--workspace-coral)]",
 };
 
 export function formatDate(value: string | null | undefined) {
