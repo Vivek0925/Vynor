@@ -500,7 +500,21 @@ function MessageItem({
 
             {message.content && (
               <p className="whitespace-pre-wrap text-[12px] leading-5 sm:text-[14px] sm:leading-6">
-                {message.content}
+                {message.content.split(/(https?:\/\/[^\s]+)/g).map((part, index) =>
+                  /^https?:\/\//.test(part) ? (
+                    <a
+                      key={`${part}-${index}`}
+                      href={part}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline underline-offset-2 hover:opacity-80"
+                    >
+                      {part}
+                    </a>
+                  ) : (
+                    <span key={`${part}-${index}`}>{part}</span>
+                  ),
+                )}
               </p>
             )}
 

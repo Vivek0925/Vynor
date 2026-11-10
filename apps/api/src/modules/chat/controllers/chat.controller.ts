@@ -1,9 +1,18 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import type { CurrentUserData } from '../../auth/interfaces/current-user.interface';
 import { ChatService } from '../services/chat.service';
+import { SendMessageDto } from '../dto/send-message.dto';
 
 @Controller('workspaces/:slug/messages')
 @UseGuards(JwtAuthGuard)
@@ -19,34 +28,45 @@ export class ChatController {
     return this.chatService.getWorkspaceMessages(user.id, slug, conversationId);
   }
 
+  @Post()
+  async createMessage(
+    @Param('slug') slug: string,
+    @CurrentUser() user: CurrentUserData,
+    @Body() dto: SendMessageDto,
+  ) {
+    return this.chatService.createMessage(user.id, {
+      ...dto,
+      workspaceSlug: slug,
+    });
+  }
 
   @Get(':messageId/attachments/:attachmentId/download')
-async downloadAttachment(
-  @Param('slug') slug: string,
-  @Param('messageId') messageId: string,
-  @Param('attachmentId') attachmentId: string,
-  @CurrentUser() user: CurrentUserData,
-) {
-  return this.chatService.getAttachmentDownloadUrl(
-    user.id,
-    slug,
-    messageId,
-    attachmentId,
-  );
-}
+  async downloadAttachment(
+    @Param('slug') slug: string,
+    @Param('messageId') messageId: string,
+    @Param('attachmentId') attachmentId: string,
+    @CurrentUser() user: CurrentUserData,
+  ) {
+    return this.chatService.getAttachmentDownloadUrl(
+      user.id,
+      slug,
+      messageId,
+      attachmentId,
+    );
+  }
 
-@Get(':messageId/attachments/:attachmentId/preview')
-async previewAttachment(
-  @Param('slug') slug: string,
-  @Param('messageId') messageId: string,
-  @Param('attachmentId') attachmentId: string,
-  @CurrentUser() user: CurrentUserData,
-) {
-  return this.chatService.getAttachmentPreviewUrl(
-    user.id,
-    slug,
-    messageId,
-    attachmentId,
-  );
-}
+  @Get(':messageId/attachments/:attachmentId/preview')
+  async previewAttachment(
+    @Param('slug') slug: string,
+    @Param('messageId') messageId: string,
+    @Param('attachmentId') attachmentId: string,
+    @CurrentUser() user: CurrentUserData,
+  ) {
+    return this.chatService.getAttachmentPreviewUrl(
+      user.id,
+      slug,
+      messageId,
+      attachmentId,
+    );
+  }
 }

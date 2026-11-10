@@ -45,6 +45,7 @@ model User {
 
   taskComments    TaskComment[] @relation("TaskCommentAuthor")
   createdProjects Project[]     @relation("ProjectCreator")
+  workspaceFiles  WorkspaceFile[]
 
   @@unique([provider, providerId])
   @@map("users")
@@ -122,6 +123,7 @@ model Workspace {
   taskLists  TaskList[]
   whiteboard Whiteboard?
   projects   Project[]
+  files      WorkspaceFile[]
 
   @@index([ownerId])
   @@map("workspaces")
@@ -263,6 +265,27 @@ model MessageAttachment {
   size     Int
 
   createdAt DateTime @default(now())
+}
+
+model WorkspaceFile {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  uploadedById String
+  uploadedBy  User      @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  fileName String
+  key      String
+  mimeType String
+  size     Int
+  starred  Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId, starred, createdAt])
+  @@index([uploadedById])
+  @@map("workspace_files")
 }
 
 model Meeting {

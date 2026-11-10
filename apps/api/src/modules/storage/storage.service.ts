@@ -1,4 +1,4 @@
-import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 
 import {
   BadRequestException,
@@ -138,5 +138,21 @@ export class StorageService {
     });
 
     return getSignedUrl(s3, command, { expiresIn: 300 });
+  }
+
+  async delete(key: string) {
+    try {
+      await s3.send(
+        new DeleteObjectCommand({
+          Bucket: process.env.S3_BUCKET!,
+          Key: key,
+        }),
+      );
+    } catch (error) {
+      console.error('Failed to delete file from object storage', error);
+      throw new ServiceUnavailableException(
+        'File storage is temporarily unavailable. Please try again later.',
+      );
+    }
   }
 }
