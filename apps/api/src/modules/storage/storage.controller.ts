@@ -100,6 +100,14 @@ export class StorageController {
           mimeType: uploaded.mimeType,
           size: uploaded.size,
         },
+        include: {
+          uploadedBy: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       });
     }
 
