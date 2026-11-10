@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import WorkspaceSectionPage from "../_components/WorkspaceSectionPage";
+import { ConfirmDialog } from "@/components/ui/ActionDialog";
 import { getConversations, type Conversation } from "@/lib/conversations";
 import {
   deleteWorkspaceFile,
@@ -44,6 +45,7 @@ export default function FilesPage({ params }: { params: Promise<{ slug: string }
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [sharing, setSharing] = useState<WorkspaceFile | null>(null);
+  const [fileToDelete, setFileToDelete] = useState<WorkspaceFile | null>(null);
   const [selectedConversation, setSelectedConversation] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const { showToast } = useToast();
@@ -116,10 +118,10 @@ export default function FilesPage({ params }: { params: Promise<{ slug: string }
   }
 
   async function handleDelete(file: WorkspaceFile) {
-    if (!window.confirm(`Delete ${file.fileName}?`)) return;
     try {
       await deleteWorkspaceFile(slug, file.id);
       setFiles((current) => current.filter((item) => item.id !== file.id));
+      setFileToDelete(null);
       showToast({ message: "File deleted.", tone: "success" });
     } catch (error) {
       showToast({
@@ -202,7 +204,7 @@ export default function FilesPage({ params }: { params: Promise<{ slug: string }
                 <button type="button" onClick={() => void handleDownload(file)} aria-label={`Download ${file.fileName}`} className="rounded-lg p-2 text-[var(--workspace-muted)] hover:text-[var(--workspace-ink)]">
                   <Download className="h-4 w-4" />
                 </button>
-                <button type="button" onClick={() => void handleDelete(file)} aria-label={`Delete ${file.fileName}`} className="rounded-lg p-2 text-[var(--workspace-muted)] hover:text-red-500">
+                <button type="button" onClick={() => setFileToDelete(file)} aria-label={`Delete ${file.fileName}`} className="rounded-lg p-2 text-[var(--workspace-muted)] hover:text-red-500">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -237,6 +239,22 @@ export default function FilesPage({ params }: { params: Promise<{ slug: string }
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(fileToDelete)}
+        title="Delete file?"
+        description={
+          fileToDelete
+            ? `"${fileToDelete.fileName}" will be permanently deleted.`
+            : undefined
+        }
+        onClose={() => setFileToDelete(null)}
+        onConfirm={() => {
+          if (fileToDelete) void handleDelete(fileToDelete);
+        }}
+        confirmLabel="Delete file"
+        destructive
+      />
     </WorkspaceSectionPage>
   );
 }
