@@ -447,7 +447,7 @@ export default function TasksBoard({ workspaceSlug }: TasksBoardProps) {
       <header className="flex min-h-[60px] shrink-0 items-center justify-between gap-4 border-b border-[var(--workspace-line)] bg-[var(--workspace-surface)] px-4 py-2 text-[var(--workspace-ink)] sm:px-5">
         <div className="flex min-w-0 items-center gap-3">
           <div className="min-w-0">
-            <div className="text-[10px] uppercase tracking-[0.22em] text-[var(--workspace-muted)]">
+            <div className="text-[10px] uppercase tracking-[0.22em] text-[var(--workspace-ink)]">
               Tasks
             </div>
 
