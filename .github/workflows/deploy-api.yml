@@ -21,7 +21,7 @@ env:
 
 jobs:
   deploy:
-    name: Build and Deploy API
+    name: Build, Migrate and Deploy API
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
@@ -33,19 +33,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
-
-      
-      - name: Diagnose GitHub OIDC claims
-        shell: bash
-        run: |
-          TOKEN=$(curl -sS \
-            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com" \
-            | jq -r '.value')
-
-          echo "$TOKEN" | cut -d '.' -f2 | base64 -d 2>/dev/null \
-            | jq '{iss, aud, sub, repository, event_name, ref}'
-    
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -100,16 +87,120 @@ jobs:
               )' \
             task-definition.json > task-definition-register.json
 
-      - name: Register new task definition revision
+      - name: Register new ECS task definition
         id: register-task
         run: |
           TASK_DEF_ARN=$(aws ecs register-task-definition \
             --cli-input-json file://task-definition-register.json \
             --query 'taskDefinition.taskDefinitionArn' \
             --output text)
+
           echo "task-definition-arn=$TASK_DEF_ARN" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy to ECS
+      # Run migrations using the new image and production DB configuration.
+      - name: Run production Prisma migrations
+        shell: bash
+        env:
+          TASK_DEF_ARN: ${{ steps.register-task.outputs.task-definition-arn }}
+        run: |
+          set -euo pipefail
+
+          # Reuse the API service's network configuration.
+          aws ecs describe-services \
+            --cluster "$ECS_CLUSTER" \
+            --services "$ECS_SERVICE" \
+            --output json > service.json
+
+          SERVICE_COUNT=$(jq '.services | length' service.json)
+
+          if [ "$SERVICE_COUNT" -ne 1 ]; then
+            echo "Could not find the ECS service."
+            exit 1
+          fi
+
+          jq '.services[0].networkConfiguration' \
+            service.json > network-configuration.json
+
+          if [ "$(jq -r 'type' network-configuration.json)" = "null" ]; then
+            echo "ECS service has no network configuration."
+            exit 1
+          fi
+
+          # Preserve the service's launch type or capacity provider strategy.
+          LAUNCH_TYPE=$(jq -r '.services[0].launchType // empty' service.json)
+          jq '.services[0].capacityProviderStrategy // []' \
+            service.json > capacity-provider-strategy.json
+
+          # Override only the container command.
+          jq -n --arg name "$CONTAINER_NAME" '{
+            containerOverrides: [{
+              name: $name,
+              command: ["sh", "-c", "./node_modules/.bin/prisma migrate deploy"]
+            }]
+          }' > migration-overrides.json
+
+          RUN_ARGS=(
+            --cluster "$ECS_CLUSTER"
+            --task-definition "$TASK_DEF_ARN"
+            --network-configuration file://network-configuration.json
+            --overrides file://migration-overrides.json
+          )
+
+          if [ -n "$LAUNCH_TYPE" ]; then
+            RUN_ARGS+=(--launch-type "$LAUNCH_TYPE")
+          elif [ "$(jq 'length' capacity-provider-strategy.json)" -gt 0 ]; then
+            RUN_ARGS+=(--capacity-provider-strategy file://capacity-provider-strategy.json)
+          else
+            echo "Could not determine ECS launch type or capacity provider strategy."
+            exit 1
+          fi
+
+          echo "Starting one-off production migration task..."
+
+          aws ecs run-task "${RUN_ARGS[@]}" \
+            --output json > run-task.json
+
+          TASK_ARN=$(jq -r '.tasks[0].taskArn // empty' run-task.json)
+
+          if [ -z "$TASK_ARN" ]; then
+            echo "ECS could not start the migration task:"
+            jq '.failures' run-task.json
+            exit 1
+          fi
+
+          echo "Migration task started."
+
+          # Wait until the migration container exits.
+          aws ecs wait tasks-stopped \
+            --cluster "$ECS_CLUSTER" \
+            --tasks "$TASK_ARN"
+
+          aws ecs describe-tasks \
+            --cluster "$ECS_CLUSTER" \
+            --tasks "$TASK_ARN" \
+            --output json > migration-result.json
+
+          EXIT_CODE=$(jq -r \
+            --arg name "$CONTAINER_NAME" \
+            '.tasks[0].containers[] | select(.name == $name) | .exitCode // "missing"' \
+            migration-result.json)
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "Production migrations failed. API deployment cancelled."
+            jq '{
+              stoppedReason: .tasks[0].stoppedReason,
+              containers: [.tasks[0].containers[] | {
+                name,
+                exitCode,
+                reason
+              }]
+            }' migration-result.json
+            exit 1
+          fi
+
+          echo "Production Prisma migrations completed successfully."
+
+      - name: Deploy API to ECS
         run: |
           aws ecs update-service \
             --cluster "$ECS_CLUSTER" \
