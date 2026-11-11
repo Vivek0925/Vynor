@@ -1,6 +1,18 @@
+
+import type { Metadata } from "next";
 import WorkspaceShell from "./_components/WorkspaceShell";
 import WorkspaceSocket from "./_components/WorkspaceSocket";
 
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
+};
 
 export default async function WorkspaceLayout({
   children,
@@ -11,13 +23,10 @@ export default async function WorkspaceLayout({
 }) {
   const { slug } = await params;
 
- return (
-  <>
-    <WorkspaceSocket workspaceSlug={slug} />
-
-    <WorkspaceShell>
-      {children}
-    </WorkspaceShell>
-  </>
-);
+  return (
+    <>
+      <WorkspaceSocket workspaceSlug={slug} />
+      <WorkspaceShell>{children}</WorkspaceShell>
+    </>
+  );
 }
