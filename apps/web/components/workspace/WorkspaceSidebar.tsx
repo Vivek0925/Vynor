@@ -5,15 +5,21 @@ import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BriefcaseBusiness,
+  CircleUserRound,
   ChevronDown,
   FileText,
   Folder,
+  HelpCircle,
   LayoutDashboard,
   LayoutList,
+  LogOut,
   MessageCircle,
   MoreHorizontal,
   Moon,
+  Palette,
+  Settings,
   Sun,
+  Sparkles,
   Video,
   Workflow,
 } from "lucide-react";
@@ -58,16 +64,17 @@ export default function WorkspaceSidebar({
   onThemeToggle,
 }: WorkspaceSidebarProps) {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const activePath = pathname.replace(`/workspace/${slug}`, "");
   const [members, setMembers] = useState<WorkspaceMember[]>([]);
   const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(
     () => new Set(),
   );
   const [membersExpanded, setMembersExpanded] = useState(false);
-  const [profileExpanded, setProfileExpanded] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [membersLoading, setMembersLoading] = useState(true);
   const [membersError, setMembersError] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
 
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
@@ -135,6 +142,31 @@ export default function WorkspaceSidebar({
       socket.off("presence:update", handlePresenceUpdate);
     };
   }, [slug]);
+
+  useEffect(() => {
+    function handleDocumentPointerDown(event: PointerEvent) {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target as Node)
+      ) {
+        setProfileMenuOpen(false);
+      }
+    }
+
+    function handleDocumentKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setProfileMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handleDocumentPointerDown);
+    document.addEventListener("keydown", handleDocumentKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleDocumentPointerDown);
+      document.removeEventListener("keydown", handleDocumentKeyDown);
+    };
+  }, []);
 
   const sortedMembers = useMemo(
     () =>
@@ -320,14 +352,92 @@ export default function WorkspaceSidebar({
           </div>
         </button>
 
-        <div className="border-t border-[var(--workspace-line)] px-2 pt-3">
+        <div
+          ref={profileMenuRef}
+          className="relative border-t border-[var(--workspace-line)] px-2 pt-3"
+        >
+          {profileMenuOpen && (
+            <div
+              role="menu"
+              aria-label="Account menu"
+              className="absolute inset-x-0 bottom-[calc(100%+12px)] z-20 rounded-[18px] border border-[var(--workspace-line)] bg-[var(--workspace-surface)] p-2 shadow-[0_18px_45px_rgba(23,32,26,0.16)]"
+            >
+              <div className="flex items-center gap-3 border-b border-[var(--workspace-line)] px-3 py-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--workspace-sage-tint)] text-[11px] font-medium text-[var(--workspace-muted)]">
+                  {userInitials}
+                </div>
+                <div className="min-w-0">
+                  <div className="truncate text-[13px] font-medium text-[var(--workspace-ink)]">
+                    {user?.name || "Your profile"}
+                  </div>
+                  <div className="truncate text-[11px] text-[var(--workspace-muted)]">
+                    {user?.email || "Account"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-0.5 pt-2">
+                <ProfileMenuItem
+                  icon={Sparkles}
+                  label="Upgrade plan"
+                  onClick={() => setProfileMenuOpen(false)}
+                />
+                <ProfileMenuItem
+                  icon={Palette}
+                  label="Personalization"
+                  onClick={() => {
+                    onThemeToggle();
+                    setProfileMenuOpen(false);
+                  }}
+                />
+                <ProfileMenuItem
+                  icon={CircleUserRound}
+                  label="Profile"
+                  onClick={() => setProfileMenuOpen(false)}
+                />
+                <ProfileMenuItem
+                  icon={Settings}
+                  label="Settings"
+                  onClick={() => setProfileMenuOpen(false)}
+                />
+              </div>
+
+              <div className="my-2 border-t border-[var(--workspace-line)]" />
+
+              <div className="space-y-0.5">
+                <ProfileMenuItem
+                  icon={HelpCircle}
+                  label="Help"
+                  onClick={() => setProfileMenuOpen(false)}
+                  showChevron
+                />
+                <ProfileMenuItem
+                  icon={LogOut}
+                  label="Log out"
+                  onClick={async () => {
+                    await logout();
+                    setProfileMenuOpen(false);
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--workspace-sage-tint)] text-[11px] font-medium text-[var(--workspace-muted)]">
+            <button
+              type="button"
+              onClick={() => setProfileMenuOpen((open) => !open)}
+              aria-expanded={profileMenuOpen}
+              aria-haspopup="menu"
+              className="flex min-w-0 flex-1 items-center gap-2 rounded-lg text-left outline-none transition-colors hover:bg-[var(--workspace-bg)] focus-visible:ring-2 focus-visible:ring-[var(--workspace-coral)]"
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--workspace-sage-tint)] text-[11px] font-medium text-[var(--workspace-muted)]">
               {userInitials}
-            </div>
-            <div className="min-w-0 flex-1 truncate text-[13px] font-medium text-[var(--workspace-ink)]">
-              {user?.name || "Your profile"}
-            </div>
+              </span>
+              <span className="min-w-0 truncate text-[13px] font-medium text-[var(--workspace-ink)]">
+                {user?.name || "Your profile"}
+              </span>
+            </button>
             <span className="flex items-center gap-2">
               <button
                 type="button"
@@ -342,20 +452,16 @@ export default function WorkspaceSidebar({
               </button>
               <button
                 type="button"
-                aria-expanded={profileExpanded}
-                onClick={() => setProfileExpanded((expanded) => !expanded)}
-                className="rounded-lg p-1 text-[var(--workspace-muted)] hover:bg-[var(--workspace-bg)]"
-                aria-label="Toggle profile details"
+                aria-expanded={profileMenuOpen}
+                aria-haspopup="menu"
+                onClick={() => setProfileMenuOpen((open) => !open)}
+                className="rounded-lg p-1 text-[var(--workspace-muted)] outline-none hover:bg-[var(--workspace-bg)] focus-visible:ring-2 focus-visible:ring-[var(--workspace-coral)]"
+                aria-label="Open account menu"
               >
                 <MoreHorizontal className="h-4 w-4 shrink-0" />
               </button>
             </span>
           </div>
-          {profileExpanded && (
-            <div className="mt-2 truncate pl-10 text-[11px] font-normal text-[var(--workspace-muted)]">
-              {user?.email || "Account"}
-            </div>
-          )}
         </div>
       </div>
     </aside>
@@ -389,6 +495,35 @@ export default function WorkspaceSidebar({
               <span>{item.label}</span>
             </Link>
           );
+  }
+
+  function ProfileMenuItem({
+    icon: Icon,
+    label,
+    onClick,
+    showChevron = false,
+  }: {
+    icon: typeof Sparkles;
+    label: string;
+    onClick: () => void | Promise<void>;
+    showChevron?: boolean;
+  }) {
+    return (
+      <button
+        type="button"
+        role="menuitem"
+        onClick={onClick}
+        className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-left text-[13px] text-[var(--workspace-ink)] outline-none transition-colors hover:bg-[var(--workspace-surface-secondary)] focus-visible:ring-2 focus-visible:ring-[var(--workspace-coral)]"
+      >
+        <Icon className="h-[18px] w-[18px] shrink-0 text-[var(--workspace-muted)]" />
+        <span className="flex-1">{label}</span>
+        {showChevron && (
+          <span className="text-[18px] leading-none text-[var(--workspace-muted)]">
+            ›
+          </span>
+        )}
+      </button>
+    );
   }
 }
 
